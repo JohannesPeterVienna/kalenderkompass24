@@ -11,7 +11,7 @@ from content.articles import ARTICLES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261029b"
+V = "20261029c"
 UPDATED = "Oktober 2026"
 TODAY = date(2026, 10, 29)
 CUR = 2027                      # Hauptjahr der Seite (Planung läuft aufs nächste Jahr)
@@ -26,7 +26,7 @@ WDL = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"
 WDS = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 
 NAV = [("/", "Feiertage"), (f"/brueckentage-{CUR}.html", "Brückentage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
-       (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
+       ("/schulferien-2026-2027.html", "Schulferien"), (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
 
 env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=True, trim_blocks=True, lstrip_blocks=True)
 PAGES = []  # (path, priority) für die Sitemap
@@ -449,6 +449,7 @@ def main():
     build_planner(); build_workdays()
     for y in YEARS: build_kw(y)
     for y in (2027, 2028): build_print(y)
+    import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
     build_articles(); build_legal(); build_static()
     print(f"{len(PAGES)} indexierbare Seiten in {OUT}")
 

@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap"><h1>{{ h1 }}</h1><p class="lead">{{ lead }}</p></div></section>
+<div class="wrap">
+  <section class="band">
+    <div class="band-head"><h2>Sommerferien 2027 auf einem Blick</h2><span class="small muted">sortiert nach Ferienbeginn</span></div>
+    {{ m.gantt(rows, weeks, "Sommerferien 2027 in Österreich und Deutschland") }}
+    <div class="legend"><span><i class="f-su"></i>Sommerferien</span><span>AT = Österreich, DE = Deutschland</span></div>
+  </section>
+</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div>
+    <h2>Alle Termine</h2>
+    <div class="scroll"><table class="tbl">
+      <thead><tr><th scope="col">Land</th><th scope="col">Zeitraum</th><th scope="col">Tage</th></tr></thead>
+      <tbody>{% for r in rows %}<tr><td><a href="{{ r.href }}">{{ r.name }}</a> <span class="small muted">{{ 'AT' if r.c == 'at' else 'DE' }}</span></td><td class="date"><span class="lg">{{ r.span }}</span><span class="sm">{{ r.short }}</span></td><td>{{ r.days }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {{ m.ad("rect") }}
+    <h2>Zahlen zum Sommer 2027</h2>
+    <div class="prose">
+      <p>Zwischen {{ span_all }} sind irgendwo in Österreich oder Deutschland Sommerferien. Am längsten dauern sie in {{ longest.name }} ({{ longest.days }} Tage), am kürzesten in {{ shortest.name }} ({{ shortest.days }} Tage).</p>
+      <p>Den größten Andrang gibt es rund um den {{ peak_day }}: Dann haben {{ peak_n }} der 25 Länder gleichzeitig frei. Wer flexibel ist, reist besser am Anfang oder am Ende des Sommers – dann sind Unterkünfte und Flüge oft günstiger.</p>
+      <p>Österreich hat mit rund neun Wochen deutlich längere Sommerferien als Deutschland, wo sie meist sechs Wochen dauern. Dafür haben deutsche Länder oft längere Herbst- oder Pfingstferien.</p>
+      <p class="small muted">Quellen: <a href="{{ src_at[1] }}" rel="noopener">{{ src_at[0] }}</a>; <a href="{{ src_de[1] }}" rel="noopener">{{ src_de[0] }}</a>.</p>
+    </div>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Mehr Ferien</h3><ul><li><a href="/schulferien-{{ sy_slug }}.html">Alle Schulferien 2026/2027</a></li><li><a href="/brueckentage-2027.html">Brückentage 2027</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li></ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

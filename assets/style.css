@@ -168,3 +168,29 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
   .layout{display:block}
   .band{border:0;padding:0}
 }
+
+/* Schulferien-Zeitstrahl */
+.f-au{background:#D9822B}.f-xm{background:var(--red)}.f-wi{background:#5B7DB1}.f-ea{background:#7FA650}.f-pf{background:#B05FA3}.f-su{background:var(--sea)}.f-day{background:var(--muted)}
+.legend i.f-au,.legend i.f-xm,.legend i.f-wi,.legend i.f-ea,.legend i.f-pf,.legend i.f-su,.legend i.f-day{border-radius:3px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:0}
+.gantt{display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.g-axis,.g-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+.g-axis .g-track{height:18px;background:none}
+.g-axis .g-track span{position:absolute;top:0;font-size:.75rem;color:var(--muted);transform:translateX(2px)}
+.g-track{position:relative;height:22px;background:var(--soft);border-radius:6px;overflow:hidden}
+.g-row a{color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-row a:hover{text-decoration:underline}
+.g-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.g-bar{position:absolute;top:3px;bottom:3px;border-radius:4px;min-width:3px}
+.tbl tr.sum td{font-weight:700;background:var(--soft)}
+.jump{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+@media (max-width:640px){.g-axis,.g-row{grid-template-columns:96px minmax(0,1fr);gap:6px}.gantt{font-size:.78rem}.g-axis .g-track span{font-size:.62rem}}
+.layout>*{min-width:0}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:640px){.tbl td.date{white-space:normal}.tbl th,.tbl td{padding:8px 10px}}
+@media (max-width:640px){.g-axis .g-track span:nth-child(even){display:none}
+  .nav{flex-wrap:nowrap;overflow-x:auto;width:100%;margin:0 -4px;padding-bottom:6px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav a{white-space:nowrap;flex:none}}
+.sm{display:none}
+@media (max-width:640px){.lg{display:none}.sm{display:inline}.tbl td.date{white-space:nowrap}}
+@media (max-width:640px){.tbl{font-size:.82rem}.tbl th,.tbl td{padding:8px 7px}.tbl .dot{margin-right:5px;width:8px;height:8px}}
+@media (max-width:640px){.tbl td:first-child{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <h1>{{ h1 }}</h1>
+      <p class="lead">{{ lead }}</p>
+    </div>
+    <div class="next" data-ferien-next data-today="{{ nxt.start.isoformat() }}">
+      <div class="small muted">Nächste Ferien</div>
+      <div class="when" data-fn-when>{{ nxt.days }} Tage</div>
+      <div class="what" data-fn-what>{{ nxt.name }}</div>
+      <div class="rel" data-fn-rel>{{ nxt.span }}</div>
+    </div>
+  </div>
+</div></section>
+<div class="wrap">
+  <section class="band">
+    <div class="band-head"><h2>Das Schuljahr {{ sy }} in {{ name }}</h2><span class="small muted">September bis September</span></div>
+    {{ m.gantt([{"href": "#termine", "name": name, "bars": d.bars}], axis, "Zeitstrahl der Schulferien " ~ sy ~ " in " ~ name) }}
+    {{ m.flegend() }}
+  </section>
+</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div>
+    <h2 id="termine">Alle Ferientermine {{ sy }}</h2>
+    <div class="scroll"><table class="tbl">
+      <thead><tr><th scope="col">Ferien</th><th scope="col">Zeitraum</th><th scope="col">Tage</th><th scope="col" title="Montag bis Freitag ohne gesetzliche Feiertage"><span class="lg">Arbeitstage</span><span class="sm">Arb.-T.</span></th></tr></thead>
+      <tbody>{% for r in d.rows %}<tr><td><span class="dot f-{{ r.cls }}"></span>{{ r.name }}</td><td class="date"><span class="lg">{{ r.span }}</span><span class="sm">{{ r.short }}</span></td><td>{{ r.days }}</td><td>{{ r.wd }}</td></tr>{% endfor %}
+      <tr class="sum"><td>Gesamt</td><td></td><td>{{ d.total }}</td><td>{{ d.wd }}</td></tr></tbody>
+    </table></div>
+    <p class="small muted">„Tage“ zählt Kalendertage inklusive Wochenenden. „Arbeitstage“ sind Montag bis Freitag ohne gesetzliche Feiertage – also die Urlaubstage, die ein berufstätiger Elternteil bräuchte, um die Ferien komplett abzudecken.</p>
+    <p class="no-print"><button class="btn" type="button" data-ferien-ics data-name="Schulferien {{ sy }} {{ name }}" data-file="schulferien-{{ sy_slug }}-{{ slug }}.ics" data-rows='{{ ics_json }}'>Ferien in den Kalender (.ics)</button>
+    <a class="btn ghost" href="/urlaubsplaner.html">Urlaub dazu planen</a></p>
+
+    <h2>Gut zu wissen</h2>
+    <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}
+      <p class="small muted">Quelle: <a href="{{ src[1] }}" rel="noopener">{{ src[0] }}</a>. Schulautonome Tage legt jede Schule selbst fest; sie sind hier nicht enthalten.</p>
+    </div>
+
+    {{ m.ad("rect") }}
+
+    <h2>Andere {{ 'Bundesländer' if country == 'at' else 'Länder' }}</h2>
+    <ul class="tiles">{% for s,n in siblings %}<li><a href="/schulferien-{{ sy_slug }}-{{ s }}.html">{{ n }}</a></li>{% endfor %}</ul>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Feiertage in {{ name }}</h3><ul><li><a href="/feiertage-2027-{{ slug }}.html">Feiertage 2027 {{ name }}</a></li><li><a href="/brueckentage-2027.html">Brückentage 2027</a></li><li><a href="/sommerferien-2027.html">Sommerferien 2027 im Vergleich</a></li><li><a href="/schulferien-{{ sy_slug }}.html">Alle Schulferien {{ sy }}</a></li></ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+<script src="/assets/ferien.js?v={{ v }}" defer></script>
+{% endblock %}

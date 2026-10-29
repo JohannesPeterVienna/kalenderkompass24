@@ -44,12 +44,15 @@
     <h3>Deutschland</h3>
     <ul class="tiles">{% for slug,name in de_regions %}<li><a href="/feiertage-{{ year }}-{{ slug }}.html">{{ name }}</a></li>{% endfor %}</ul>
 
+    <h2>Schulferien 2026/2027</h2>
+    <p>Alle amtlichen Ferientermine für 25 Bundesländer auf einem Zeitstrahl – mit Countdown, Kalender-Export und den Urlaubstagen, die Eltern zur Abdeckung bräuchten. <a href="/schulferien-2026-2027.html">Zur Ferienübersicht</a> · <a href="/sommerferien-2027.html">Sommerferien 2027 im Vergleich</a></p>
+
     <h2>Ratgeber</h2>
     <ul class="cards">{% for a in articles %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>
   </div>
   <aside class="side">
     <div class="box"><h3>Diese Woche</h3><div class="kw-now" data-kw-now><b>KW {{ kw.week }}</b></div><p class="small muted" style="margin:8px 0 0"><a href="/kalenderwochen-{{ kw.year }}.html">Alle Kalenderwochen {{ kw.year }}</a></p></div>
-    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/brueckentage-{{ year }}.html">Brückentage {{ year }}</a></li></ul></div>
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/brueckentage-{{ year }}.html">Brückentage {{ year }}</a></li></ul></div>
     {{ m.ad("half") }}
   </aside>
 </div>

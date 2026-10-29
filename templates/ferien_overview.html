@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap"><h1>{{ h1 }}</h1><p class="lead">{{ lead }}</p>
+  <p class="jump"><a class="btn ghost" href="#oesterreich">Österreich</a> <a class="btn ghost" href="#deutschland">Deutschland</a> <a class="btn ghost" href="/sommerferien-2027.html">Sommerferien 2027</a></p></div></section>
+<div class="wrap">
+  <section class="band" id="oesterreich">
+    <div class="band-head"><h2>Österreich – alle 9 Bundesländer</h2><span class="small muted">Name antippen für Details</span></div>
+    {{ m.gantt(gantt_at, axis_at, "Schulferien " ~ sy ~ " in Österreich") }}
+    {{ m.flegend() }}
+  </section>
+  <p class="small muted">Herbst-, Weihnachts-, Oster- und Pfingstferien sind in ganz Österreich gleich. Unterschiede gibt es nur bei den Semesterferien (drei Gruppen im Februar) und beim Sommer: Burgenland, Niederösterreich und Wien starten eine Woche früher. Quelle: <a href="{{ src_at[1] }}" rel="noopener">{{ src_at[0] }}</a>.</p>
+</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap">
+  <section class="band" id="deutschland">
+    <div class="band-head"><h2>Deutschland – alle 16 Länder</h2><span class="small muted">Name antippen für Details</span></div>
+    {{ m.gantt(gantt_de, axis_de, "Schulferien " ~ sy ~ " in Deutschland") }}
+    {{ m.flegend() }}
+  </section>
+  <p class="small muted">In Deutschland legt jedes Land seine Ferien selbst fest; die Kultusministerkonferenz stimmt vor allem die Sommerferien ab, damit sie gestaffelt beginnen. Quelle: <a href="{{ src_de[1] }}" rel="noopener">{{ src_de[0] }}</a>.</p>
+</div>
+<div class="wrap layout">
+  <div>
+    <h2>Sommerferien 2027 – wer startet zuerst?</h2>
+    <div class="scroll"><table class="tbl">
+      <thead><tr><th scope="col">Land</th><th scope="col">Sommerferien</th><th scope="col">Tage</th></tr></thead>
+      <tbody>{% for r in summer_rows %}<tr><td><a href="{{ r.href }}">{{ r.name }}</a> <span class="small muted">{{ 'AT' if r.c == 'at' else 'DE' }}</span></td><td class="date"><span class="lg">{{ r.span }}</span><span class="sm">{{ r.short }}</span></td><td>{{ r.days }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {{ m.ad("rect") }}
+    <h2>So nutzt du die Übersicht</h2>
+    <div class="prose">
+      <p><strong>Urlaub buchen:</strong> Reisen in der Nebensaison sind oft deutlich günstiger. Der Zeitstrahl zeigt, wann in vielen Ländern gleichzeitig Ferien sind – und welche Wochen frei von Ferienandrang bleiben.</p>
+      <p><strong>Familie in mehreren Ländern:</strong> Wer Großeltern, Patchwork-Kinder oder Freunde in einem anderen Bundesland hat, findet hier sofort die gemeinsamen Ferienwochen.</p>
+      <p><strong>Betreuung planen:</strong> Auf jeder Länderseite steht, wie viele Arbeitstage in den Ferien liegen – also wie viele Urlaubstage Eltern bräuchten, um alles selbst abzudecken.</p>
+      <p class="small muted">Alle Angaben ohne Gewähr. Schulautonome Tage sind nicht enthalten; sie legt jede Schule selbst fest.</p>
+    </div>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Österreich</h3><ul>{% for r in gantt_at %}<li><a href="{{ r.href }}">{{ r.name }}</a></li>{% endfor %}</ul></div>
+    <div class="box"><h3>Deutschland</h3><ul>{% for r in gantt_de %}<li><a href="{{ r.href }}">{{ r.name }}</a></li>{% endfor %}</ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

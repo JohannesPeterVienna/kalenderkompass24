@@ -38,3 +38,15 @@
 {% macro crumbs(items) -%}
 <nav class="crumbs wrap" aria-label="Brotkrumen">{% for href,label in items %}{% if not loop.last %}<a href="{{ href }}">{{ label }}</a> › {% else %}<span>{{ label }}</span>{% endif %}{% endfor %}</nav>
 {%- endmacro %}
+
+{% macro gantt(rows, axis, label) -%}
+<div class="gantt" role="img" aria-label="{{ label }}">
+  <div class="g-axis"><span></span><div class="g-track">{% for a in axis %}<span style="left:{{ a.left }}%">{{ a.label }}</span>{% endfor %}</div></div>
+  {% for r in rows %}<div class="g-row"><a href="{{ r.href }}">{{ r.name }}</a><div class="g-track">{% for a in axis %}<i class="g-tick" style="left:{{ a.left }}%"></i>{% endfor %}{% for b in r.bars %}<span class="g-bar f-{{ b.cls }}" style="left:{{ b.left }}%;width:{{ b.width }}%" title="{{ b.title }}"></span>{% endfor %}</div></div>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro flegend() -%}
+<div class="legend"><span><i class="f-au"></i>Herbst</span><span><i class="f-xm"></i>Weihnachten</span><span><i class="f-wi"></i>Semester / Winter</span><span><i class="f-ea"></i>Ostern / Frühjahr</span><span><i class="f-pf"></i>Pfingsten</span><span><i class="f-su"></i>Sommer</span><span><i class="f-day"></i>einzelner Tag</span></div>
+{%- endmacro %}
