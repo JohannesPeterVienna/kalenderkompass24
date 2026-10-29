@@ -390,7 +390,7 @@ def build_articles():
               h1=a["title"], lead=a["teaser"], body=a["body"], related=related, crumbs=crumbs, jsonld=ld, active="", priority=0.7)
 
 
-LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8/8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
+LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
 
 
 def build_legal():
