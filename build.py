@@ -431,6 +431,7 @@ def build_static():
     (OUT / "assets" / "icon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="5" width="28" height="25" rx="5" fill="#15233B"/><rect x="2" y="5" width="28" height="8" rx="4" fill="#C4122F"/><rect x="7" y="17" width="5" height="5" rx="1" fill="#F2B100"/><rect x="14" y="23.5" width="5" height="4" rx="1" fill="#0F7C80"/></svg>')
     (OUT / "CNAME").write_text("kalenderkompass24.de\n")
     (OUT / ".nojekyll").write_text("")
+    (OUT / "google9bf1079fd4bf073e.html").write_text("google-site-verification: google9bf1079fd4bf073e.html")
     (OUT / "ads.txt").write_text("google.com, pub-7811071715414905, DIRECT, f08c47fec0942fa0\n")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     urls = "".join(f"<url><loc>{SITE}{p}</loc><lastmod>2026-10-29</lastmod><priority>{pr}</priority></url>" for p, pr in PAGES)
