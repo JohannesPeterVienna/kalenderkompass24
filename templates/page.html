@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{% if crumbs %}{{ m.crumbs(crumbs) }}{% endif %}
+<div class="wrap layout" style="padding-top:28px">
+  <article class="prose" style="max-width:none">
+    <h1>{{ h1 }}</h1>
+    {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
+    {% if ads %}{{ m.ad("billboard") }}{% endif %}
+    <div class="prose">{{ body | safe }}</div>
+    {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}
+  </article>
+  <aside class="side">
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Brückentage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li></ul></div>
+    {% if ads %}{{ m.ad("half") }}{% endif %}
+  </aside>
+</div>
+{% endblock %}

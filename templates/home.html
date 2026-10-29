@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+<section class="hero"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <h1>Wann ist der nächste freie Tag?</h1>
+      <p class="lead">Feiertage, Brückentage und der beste Zeitpunkt für deinen Urlaub – für jedes Bundesland in Österreich und Deutschland, auf einen Blick.</p>
+      {{ m.picker(years) }}
+    </div>
+    <div class="next" data-next aria-live="polite">
+      <div class="when">{{ next.rel }}</div><div class="what">{{ next.name }}</div><div class="rel">{{ next.date }} · Österreich</div>
+    </div>
+  </div>
+</div></section>
+
+<div class="wrap">{{ m.band(band, "Dein Jahr " ~ band.year ~ " in Farbe") }}</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+
+<div class="wrap layout">
+  <div>
+    <h2>Brückentage <span data-year-label>{{ year }}</span> in <span data-region-label>Österreich</span></h2>
+    <p class="muted">Ein oder zwei Urlaubstage zwischen Feiertag und Wochenende – sortiert nach Datum. Die Zahl links sind die nötigen Urlaubstage, rechts die freien Tage am Stück.</p>
+    {{ m.bridges(bridge_list, "at") }}
+
+    <h2>Urlaub mit System</h2>
+    <div class="planner" data-planner>
+      <div class="row">
+        <label class="range">Wie viele Urlaubstage willst du einsetzen?<output data-budget-out>10</output><input type="range" min="1" max="30" value="10" data-budget aria-label="Urlaubstage"></label>
+      </div>
+      <p class="plan-sum" data-plan-sum>Der Planer sucht die Blöcke mit den meisten freien Tagen pro Urlaubstag.</p>
+      <ol class="bridges" data-plan-list></ol>
+      <p class="small muted" style="margin-top:12px">Mehr Optionen im <a href="/urlaubsplaner.html">Urlaubsplaner</a>.</p>
+    </div>
+
+    {{ m.ad("rect") }}
+
+    <h2>Alle Feiertage <span data-year-label>{{ year }}</span> · <span data-region-label>Österreich</span></h2>
+    {{ m.htable(rows) }}
+    <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>In meinen Kalender übernehmen (.ics)</button></p>
+
+    <h2>Feiertage {{ year }} nach Bundesland</h2>
+    <h3>Österreich</h3>
+    <ul class="tiles">{% for slug,name in at_regions %}<li><a href="/feiertage-{{ year }}-{{ slug }}.html">{{ name }}</a></li>{% endfor %}</ul>
+    <h3>Deutschland</h3>
+    <ul class="tiles">{% for slug,name in de_regions %}<li><a href="/feiertage-{{ year }}-{{ slug }}.html">{{ name }}</a></li>{% endfor %}</ul>
+
+    <h2>Ratgeber</h2>
+    <ul class="cards">{% for a in articles %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Diese Woche</h3><div class="kw-now" data-kw-now><b>KW {{ kw.week }}</b></div><p class="small muted" style="margin:8px 0 0"><a href="/kalenderwochen-{{ kw.year }}.html">Alle Kalenderwochen {{ kw.year }}</a></p></div>
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/brueckentage-{{ year }}.html">Brückentage {{ year }}</a></li></ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

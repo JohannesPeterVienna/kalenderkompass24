@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kalenderkompass24.de/sitemap.xml

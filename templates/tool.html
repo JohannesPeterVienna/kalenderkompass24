@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <h1>{{ h1 }}</h1>
+  <p class="lead">{{ lead }}</p>
+  {% if show_picker %}{{ m.picker(years, show_year=show_year) }}{% endif %}
+</div></section>
+<div class="wrap layout">
+  <div>
+    {{ tool | safe }}
+    {{ m.ad("rect") }}
+    <div class="prose">{{ body | safe }}</div>
+    {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Brückentage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/kalenderwochen-{{ year }}.html">Kalenderwochen {{ year }}</a></li></ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

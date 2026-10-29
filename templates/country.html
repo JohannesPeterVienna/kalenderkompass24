@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <h1>{{ h1 }}</h1>
+  <p class="lead">{{ lead }}</p>
+</div></section>
+<div class="wrap">{{ m.band(band, band_title, live=False) }}</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div>
+    <h2>{{ table_title }}</h2>
+    {{ m.htable(rows, live=False) }}
+
+    {% if patrons %}
+    <h2>Landespatrone und schulfreie Tage</h2>
+    <p class="muted">Diese Tage sind in Österreich keine gesetzlichen Feiertage. Geschäfte haben offen, an Schulen ist in der Regel frei, und manche Betriebe und Behörden geben frei.</p>
+    <div class="scroll"><table class="tbl"><thead><tr><th>Datum</th><th>Tag</th><th>Bundesland</th></tr></thead><tbody>
+    {% for p in patrons %}<tr><td class="date">{{ p.day }}</td><td>{{ p.name }}</td><td>{{ p.regions }}</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% endif %}
+
+    {% if matrix %}
+    <h2>Welcher Feiertag gilt wo?</h2>
+    <p class="muted">Ein roter Punkt bedeutet: gesetzlicher Feiertag im jeweiligen Bundesland.</p>
+    <div class="scroll"><table class="tbl matrix"><thead><tr><th>Feiertag {{ year }}</th>{% for code in matrix.codes %}<th scope="col" title="{{ matrix.names[loop.index0] }}">{{ code }}</th>{% endfor %}</tr></thead><tbody>
+    {% for r in matrix.rows %}<tr><td><strong>{{ r.name }}</strong><div class="small muted">{{ r.day }}</div></td>{% for c in r.cells %}<td>{% if c %}<span class="yes" aria-label="ja">●</span>{% else %}<span class="muted" aria-label="nein">–</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}
+    </tbody></table></div>
+    <p class="small muted">{{ matrix.legend }}</p>
+    {% endif %}
+
+    {{ m.ad("rect") }}
+
+    <h2>Brückentage {{ year }}</h2>
+    {% if bridge_list is not none %}{{ m.bridges(bridge_list, country, live=False) }}{% endif %}
+    {% if bridge_note %}<p class="muted">{{ bridge_note }}</p>{% endif %}
+
+    <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
+
+    <h2>Feiertage {{ year }} nach Bundesland</h2>
+    <ul class="tiles">{% for s,n in regions %}<li><a href="/feiertage-{{ region_year }}-{{ s }}.html">{{ n }}</a></li>{% endfor %}</ul>
+
+    <h2>Andere Jahre</h2>
+    <ul class="tiles">{% for y in other_years %}<li><a href="/feiertage-{{ y }}-{{ slug }}.html">Feiertage {{ y }} {{ country_name }}</a></li>{% endfor %}</ul>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Für dein Bundesland</h3><p class="small">Auf der Startseite wählst du dein Bundesland und siehst Brückentage und den nächsten Feiertag.</p><a class="btn" href="/">Zur Übersicht</a></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

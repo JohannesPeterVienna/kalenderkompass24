@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% import "macros.html" as m %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <h1>{{ h1 }}</h1>
+      <p class="lead">{{ lead }}</p>
+    </div>
+    <div class="next">
+      <div class="when">{{ legal_count }}</div><div class="what">gesetzliche Feiertage {{ year }}</div><div class="rel">davon {{ weekday_count }} an Werktagen · {{ bridge_count }} Brückentag{{ '' if bridge_count == 1 else 'e' }}</div>
+    </div>
+  </div>
+</div></section>
+<div class="wrap">{{ m.band(band, "Feiertage und Brückentage " ~ year ~ " in " ~ name) }}</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div>
+    <h2>Alle Feiertage {{ year }} in {{ name }}</h2>
+    {{ m.htable(rows) }}
+    <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>Feiertage {{ year }} in den Kalender (.ics)</button></p>
+
+    <h2>Brückentage {{ year }} in {{ name }}</h2>
+    {{ m.bridges(bridge_list, country) }}
+
+    {{ m.ad("rect") }}
+
+    <h2>Was in {{ name }} gilt</h2>
+    <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
+
+    {% if other_years %}<h2>Andere Jahre</h2>
+    <ul class="tiles">{% for y in other_years %}<li><a href="/feiertage-{{ y }}-{{ slug }}.html">Feiertage {{ y }} {{ name }}</a></li>{% endfor %}</ul>{% endif %}
+
+    <h2>Weitere {{ 'Bundesländer' }}</h2>
+    <ul class="tiles">{% for s,n in siblings %}<li><a href="/feiertage-{{ year }}-{{ s }}.html">{{ n }}</a></li>{% endfor %}</ul>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Urlaub planen</h3><p class="small">Wie viele freie Tage holst du {{ year }} in {{ name }} aus deinen Urlaubstagen heraus?</p><a class="btn" href="/urlaubsplaner.html">Zum Urlaubsplaner</a></div>
+    <div class="box"><h3>Übersicht</h3><ul><li><a href="/feiertage-{{ year }}-{{ country_slug }}.html">Feiertage {{ year }} {{ country_name }}</a></li><li><a href="/brueckentage-{{ year }}.html">Brückentage {{ year }}</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li></ul></div>
+    {{ m.ad("half") }}
+  </aside>
+</div>
+{% endblock %}

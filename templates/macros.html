@@ -1,0 +1,40 @@
+{% macro ad(kind) -%}
+<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true"></div>
+{%- endmacro %}
+
+{% macro picker(years, show_year=True, country='at') -%}
+<div class="picker no-print">
+  <label>Land<select data-country><option value="at"{% if country=='at' %} selected{% endif %}>Österreich</option><option value="de"{% if country=='de' %} selected{% endif %}>Deutschland</option></select></label>
+  <label>Bundesland<select data-region><option value="">wird geladen …</option></select></label>
+  {% if show_year %}<label>Jahr<select data-year>{% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}</select></label>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro band(b, title, live=True) -%}
+<section class="band" aria-labelledby="band-{{ b.year }}">
+  <div class="band-head"><h2 id="band-{{ b.year }}">{{ title }}</h2><span class="small muted">Jedes Kästchen ist ein Tag</span></div>
+  <div class="yr" role="img" aria-label="Jahresübersicht {{ b.year }}: Feiertage rot, Brückentage gelb"{% if live %} data-band{% endif %}>
+  {%- for m in b.months -%}<span class="m">{{ m.label }}</span>{% for c in m.cells %}<span class="{{ c.cls }}"{% if c.title %} title="{{ c.title }}"{% endif %}></span>{% endfor %}{%- endfor -%}
+  </div>
+  <div class="legend"><span><i style="background:var(--red)"></i>gesetzlicher Feiertag</span><span><i style="background:var(--red-soft);box-shadow:inset 0 0 0 1.5px var(--red)"></i>Landespatron / schulfrei</span><span><i style="background:var(--sun)"></i>Brückentag</span><span><i style="background:var(--weekend)"></i>Wochenende</span></div>
+</section>
+{%- endmacro %}
+
+{% macro bridges(list, country, live=True) -%}
+<ol class="bridges"{% if live %} data-bridges{% endif %}>
+{% for b in list %}<li class="bridge"><span class="chip">{{ b.vacation }}</span><div><div class="take">{{ b.take }}</div><div class="muted small">rund um {{ b.holiday }} · frei von {{ b.from }} bis {{ b.to }}</div></div><div class="ratio"><b>{{ b.free }}</b><span class="small muted">Tage frei</span></div></li>
+{% else %}<li class="empty">Keine Brückentage mit ein oder zwei Urlaubstagen.</li>{% endfor %}
+</ol>
+{%- endmacro %}
+
+{% macro htable(rows, live=True) -%}
+<div class="scroll"><table class="tbl">
+<thead><tr><th scope="col">Datum</th><th scope="col">Wochentag</th><th scope="col">Feiertag</th></tr></thead>
+<tbody{% if live %} data-table{% endif %}>
+{% for h in rows %}<tr class="{{ 'we' if h.weekend }} {{ 'patron' if h.kind=='patron' }}"><td class="date">{{ h.day }}</td><td>{{ h.wd }}</td><td>{{ h.name }}{% if h.note %}<div class="small muted">{{ h.note }}</div>{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>
+{%- endmacro %}
+
+{% macro crumbs(items) -%}
+<nav class="crumbs wrap" aria-label="Brotkrumen">{% for href,label in items %}{% if not loop.last %}<a href="{{ href }}">{{ label }}</a> › {% else %}<span>{{ label }}</span>{% endif %}{% endfor %}</nav>
+{%- endmacro %}
