@@ -390,12 +390,14 @@ def build_articles():
               h1=a["title"], lead=a["teaser"], body=a["body"], related=related, crumbs=crumbs, jsonld=ld, active="", priority=0.7)
 
 
-LEGAL_ADDR = "AdStern :: Agentur digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a>"
+LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8/8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
 
 
 def build_legal():
     write("imprint.html", "page.html", title="Impressum | Kalenderkompass 24", description="Impressum und Offenlegung von Kalenderkompass 24.",
           h1="Impressum", body=f"""<h2>Medieninhaber und Herausgeber</h2><p>{LEGAL_ADDR}</p>
+<h2>Unternehmensangaben</h2><p>Unternehmensgegenstand: Werbeagentur<br>UID-Nummer: ATU54682507<br>Gewerbebehörde: Magistratisches Bezirksamt für den 1. Bezirk, Wien</p>
+<p>Angaben nach § 5 E-Commerce-Gesetz und § 25 Mediengesetz.</p>
 <h2>Grundlegende Richtung</h2><p>Kalenderkompass 24 ist eine unabhängige Informationsseite zu Feiertagen, Brückentagen, Kalenderwochen und Urlaubsplanung in Österreich und Deutschland. Die Seite finanziert sich über Werbung.</p>
 <h2>Haftung</h2><p>Alle Angaben wurden sorgfältig nach den geltenden Feiertagsgesetzen berechnet und geprüft, erfolgen aber ohne Gewähr. Rechtliche Hinweise in den Ratgebern ersetzen keine Rechtsberatung.</p>""",
           ads=False, robots="noindex,follow", active="")
