@@ -194,3 +194,4 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 @media (max-width:640px){.lg{display:none}.sm{display:inline}.tbl td.date{white-space:nowrap}}
 @media (max-width:640px){.tbl{font-size:.82rem}.tbl th,.tbl td{padding:8px 7px}.tbl .dot{margin-right:5px;width:8px;height:8px}}
 @media (max-width:640px){.tbl td:first-child{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}}
+main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
