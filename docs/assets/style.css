@@ -131,7 +131,7 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 /* Werbeflächen: bleiben ohne konfigurierte Anzeige unsichtbar */
 .ad{display:none;margin:28px auto;text-align:center}
 .ad.on{display:block}
-.ad::before{content:"Anzeige";display:block;font-size:.7rem;color:var(--muted);margin-bottom:4px}
+.ad::before{content:"Werbung";display:block;font-size:.7rem;color:var(--muted);margin-bottom:4px}
 .ad--billboard{min-height:100px;max-width:970px}
 .ad--rect{min-height:250px;max-width:336px}
 .ad--half{min-height:600px;width:300px}

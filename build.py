@@ -11,7 +11,7 @@ from content.articles import ARTICLES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261029"
+V = "20261029b"
 UPDATED = "Oktober 2026"
 TODAY = date(2026, 10, 29)
 CUR = 2027                      # Hauptjahr der Seite (Planung läuft aufs nächste Jahr)
