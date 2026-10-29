@@ -176,7 +176,7 @@
     const P = pages[pi];
     $("[data-fstage]").innerHTML = `<div class="fsheet" style="aspect-ratio:${P.w}/${P.h}">${svg(P)}</div>`;
     $("[data-finfo]").innerHTML = `${pages.length} Seite${pages.length > 1 ? "n" : ""} · A4 ${P.w > P.h ? "quer" : "hoch"}` + (pages.length > 1 ? ` <span class="pager"><button type="button" data-prev aria-label="Vorige Seite">‹</button> ${pi + 1} / ${pages.length} <button type="button" data-next aria-label="Nächste Seite">›</button></span>` : "");
-    $("[data-fnote]").textContent = st.ferien && SF ? `Schulferien enthalten für das Schuljahr ${SF.schuljahr} (bis ${SF.bis.split("-").reverse().join(".")}); spätere Ferien ergänzen wir, sobald sie amtlich veröffentlicht sind.` : "";
+    $("[data-fnote]").textContent = st.ferien && SF ? `Schulferien enthalten für das Schuljahr ${SF.schuljahr} – bis zum Ende der Sommerferien 2027. Spätere Ferien ergänzen wir, sobald sie amtlich veröffentlicht sind.` : "";
     save();
   }
   function bind() {
