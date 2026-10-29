@@ -28,6 +28,9 @@
     <h2>Was in {{ name }} gilt</h2>
     <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
 
+    {% if ferien %}<h2>Schulferien {{ ferien.sy }} in {{ name }}</h2>
+    <p>{{ ferien.text }} <a href="{{ ferien.href }}">Alle Ferientermine mit Zeitstrahl</a></p>{% endif %}
+
     {% if other_years %}<h2>Andere Jahre</h2>
     <ul class="tiles">{% for y in other_years %}<li><a href="/feiertage-{{ y }}-{{ slug }}.html">Feiertage {{ y }} {{ name }}</a></li>{% endfor %}</ul>{% endif %}
 

@@ -225,7 +225,19 @@ def bridge_days(country, region, year, max_gap=2):
     return result
 
 
+def selftest():
+    """Stichproben gegen bekannte Daten – läuft bei jedem Build."""
+    known = {2000: (4, 23), 2008: (3, 23), 2011: (4, 24), 2019: (4, 21), 2024: (3, 31), 2025: (4, 20), 2026: (4, 5),
+             2027: (3, 28), 2028: (4, 16), 2030: (4, 21), 2038: (4, 25)}
+    for y, (m, d) in known.items():
+        assert easter(y) == date(y, m, d), y
+    assert buss_und_bettag(2027) == date(2027, 11, 17)
+    assert len(at_holidays(2027)) == 13
+    assert len(de_holidays(2027, "XX")) == 9
+
+
 if __name__ == "__main__":
+    selftest()
     # Plausibilitätsprüfungen gegen bekannte Daten
     assert easter(2026) == date(2026, 4, 5)
     assert easter(2027) == date(2027, 3, 28)

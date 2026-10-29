@@ -174,6 +174,18 @@ def build_home():
           articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/")
 
 
+def ferien_teaser(country, slug, name):
+    import ferien as F
+    ps = [p for p in F.periods(country, slug) if not p["single"]]
+    su = F.summer(country, slug)
+    lng = max((p for p in ps if p["name"] != "Sommerferien"), key=lambda p: p["days"])
+    return {"text": f"Im Schuljahr {F.SCHOOLYEAR} hat {name} {len(ps)} Ferienblöcke mit insgesamt {F.total_days(country, slug)} Ferientagen. "
+                    f"Die Sommerferien 2027 dauern von {fmt(su['start'], country)} bis {fmt(su['end'], country)}. "
+                    f"Die längsten Ferien nach dem Sommer sind die {lng['name']} mit {lng['days']} Tagen ({fmt(lng['start'], country, wd=False)} bis {fmt(lng['end'], country, wd=False)}). "
+                    f"Wer Brückentage und Ferien kombiniert, kann Familienurlaub besonders effizient planen.",
+            "href": f"/schulferien-{F.SY_SLUG}-{slug}.html", "sy": F.SCHOOLYEAR}
+
+
 def build_regions(year):
     for country, regions in (("at", H.AT_REGIONS), ("de", {k: v[0] for k, v in H.DE_REGIONS.items()})):
         cslug = "oesterreich" if country == "at" else "deutschland"
@@ -194,6 +206,7 @@ def build_regions(year):
                   country_slug=cslug, country_name=cname, legal_count=len(legal),
                   weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
                   band=band_view(country, slug, year), rows=rows, bridge_list=bl, facts=region_facts(country, slug, year),
+                  ferien=ferien_teaser(country, slug, name) if year == 2027 else None,
                   other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
                   crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
                   jsonld=[crumbs_ld(crumbs), holiday_ld(country, slug, year, rows)], active="/", priority=0.8 if year == CUR else 0.6)
@@ -310,9 +323,28 @@ def build_workdays():
   <div data-workdays-out style="margin-top:12px"><p class="plan-sum">Wähle zwei Daten.</p></div>
 </div>"""
     at = sum(1 for i in range((b - a).days + 1) if (d := a + timedelta(i)).weekday() < 5 and d not in H.off_days("at", "wien", CUR))
+    def wd_month(country, region, y, m):
+        off = H.off_days(country, region, y); d = date(y, m, 1); n = 0
+        while d.month == m:
+            n += d.weekday() < 5 and d not in off; d += timedelta(1)
+        return n
+    de_tot = {name: sum(wd_month("de", slug, CUR, m) for m in range(1, 13)) for slug, (name, code) in H.DE_REGIONS.items()}
+    lo, hi = min(de_tot.values()), max(de_tot.values())
+    lo_n = ", ".join(k for k, v in de_tot.items() if v == lo); hi_n = ", ".join(k for k, v in de_tot.items() if v == hi)
+    rows = "".join(f"<tr><td>{M_AT[m-1]}</td><td>{wd_month('at', 'wien', CUR, m)}</td><td>{wd_month('de', 'bayern', CUR, m)}</td><td>{wd_month('de', 'berlin', CUR, m)}</td></tr>" for m in range(1, 13))
     body = f"""<h2>Arbeitstage {CUR} im Überblick</h2>
-<p>In Wien hat {CUR} {at} Arbeitstage von Montag bis Freitag. In Deutschland hängt die Zahl vom Bundesland ab, weil die Zahl der Feiertage zwischen 10 und 13 schwankt und manche auf ein Wochenende fallen.</p>
-<p>Der Rechner zählt beide Daten mit. Er berücksichtigt Samstage und Sonntage sowie die gesetzlichen Feiertage des gewählten Bundeslandes – nicht aber Urlaub, Krankenstand oder betriebliche Schließtage.</p>
+<p>In Wien hat {CUR} {at} Arbeitstage von Montag bis Freitag. In Deutschland hängt die Zahl vom Bundesland ab: Am wenigsten Arbeitstage hat {CUR} {lo_n} mit {lo}, am meisten {hi_n} mit {hi}. Der Grund sind unterschiedlich viele Feiertage – zwischen 10 und 13 – und die Frage, ob sie auf ein Wochenende fallen.</p>
+<h2>Arbeitstage {CUR} pro Monat</h2>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Monat</th><th scope="col">Wien</th><th scope="col">Bayern</th><th scope="col">Berlin</th></tr></thead><tbody>{rows}
+<tr><td><strong>Jahr</strong></td><td><strong>{at}</strong></td><td><strong>{de_tot['Bayern']}</strong></td><td><strong>{de_tot['Berlin']}</strong></td></tr></tbody></table></div>
+<p class="small muted">Montag bis Freitag ohne gesetzliche Feiertage. Für Bayern mit Mariä Himmelfahrt (gilt nur in Gemeinden mit überwiegend katholischer Bevölkerung{'; fällt ' + str(CUR) + ' auf ' + WDL[date(CUR, 8, 15).weekday()] if date(CUR, 8, 15).weekday() >= 5 else ''}), ohne das Augsburger Friedensfest.</p>
+<h2>Arbeitstage, Werktage, Kalendertage</h2>
+<ul><li><strong>Kalendertage</strong> sind alle Tage, auch Wochenenden und Feiertage.</li>
+<li><strong>Werktage</strong> sind im rechtlichen Sinn meist Montag bis Samstag ohne Feiertage. Der Urlaubsanspruch in Österreich wird teils in Werktagen angegeben (30 Werktage = 5 Wochen).</li>
+<li><strong>Arbeitstage</strong> sind die Tage, an denen tatsächlich gearbeitet wird – bei einer Fünftagewoche Montag bis Freitag ohne Feiertage. Diese zählt der Rechner.</li></ul>
+<h2>Wofür man Arbeitstage braucht</h2>
+<p><strong>Projektplanung:</strong> Wie viele Arbeitstage bleiben bis zur Deadline? <strong>Tagessätze:</strong> Wer ein Monatsgehalt durch die Arbeitstage teilt, erhält den Wert eines Arbeitstags – praktisch etwa bei unbezahltem Urlaub oder anteiliger Bezahlung. <strong>Fristen:</strong> Manche Fristen laufen in Arbeitstagen, die meisten gesetzlichen Fristen aber in Kalendertagen – hier lohnt sich ein genauer Blick.</p>
+<p>Der Rechner zählt Anfangs- und Enddatum mit. Er berücksichtigt Samstage und Sonntage sowie die gesetzlichen Feiertage des gewählten Bundeslandes – nicht aber Urlaub, Krankenstand, betriebliche Schließtage oder Feiertage einzelner Gemeinden.</p>
 <p>Mehr zu Kalender-, Werk- und Arbeitstagen und zur Berechnung von Fristen im Beitrag <a href="/tage-richtig-zaehlen.html">Tage richtig zählen</a>.</p>"""
     crumbs = [("/", "Start"), ("/arbeitstage-rechner.html", "Arbeitstage-Rechner")]
     write("arbeitstage-rechner.html", "tool.html", title="Arbeitstage-Rechner: Arbeitstage zwischen zwei Daten zählen | Kalenderkompass 24",
@@ -403,10 +435,22 @@ def build_legal():
           ads=False, robots="noindex,follow", active="")
     write("about.html", "page.html", title="Über Kalenderkompass 24", description="Wer hinter Kalenderkompass 24 steht und wie die Feiertage berechnet werden.",
           h1="Über Kalenderkompass 24", lead="Feiertage, Brückentage und Urlaubsplanung – genau, schnell und ohne Anmeldung.",
-          body=f"""<p>Kalenderkompass 24 wird von AdStern in Wien betrieben. Die Seite beantwortet die Fragen, die sich jedes Jahr wieder stellen: Wann ist der nächste Feiertag? Welche Brückentage gibt es? Wie hole ich aus meinem Urlaub die meisten freien Tage heraus?</p>
-<h2>Woher die Daten kommen</h2><p>Die Feiertage werden nicht abgeschrieben, sondern aus den Rechtsgrundlagen berechnet: für Österreich aus § 7 Arbeitsruhegesetz, für Deutschland aus den Feiertagsgesetzen der 16 Bundesländer. Bewegliche Feiertage leiten wir vom Osterdatum ab, das nach dem gregorianischen Kalender berechnet wird. Die Ergebnisse gleichen wir mit amtlichen Veröffentlichungen ab.</p>
+          body=f"""<p>Kalenderkompass 24 wird von AdStern in Wien betrieben. Die Seite beantwortet Fragen, die sich jedes Jahr wieder stellen: Wann ist der nächste Feiertag? Welche Brückentage gibt es? Wann sind Schulferien? Und wie hole ich aus meinem Urlaub die meisten freien Tage heraus?</p>
+<h2>Was du hier findest</h2>
+<ul><li>Gesetzliche Feiertage für alle 9 österreichischen Bundesländer und alle 16 deutschen Länder, mit Landespatronen und regionalen Besonderheiten</li>
+<li>Brückentage und einen Urlaubsplaner, der Urlaubstage rund um Feiertage optimal verteilt</li>
+<li>Amtliche Schulferien-Termine mit Zeitstrahl und Kalender-Export</li>
+<li>Kalenderwochen, Arbeitstage-Rechner und Kalender zum Ausdrucken</li>
+<li>Ratgeber zu Urlaubsanspruch, Fristen und Feiertagsregeln</li></ul>
+<h2>Woher die Daten kommen</h2>
+<p><strong>Feiertage</strong> werden nicht abgeschrieben, sondern aus den Rechtsgrundlagen berechnet: für Österreich aus § 7 Arbeitsruhegesetz, für Deutschland aus den Feiertagsgesetzen der 16 Länder. Bewegliche Feiertage wie Ostermontag, Christi Himmelfahrt oder Pfingstmontag leiten wir vom Osterdatum ab, das nach dem gregorianischen Kalender berechnet wird. Der Buß- und Bettag in Sachsen ist der Mittwoch vor dem 23. November.</p>
+<p><strong>Schulferien</strong> übernehmen wir ausschließlich aus amtlichen Quellen: für Österreich aus dem Ferienkalender auf oesterreich.gv.at, für Deutschland aus den Kalenderdateien der Kultusministerkonferenz. Wir zeigen nur Schuljahre, die dort bereits veröffentlicht sind – keine Schätzungen.</p>
+<h2>So prüfen wir</h2>
+<p>Bei jeder Aktualisierung prüft ein Testprogramm die Berechnung gegen bekannte Stichproben – etwa die Ostertermine von 2000 bis 2038, den Buß- und Bettag und die Zahl der bundesweiten Feiertage. Schlägt ein Test fehl, wird die Seite nicht veröffentlicht. Zusätzlich gleichen wir die Ergebnisse mit amtlichen Veröffentlichungen ab. Brückentage und Urlaubsvorschläge werden aus denselben Daten abgeleitet, damit Tabellen, Kalender und Planer immer übereinstimmen.</p>
+<h2>Grenzen</h2>
+<p>Nicht enthalten sind Feiertage einzelner Gemeinden (etwa das Hohe Friedensfest in Augsburg – wir weisen auf solche Fälle hin), schulautonome Tage, betriebliche Schließtage und Regelungen aus Kollektiv- oder Tarifverträgen. Landespatrone sind in Österreich keine gesetzlichen Feiertage; wir zeigen sie getrennt an.</p>
 <h2>Deine Daten</h2><p>Alle Werkzeuge rechnen in deinem Browser. Was du eingibst, verlässt dein Gerät nicht. Werbung und Statistik laufen nur mit deiner Einwilligung, Details in der <a href="/privacy.html">Datenschutzerklärung</a>.</p>
-<h2>Fehler gefunden?</h2><p>Schreib uns an <a href="mailto:office@adstern.com">office@adstern.com</a>. Wir korrigieren Fehler so schnell wie möglich.</p>""",
+<h2>Fehler gefunden?</h2><p>Schreib uns an <a href="mailto:office@adstern.com">office@adstern.com</a>. Wir prüfen jeden Hinweis und korrigieren Fehler so schnell wie möglich. Stand der Daten: {UPDATED}.</p>""",
           active="", priority=0.3)
     write("privacy.html", "page.html", title="Datenschutz | Kalenderkompass 24", description="Datenschutzerklärung von Kalenderkompass 24.",
           h1="Datenschutzerklärung", lead="Stand: 29. Oktober 2026", ads=False, robots="noindex,follow", active="", body=f"""
@@ -439,6 +483,7 @@ def build_static():
 
 
 def main():
+    H.selftest()
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir()
     build_data()
