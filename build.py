@@ -11,7 +11,7 @@ from content.articles import ARTICLES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261029c"
+V = "20261029d"
 UPDATED = "Oktober 2026"
 TODAY = date(2026, 10, 29)
 CUR = 2027                      # Hauptjahr der Seite (Planung läuft aufs nächste Jahr)
@@ -26,7 +26,7 @@ WDL = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"
 WDS = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 
 NAV = [("/", "Feiertage"), (f"/brueckentage-{CUR}.html", "Brückentage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
-       ("/schulferien-2026-2027.html", "Schulferien"), (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
+       ("/schulferien-2026-2027.html", "Schulferien"), ("/familienplaner.html", "Familienplaner"), (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
 
 env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=True, trim_blocks=True, lstrip_blocks=True)
 PAGES = []  # (path, priority) für die Sitemap
@@ -121,6 +121,10 @@ def build_data():
             "h": h}
     (OUT / "data").mkdir(exist_ok=True)
     (OUT / "data" / "feiertage.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    import ferien as F
+    sf = {f"{c}:{slug}": [[p["name"], p["start"].isoformat(), p["end"].isoformat()] for p in F.periods(c, slug)]
+          for c in ("at", "de") for slug in F.regions(c)}
+    (OUT / "data" / "schulferien.json").write_text(json.dumps({"schuljahr": F.SCHOOLYEAR, "bis": F.SY_END.isoformat(), "f": sf}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
 # ---------------------------------------------------------------- Texte je Region
@@ -315,6 +319,52 @@ def build_planner():
           active="/urlaubsplaner.html", priority=0.9)
 
 
+def build_familie():
+    tool = """<div class="familie" data-familie>
+<form class="fform" data-fform onsubmit="return false">
+  <div class="fgrid">
+    <label>Bundesland<select name="region"><option>wird geladen …</option></select></label>
+    <label>Jahr<select name="year"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select></label>
+    <label>Monate<select name="month"><option value="all">alle 12 Monate</option>""" + "".join(f'<option value="{i}">{n}</option>' for i, n in enumerate(M_AT)) + """</select></label>
+    <label>Überschrift<input type="text" name="title" maxlength="30" placeholder="z. B. Familie Huber"></label>
+  </div>
+  <fieldset class="flay"><legend>Darstellung</legend>
+    <label><input type="radio" name="layout" value="spalten"> Spalte pro Person (A4 hoch)</label>
+    <label><input type="radio" name="layout" value="raster"> Monatsraster (A4 quer)</label>
+    <label><input type="checkbox" name="ferien"> Schulferien einzeichnen</label>
+  </fieldset>
+  <h3>Familie &amp; Geburtstage</h3>
+  <p class="small muted">Bis zu sechs Personen bekommen eine eigene Spalte. Weitere Personen – etwa Großeltern – erscheinen mit ihrem Geburtstag bei den Terminen. Fotos bleiben auf deinem Gerät.</p>
+  <ul class="people" data-people></ul>
+  <p><button type="button" class="btn ghost" data-add>+ Person hinzufügen</button></p>
+</form>
+<div class="fpreview"><div data-fstage class="fstage"></div><p class="small muted" data-finfo></p>
+  <p class="factions"><button type="button" class="btn" data-fpdf>PDF herunterladen</button> <button type="button" class="linkbtn" data-freset>Alles zurücksetzen</button></p>
+  <p class="small muted" data-fnote></p><p class="small" data-fmsg role="status"></p></div>
+</div>
+<script src="/assets/familie.js?v=""" + V + """" defer></script>"""
+    body = """<h2>So entsteht dein Familienplaner</h2>
+<ol><li><strong>Bundesland wählen:</strong> Die gesetzlichen Feiertage und die amtlichen Schulferien deines Bundeslandes werden automatisch eingetragen.</li>
+<li><strong>Familie eintragen:</strong> Name, Geburtstag und – wenn du willst – ein Foto. Jede Person bekommt eine eigene Spalte mit Foto im Kopf.</li>
+<li><strong>Prüfen und drucken:</strong> Die Vorschau zeigt jede Seite genau so, wie sie gedruckt wird. Ein Klick erzeugt ein PDF mit allen zwölf Monaten.</li></ol>
+<h2>Warum ein Familienplaner auf Papier?</h2>
+<p>Ein gedruckter Planer an der Kühlschranktür ist für alle sichtbar – auch für Kinder ohne Handy und für Großeltern, die zu Besuch sind. Wer wann Training hat, wer abgeholt werden muss und wann der nächste Geburtstag ansteht, sieht man auf einen Blick. Die Spalte pro Person verhindert, dass Termine untergehen.</p>
+<h2>Geburtstage mit Foto</h2>
+<p>Am Geburtstag erscheint das Foto der Person direkt im Kalender – bei eigener Spalte in dieser Spalte, sonst bei den Terminen. Gibst du das Geburtsjahr ein, steht bei Personen ohne eigene Spalte auch das Alter dabei („Oma Geburtstag (75)“). Ideal für Großeltern, Paten und Freunde der Kinder.</p>
+<h2>Deine Fotos bleiben bei dir</h2>
+<p>Fotos werden direkt in deinem Browser quadratisch zugeschnitten und verkleinert. Sie werden nicht hochgeladen und nicht an uns übertragen; gespeichert werden sie nur im lokalen Speicher deines Browsers, damit du später weitermachen kannst. „Alles zurücksetzen“ löscht sie wieder.</p>
+<h2>Tipps zum Drucken</h2>
+<p>Drucke im Format A4 mit 100 % Skalierung („Tatsächliche Größe“). Auf etwas stärkerem Papier (100–120 g/m²) halten Kugelschreiber und Fineliner gut und nichts schlägt durch. Gelocht passt der Planer in jeden Ordner; mit einer Klemmleiste wird er zum Wandkalender.</p>
+<p class="small muted">Feiertage nach den Feiertagsgesetzen, Schulferien nach oesterreich.gv.at und der Kultusministerkonferenz. Alle Angaben ohne Gewähr.</p>"""
+    crumbs = [("/", "Start"), ("/familienplaner.html", "Familienplaner")]
+    write("familienplaner.html", "tool.html", title="Familienplaner 2027 zum Ausdrucken – mit Feiertagen, Schulferien & Geburtstagsfotos | Kalenderkompass 24",
+          description="Familienplaner 2027 kostenlos gestalten: Spalte pro Person, Feiertage und Schulferien deines Bundeslandes, Geburtstage mit Foto – als PDF zum Ausdrucken.",
+          h1="Familienplaner 2027", lead="Gestalte euren Familienkalender mit Feiertagen und Schulferien deines Bundeslandes – und den Geburtstagen der Familie, auf Wunsch mit Foto.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen",)],
+          jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Familienplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/familienplaner.html"}],
+          active="/familienplaner.html", priority=0.9)
+
+
 def build_workdays():
     a, b = date(CUR, 1, 1), date(CUR, 12, 31)
     tool = f"""<div class="planner" data-workdays>
@@ -491,7 +541,7 @@ def main():
     for y in (2027, 2028): build_regions(y)
     for y in YEARS: build_country(y)
     for y in (2027, 2028): build_bridges(y)
-    build_planner(); build_workdays()
+    build_planner(); build_workdays(); build_familie()
     for y in YEARS: build_kw(y)
     for y in (2027, 2028): build_print(y)
     import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
