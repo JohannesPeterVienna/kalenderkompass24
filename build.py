@@ -538,6 +538,23 @@ def build_static():
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
 
+def check_years():
+    """Selbsttest: Auf jeder Jahresseite dürfen Titel und Überschriften nur das eigene Jahr nennen."""
+    bad = []
+    for f in OUT.glob("*.html"):
+        m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", f.name)
+        if not m: continue
+        y = m.group(1)
+        html = f.read_text(encoding="utf-8")
+        for tag in re.findall(r"<(?:title|h1|h2)[^>]*>(.*?)</(?:title|h1|h2)>", html, re.S):
+            text = re.sub(r"<[^>]+>", "", tag)
+            others = {x for x in re.findall(r"\b20\d\d\b", text) if x != y and "/" not in text}
+            if others: bad.append(f"{f.name}: „{text.strip()[:80]}“")
+    if bad:
+        sys.exit("Jahres-Selbsttest fehlgeschlagen:\n" + "\n".join(bad[:30]))
+    print("Jahres-Selbsttest: alle Jahresseiten nennen nur ihr eigenes Jahr")
+
+
 def main():
     H.selftest()
     if OUT.exists(): shutil.rmtree(OUT)
@@ -552,6 +569,7 @@ def main():
     for y in (2027, 2028): build_print(y)
     import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
     build_articles(); build_legal(); build_static()
+    check_years()
     print(f"{len(PAGES)} indexierbare Seiten in {OUT}")
 
 
