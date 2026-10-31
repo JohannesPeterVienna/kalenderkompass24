@@ -27,6 +27,8 @@
 
     <h2>Was in {{ name }} gilt</h2>
     <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
+    {% if land_html %}<h2>Rechtsgrundlage und Besonderheiten in {{ name }}</h2>
+    <div class="prose">{{ land_html | safe }}</div>{% endif %}
 
     {% if ferien %}<h2>Schulferien {{ ferien.sy }} in {{ name }}</h2>
     <p>{{ ferien.text }} <a href="{{ ferien.href }}">Alle Ferientermine mit Zeitstrahl</a></p>{% endif %}

@@ -7,6 +7,8 @@ from jinja2 import Environment, FileSystemLoader
 sys.path.insert(0, str(Path(__file__).parent))
 import holidays as H
 from content.articles import ARTICLES
+from content.laender import LAND
+from content.werkzeuge import URLAUBSPLANER
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
@@ -213,6 +215,7 @@ def build_regions(year):
                   country_slug=cslug, country_name=cname, legal_count=len(legal),
                   weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
                   band=band_view(country, slug, year), rows=rows, bridge_list=bl, facts=region_facts(country, slug, year),
+                  land_html=LAND.get(slug) if (country == "de" and year == CUR) else None,
                   ferien=ferien_teaser(country, slug, name) if year == 2027 else None,
                   other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
                   crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
@@ -310,11 +313,7 @@ def build_planner():
   <div class="legend"><span><i style="background:var(--red)"></i>Feiertag</span><span><i style="background:var(--sea)"></i>vorgeschlagener Urlaubstag</span><span><i style="background:var(--sun)"></i>weiterer Brückentag</span></div></div>
   <ol class="bridges" data-plan-list></ol>
 </div>"""
-    body = """<h2>Wie der Planer rechnet</h2>
-<p>Für jeden möglichen Urlaubsblock zählt der Planer, wie viele freie Tage am Stück entstehen – Wochenenden und gesetzliche Feiertage deines Bundeslandes inklusive. Dann wählt er die Blöcke mit dem besten Verhältnis von freien Tagen zu Urlaubstagen, bis dein Kontingent aufgebraucht ist. Ein Block umfasst höchstens zehn Urlaubstage.</p>
-<p>Ist das gewählte Jahr das laufende, plant er ab heute. Landespatrone in Österreich zählt er nicht als frei, weil sie keine gesetzlichen Feiertage sind.</p>
-<h2>Was der Planer nicht weiß</h2>
-<p>Schulferien, Betriebsurlaub und Absprachen im Team kennt nur dein Kalender. Nimm die Vorschläge als Ausgangspunkt und stimme den Urlaub wie gewohnt ab – in Österreich muss er vereinbart werden, in Deutschland legt ihn der Arbeitgeber unter Berücksichtigung deiner Wünsche fest.</p>"""
+    body = URLAUBSPLANER
     crumbs = [("/", "Start"), ("/urlaubsplaner.html", "Urlaubsplaner")]
     write("urlaubsplaner.html", "tool.html", title=f"Urlaubsplaner {CUR}: aus wenig Urlaub viele freie Tage machen | Kalenderkompass 24",
           description=f"Urlaubsplaner {CUR} für Österreich und Deutschland: Gib deine Urlaubstage ein und finde die Termine mit den meisten freien Tagen in deinem Bundesland.",
