@@ -14,7 +14,7 @@
     {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}
   </div>
   <aside class="side">
-    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Brückentage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/kalenderwochen-{{ year }}.html">Kalenderwochen {{ year }}</a></li></ul></div>
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Brückentage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li>{% set py = year if year >= 2027 else 2027 %}<li><a href="/kalender-{{ py }}-zum-ausdrucken.html">Kalender {{ py }} zum Ausdrucken</a></li><li><a href="/kalenderwochen-{{ year }}.html">Kalenderwochen {{ year }}</a></li></ul></div>
     {{ m.ad("half") }}{{ m.ad("sky") }}
   </aside>
 </div>
