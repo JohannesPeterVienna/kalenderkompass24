@@ -222,3 +222,8 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .pager button{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:50%;width:30px;height:30px;cursor:pointer}
 @media (max-width:900px){.familie{grid-template-columns:minmax(0,1fr)}.fpreview{position:static;order:-1}}
 @media (max-width:480px){.fgrid{grid-template-columns:1fr}.person{grid-template-columns:56px 1fr}.person label:not(.ph){grid-column:2}}
+
+/* Werbeplätze: Superbanner 728×90 (ab Tablet), Wide Skyscraper 160×600 (nur mit Seitenleiste) */
+.ad--superbanner{max-width:728px;min-height:90px}.ad--sky{width:160px;min-height:600px}
+@media (max-width:767px){.ad--superbanner{display:none!important}}
+@media (max-width:960px){.ad--sky{display:none!important}}

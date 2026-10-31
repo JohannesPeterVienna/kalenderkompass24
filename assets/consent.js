@@ -7,7 +7,10 @@
   const GOOGLE_VENDOR = 755;
 
   // Anzeigenblöcke: Block-IDs werden nach der AdSense-Freigabe hier eingetragen.
-  const SLOTS = { billboard: "", rect: "", half: "" };
+  const SLOTS = { billboard: "", rect: "", half: "", superbanner: "", sky: "" };
+  // Feste IAB-Formate: Superbanner 728×90, Wide Skyscraper 160×600. Die übrigen Plätze sind responsiv
+  // (Billboard 970×250 / Leaderboard 728×90 / Mobile 320×100, Half Page 300×600, Medium Rectangle 300×250).
+  const FIXED = { superbanner: [728, 90], sky: [160, 600] };
 
   const gpc = navigator.globalPrivacyControl === true;
 
@@ -21,11 +24,16 @@
       const id = SLOTS[box.dataset.ad];
       if (!id) return;
       box.classList.add("on");
+      if (box.offsetParent === null) { box.classList.remove("on"); return; }   // auf diesem Bildschirm ausgeblendet
       const ins = document.createElement("ins");
-      ins.className = "adsbygoogle"; ins.style.display = "block";
-      ins.dataset.adClient = PUB; ins.dataset.adSlot = id;
-      ins.dataset.adFormat = box.dataset.ad === "half" ? "vertical" : "auto";
-      ins.dataset.fullWidthResponsive = "true";
+      ins.className = "adsbygoogle"; ins.dataset.adClient = PUB; ins.dataset.adSlot = id;
+      const fixed = FIXED[box.dataset.ad];
+      if (fixed) { ins.style.cssText = `display:inline-block;width:${fixed[0]}px;height:${fixed[1]}px`; }
+      else {
+        ins.style.display = "block";
+        ins.dataset.adFormat = box.dataset.ad === "half" ? "vertical" : "auto";
+        ins.dataset.fullWidthResponsive = "true";
+      }
       box.appendChild(ins);
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     });

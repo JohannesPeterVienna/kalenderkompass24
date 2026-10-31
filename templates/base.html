@@ -33,6 +33,7 @@
 </div></header>
 <main id="inhalt">
 {% block main %}{% endblock %}
+{% if ads %}<div class="wrap"><div class="ad ad--superbanner" data-ad="superbanner" aria-hidden="true"></div></div>{% endif %}
 </main>
 <footer class="foot"><div class="wrap">
   <div>Kalenderkompass 24 – Feiertage, Brückentage und Urlaubsplanung für Österreich und Deutschland. Alle Angaben ohne Gewähr; Stand {{ updated }}.</div>

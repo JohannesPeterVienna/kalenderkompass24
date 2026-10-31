@@ -39,7 +39,7 @@
   <aside class="side">
     <div class="box"><h3>Österreich</h3><ul>{% for r in gantt_at %}<li><a href="{{ r.href }}">{{ r.name }}</a></li>{% endfor %}</ul></div>
     <div class="box"><h3>Deutschland</h3><ul>{% for r in gantt_de %}<li><a href="{{ r.href }}">{{ r.name }}</a></li>{% endfor %}</ul></div>
-    {{ m.ad("half") }}
+    {{ m.ad("half") }}{{ m.ad("sky") }}
   </aside>
 </div>
 {% endblock %}
