@@ -79,7 +79,7 @@ select,input[type=number],input[type=date]{font:inherit;color:var(--ink);backgro
 
 /* Layout mit Seitenleiste */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:40px;align-items:start;padding-bottom:40px}
-.side{position:sticky;top:16px;display:flex;flex-direction:column;gap:20px}
+.side{display:flex;flex-direction:column;gap:20px}
 .side .box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
 .side .box h3{margin-top:0;font-size:1.05rem}
 .side ul{margin:0;padding-left:1.1em}
@@ -189,7 +189,7 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media (max-width:640px){.tbl td.date{white-space:normal}.tbl th,.tbl td{padding:8px 10px}}
 @media (max-width:640px){.g-axis .g-track span:nth-child(even){display:none}
-  .nav{flex-wrap:nowrap;overflow-x:auto;width:100%;margin:0 -4px;padding-bottom:6px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav a{white-space:nowrap;flex:none}}
+  .nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%;margin:0}.nav a{text-align:center;padding:9px 4px;font-size:.88rem;background:var(--soft)}}
 .sm{display:none}
 @media (max-width:640px){.lg{display:none}.sm{display:inline}.tbl td.date{white-space:nowrap}}
 @media (max-width:640px){.tbl{font-size:.82rem}.tbl th,.tbl td{padding:8px 7px}.tbl .dot{margin-right:5px;width:8px;height:8px}}

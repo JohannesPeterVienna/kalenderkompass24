@@ -129,6 +129,8 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
                           "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode", "eventStatus": "https://schema.org/EventScheduled",
                           "location": {"@type": "AdministrativeArea", "name": f"{name}, {country_label[c]}"}} for r in d["rows"] if not r["single"]]
             write(path, "ferien_region.html",
+                  # AT: Bundesländer unterscheiden sich nur in Semester- und Sommerferienbeginn -> nicht einzeln indexieren
+                  robots="noindex,follow" if c == "at" else None,
                   title=f"Schulferien {F.SCHOOLYEAR} {name}: alle Termine | Kalenderkompass 24",
                   description=f"Schulferien {F.SCHOOLYEAR} in {name}: alle Ferientermine mit Dauer, Sommerferien {fmt(su['start'], c, wd=False)} – {fmt(su['end'], c, wd=False)}, Zeitstrahl, Kalender-Download und Urlaubstage-Bedarf für Eltern.",
                   h1=f"Schulferien {F.SCHOOLYEAR} in {name}",

@@ -37,6 +37,7 @@ PENTECOST = EASTER + timedelta(days=49)
 
 def _de_name(kind, a, b):
     if kind == "Herbst": return "Herbstferien"
+    if kind.startswith("Buß"): return "Buß- und Bettag (schulfrei)"
     if kind == "Weihnachten": return "Weihnachtsferien"
     if kind == "Winter": return "Winterferien"
     if kind == "Sommer": return "Sommerferien"
@@ -56,7 +57,7 @@ def periods(country, slug):
         raw = [(_de_name(k, D(a), D(b)), D(a), D(b)) for k, a, b in _raw["de"][slug]]
     out = []
     for n, a, b in raw:
-        if a == b and not n.startswith(("Allerseelen", "Brückentag")): n = f"{n} (einzelner Tag)"
+        if a == b and not n.startswith(("Allerseelen", "Brückentag", "Buß")): n = f"{n} (einzelner Tag)"
         out.append({"name": n, "start": a, "end": b, "days": (b - a).days + 1, "single": a == b})
     return out
 

@@ -59,6 +59,8 @@
     }
     window.__tcfapi("addEventListener", 2, (tc, ok) => {
       if (!ok || !tc) return;
+      // Außerhalb von EWR/UK/CH gilt die DSGVO-Einwilligung nicht – Statistik dann direkt starten.
+      if (tc.gdprApplies === false) { loadGA(); return; }
       if (tc.eventStatus !== "tcloaded" && tc.eventStatus !== "useractioncomplete") return;
       const p1 = tc.purpose && tc.purpose.consents && tc.purpose.consents[1];
       const v = tc.vendor && tc.vendor.consents && tc.vendor.consents[GOOGLE_VENDOR];

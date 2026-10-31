@@ -1,5 +1,5 @@
 """Erzeugt die komplette statische Website in docs/ (GitHub Pages)."""
-import json, shutil, sys
+import json, re, shutil, sys
 from datetime import date, timedelta
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
@@ -42,6 +42,9 @@ def fmt(d, country, wd=True, year=True):
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
                 lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None)
+    m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
+    if "year" not in ctx and m and int(m.group(1)) in YEARS:
+        base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
     base.update(ctx)
     base["path"] = "/" if path == "index.html" else "/" + path
     html = env.get_template(template).render(**base)
@@ -213,6 +216,9 @@ def build_regions(year):
                   ferien=ferien_teaser(country, slug, name) if year == 2027 else None,
                   other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
                   crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
+                  # AT-Bundesländer haben identische gesetzliche Feiertage, Folgejahr-Seiten sind Vorschau:
+                  # beides bleibt für Besucher erreichbar, wird aber nicht als eigene Suchseite angeboten.
+                  robots="noindex,follow" if (country == "at" or year != CUR) else None,
                   jsonld=[crumbs_ld(crumbs), holiday_ld(country, slug, year, rows)], active="/", priority=0.8 if year == CUR else 0.6)
 
 
@@ -478,7 +484,7 @@ LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8, 10
 def build_legal():
     write("imprint.html", "page.html", title="Impressum | Kalenderkompass 24", description="Impressum und Offenlegung von Kalenderkompass 24.",
           h1="Impressum", body=f"""<h2>Medieninhaber und Herausgeber</h2><p>{LEGAL_ADDR}</p>
-<h2>Unternehmensangaben</h2><p>Unternehmensgegenstand: Werbeagentur<br>UID-Nummer: ATU54682507<br>Gewerbebehörde: Magistratisches Bezirksamt für den 1. Bezirk, Wien</p>
+<h2>Unternehmensangaben</h2><p>Unternehmensgegenstand: Werbeagentur<br>UID-Nummer: ATU54682507<br>Gewerbebehörde: Magistratisches Bezirksamt für den 1. und 8. Bezirk, Wien<br>Kammerzugehörigkeit: Wirtschaftskammer Wien, Fachgruppe Werbung und Marktkommunikation<br>Berufsbezeichnung: Werbeagentur (Gewerbe, verliehen in Österreich)<br>Anwendbare Rechtsvorschriften: Gewerbeordnung, abrufbar unter <a href="https://www.ris.bka.gv.at" rel="noopener">www.ris.bka.gv.at</a></p>
 <p>Angaben nach § 5 E-Commerce-Gesetz und § 25 Mediengesetz.</p>
 <h2>Grundlegende Richtung</h2><p>Kalenderkompass 24 ist eine unabhängige Informationsseite zu Feiertagen, Brückentagen, Kalenderwochen und Urlaubsplanung in Österreich und Deutschland. Die Seite finanziert sich über Werbung.</p>
 <h2>Haftung</h2><p>Alle Angaben wurden sorgfältig nach den geltenden Feiertagsgesetzen berechnet und geprüft, erfolgen aber ohne Gewähr. Rechtliche Hinweise in den Ratgebern ersetzen keine Rechtsberatung.</p>""",
