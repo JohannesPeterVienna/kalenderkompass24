@@ -1,9 +1,13 @@
 /* Werbung und Statistik — beides läuft über Googles zertifizierte Einwilligungsverwaltung (TCF 2.2).
-   Reihenfolge: zuerst dataLayer/gtag und die Consent-Mode-Grundwerte (alles "denied"), erst danach
-   irgendein Google-Skript. Google Analytics misst nur, wenn der Google-Dialog Zweck 1 + Anbieter Google
-   (TCF) UND die Statistik-Zustimmung im Consent Mode (analytics_storage GRANTED) meldet; UNKNOWN oder
-   fehlende Werte zählen als Nein. Widerruf/Ablehnung schalten die Messung sofort ab (consent update +
-   ga-disable). Signals und Werbepersonalisierung sind in Analytics deaktiviert. */
+   Reihenfolge: zuerst dataLayer/gtag und die Consent-Mode-Grundwerte (alles "denied", ga-disable an),
+   erst danach irgendein Google-Skript. Google Analytics misst nur,
+   - wenn die DSGVO gilt: TCF Zweck 1 + Anbieter Google (755) zugestimmt UND Consent-Mode-Wert
+     analyticsStoragePurposeConsentStatus === GRANTED (1);
+   - außerhalb der DSGVO (gdprApplies false): Analyticswert GRANTED (1) oder NOT_APPLICABLE (3) UND
+     die CMP meldet „kein US-Opt-out“ (usstatesoptout DOES_NOT_APPLY 1 / NOT_OPTED_OUT 2).
+   Fehlend, UNKNOWN (0), DENIED (2), NOT_CONFIGURED (4) oder ein Fehler einer CMP-Schnittstelle = Nein.
+   Ein eindeutiges TCF-Nein schaltet sofort ab, ohne vorher weitere CMP-Schnittstellen abzufragen.
+   Werte: developers.google.com/funding-choices/fc-api-docs. Signals/Werbepersonalisierung in GA aus. */
 (() => {
   const PUB = "ca-pub-7811071715414905";
   const GA = "G-T00HRG2YVF";
@@ -69,17 +73,30 @@
       } catch (_) { return 0; }
     },
 
+    usOptOut(){
+      // googlefc.usstatesoptout.InitialUsStatesOptOutStatusEnum: 1 DOES_NOT_APPLY, 2 NOT_OPTED_OUT, 3 OPTED_OUT.
+      // Nur 1 oder 2 bestätigen "kein Opt-out"; noch nicht gemeldet (0), 3 oder ein Fehler sperren.
+      try {
+        const u = window.googlefc.usstatesoptout;
+        if (!u || typeof u.getInitialUsStatesOptOutStatus !== "function") return true;
+        const st = u.getInitialUsStatesOptOutStatus();
+        return st !== 1 && st !== 2;
+      } catch (_) { return true; }
+    },
+
     erlaubt(){
       if (gpc) return false;
-      const cm = this.consentMode(), tc = this.tcf;
-      if (cm === 2) return false;
-      if (!tc) return null;
-      // Außerhalb von EWR/UK/CH gilt die DSGVO-Einwilligung nicht – Statistik dann ohne Dialog erlaubt.
-      if (tc.gdprApplies === false) return true;
+      const tc = this.tcf;
+      if (!tc) return null;                                   // CMP noch stumm: Grundwerte bleiben "denied"
+      if (tc.gdprApplies === false){
+        const cm = this.consentMode();
+        return (cm === 1 || cm === 3) && !this.usOptOut();
+      }
       if (tc.eventStatus !== "tcloaded" && tc.eventStatus !== "useractioncomplete") return null;
       const p1 = !!(tc.purpose && tc.purpose.consents && tc.purpose.consents[1]);
       const v = !!(tc.vendor && tc.vendor.consents && tc.vendor.consents[GOOGLE_VENDOR]);
-      return p1 && v && cm === 1;
+      if (!p1 || !v) return false;                            // eindeutiges Nein – keine weitere CMP-Abfrage
+      return this.consentMode() === 1;
     },
 
     starten(){
@@ -126,7 +143,10 @@
       if (tc.eventStatus === "useractioncomplete" || tc.eventStatus === "tcloaded") setTimeout(() => statistik.pruefen(), 300);
     });
   }
-  window.googlefc.callbackQueue.push({ CONSENT_MODE_DATA_READY: () => statistik.pruefen() });
+  window.googlefc.callbackQueue.push({
+    CONSENT_MODE_DATA_READY: () => statistik.pruefen(),
+    INITIAL_US_STATES_OPT_OUT_DATA_READY: () => statistik.pruefen()
+  });
 
   // Link „Datenschutz-Einstellungen" im Seitenfuß öffnet den Google-Dialog erneut
   document.addEventListener("click", e => {
