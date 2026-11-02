@@ -227,3 +227,6 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .ad--superbanner{max-width:728px;min-height:90px}.ad--sky{width:160px;min-height:600px}
 @media (max-width:767px){.ad--superbanner{display:none!important}}
 @media (max-width:960px){.ad--sky{display:none!important}}
+
+/* Abstand Superbanner – Fußzeilen-Knopf (≥ 150 px) */
+.ad--superbanner{margin-bottom:120px}
