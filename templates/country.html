@@ -1,9 +1,10 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {{ m.crumbs(crumbs) }}
 <section class="hero" style="padding-top:20px"><div class="wrap">
   <h1>{{ h1 }}</h1>
   <p class="lead">{{ lead }}</p>
+  {{ m.checked_line() }}
 </div></section>
 <div class="wrap">{{ m.band(band, band_title, live=False) }}</div>
 <div class="wrap">{{ m.ad("billboard") }}</div>

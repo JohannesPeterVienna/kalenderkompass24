@@ -1,10 +1,10 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {{ m.crumbs(crumbs) }}
-<section class="hero" style="padding-top:20px"><div class="wrap"><h1>{{ h1 }}</h1><p class="lead">{{ lead }}</p></div></section>
+<section class="hero" style="padding-top:20px"><div class="wrap"><h1>{{ h1 }}</h1><p class="lead">{{ lead }}</p>{{ m.checked_line([src_at, src_de]) }}</div></section>
 <div class="wrap">
   <section class="band">
-    <div class="band-head"><h2>Sommerferien 2027 auf einem Blick</h2><span class="small muted">sortiert nach Ferienbeginn</span></div>
+    <div class="band-head"><h2>Sommerferien 2027 auf einen Blick</h2><span class="small muted">sortiert nach Ferienbeginn</span></div>
     {{ m.gantt(rows, weeks, "Sommerferien 2027 in Österreich und Deutschland") }}
     <div class="legend"><span><i class="f-su"></i>Sommerferien</span><span>AT = Österreich, DE = Deutschland</span></div>
   </section>
@@ -20,7 +20,7 @@
     {{ m.ad("rect") }}
     <h2>Zahlen zum Sommer 2027</h2>
     <div class="prose">
-      <p>Zwischen {{ span_all }} sind irgendwo in Österreich oder Deutschland Sommerferien. Am längsten dauern sie in {{ longest.name }} ({{ longest.days }} Tage), am kürzesten in {{ shortest.name }} ({{ shortest.days }} Tage).</p>
+      <p>Zwischen {{ span_all }} sind irgendwo in Österreich oder Deutschland Sommerferien. Am längsten dauern sie {{ longest.names }} ({{ 'je ' if longest.n > 1 }}{{ longest.days }} Tage), am kürzesten {{ shortest.names }} ({{ 'je ' if shortest.n > 1 }}{{ shortest.days }} Tage).</p>
       <p>Den größten Andrang gibt es rund um den {{ peak_day }}: Dann haben {{ peak_n }} der 25 Länder gleichzeitig frei. Wer flexibel ist, reist besser am Anfang oder am Ende des Sommers – dann sind Unterkünfte und Flüge oft günstiger.</p>
       <p>Österreich hat mit rund neun Wochen deutlich längere Sommerferien als Deutschland, wo sie meist sechs Wochen dauern. Dafür haben deutsche Länder oft längere Herbst- oder Pfingstferien.</p>
       <p class="small muted">Quellen: <a href="{{ src_at[1] }}" rel="noopener">{{ src_at[0] }}</a>; <a href="{{ src_de[1] }}" rel="noopener">{{ src_de[0] }}</a>.</p>

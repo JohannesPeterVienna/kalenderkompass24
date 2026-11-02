@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 <section class="hero"><div class="wrap">
   <div class="hero-grid">
@@ -18,7 +18,7 @@
 
 <div class="wrap layout">
   <div>
-    <h2>Brückentage <span data-year-label>{{ year }}</span> in <span data-region-label>Österreich</span></h2>
+    <h2>Brückentage <span data-year-label>{{ year }}</span> <span data-region-in>in Österreich</span></h2>
     <p class="muted">Ein oder zwei Urlaubstage zwischen Feiertag und Wochenende – sortiert nach Datum. Die Zahl links sind die nötigen Urlaubstage, rechts die freien Tage am Stück.</p>
     {{ m.bridges(bridge_list, "at") }}
 
@@ -32,8 +32,6 @@
       <p class="small muted" style="margin-top:12px">Mehr Optionen im <a href="/urlaubsplaner.html">Urlaubsplaner</a>.</p>
     </div>
 
-    {{ m.ad("rect") }}
-
     <h2>Alle Feiertage <span data-year-label>{{ year }}</span> · <span data-region-label>Österreich</span></h2>
     {{ m.htable(rows) }}
     <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>In meinen Kalender übernehmen (.ics)</button></p>
@@ -46,6 +44,8 @@
 
     <h2>Schulferien 2026/2027</h2>
     <p>Alle amtlichen Ferientermine für 25 Bundesländer auf einem Zeitstrahl – mit Countdown, Kalender-Export und den Urlaubstagen, die Eltern zur Abdeckung bräuchten. <a href="/schulferien-2026-2027.html">Zur Ferienübersicht</a> · <a href="/sommerferien-2027.html">Sommerferien 2027 im Vergleich</a></p>
+
+    {{ m.ad("rect") }}
 
     <h2>Ratgeber</h2>
     <ul class="cards">{% for a in articles %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>

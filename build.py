@@ -13,8 +13,10 @@ from content.werkzeuge import URLAUBSPLANER
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261031c"
-UPDATED = "Oktober 2026"
+V = "20261102a"
+UPDATED = "November 2026"
+CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
+CHECKED_ISO = "2026-11-02"
 TODAY = date(2026, 10, 29)
 CUR = 2027                      # Hauptjahr der Seite (Planung läuft aufs nächste Jahr)
 YEARS = [2026, 2027, 2028]
@@ -43,12 +45,20 @@ def fmt(d, country, wd=True, year=True):
 
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
-                lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None)
+                lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None,
+                checked=None, sources=None, skip_ads=())
     m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
     if "year" not in ctx and m and int(m.group(1)) in YEARS:
         base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
     base.update(ctx)
     base["path"] = "/" if path == "index.html" else "/" + path
+    # Anzeigenplätze nur auf indexierbaren Seiten; Einwilligung/Statistik (consent.js) bleibt überall gleich
+    base["slots"] = bool(base["ads"]) and "noindex" not in (base["robots"] or "")
+    if template == "tool.html":
+        # Erste Anzeige erst nach dem ersten Erklärabschnitt unter dem Werkzeug
+        body = base.get("body") or ""
+        cut = body.find("<h2", body.find("<h2") + 1) if body.count("<h2") > 1 else -1
+        base["body_first"], base["body_rest"] = (body[:cut], body[cut:]) if cut > 0 else (body, "")
     html = env.get_template(template).render(**base)
     (OUT / path).write_text(html, encoding="utf-8")
     if base.get("robots") is None:
@@ -123,7 +133,7 @@ def build_data():
                                           for x in H.region_holidays(country, r, y)]
     data = {"countries": {"at": {"label": "Österreich", "regions": H.AT_REGIONS},
                           "de": {"label": "Deutschland", "regions": {k: v[0] for k, v in H.DE_REGIONS.items()}}},
-            "h": h}
+            "art": H.REGION_ARTICLE, "h": h}
     (OUT / "data").mkdir(exist_ok=True)
     (OUT / "data" / "feiertage.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     import ferien as F
@@ -135,16 +145,17 @@ def build_data():
 # ---------------------------------------------------------------- Texte je Region
 def region_facts(country, region, year):
     name = region_name(country, region)
+    in_name = H.region_in(region, name)
     rows = H.region_holidays(country, region, year)
     legal = [r for r in rows if r["kind"] == "legal"]
     wkd = [r for r in legal if r["date"].weekday() < 5]
     facts = []
     if country == "at":
-        facts.append(f"In {name} gelten wie in ganz Österreich die 13 gesetzlichen Feiertage nach § 7 Arbeitsruhegesetz. "
+        facts.append(f"{H.cap(in_name)} gelten wie in ganz Österreich die 13 gesetzlichen Feiertage nach § 7 Arbeitsruhegesetz. "
                      f"{year} fallen davon {len(wkd)} auf einen Werktag von Montag bis Freitag.")
         pats = [r for r in rows if r["kind"] == "patron"]
         for p in pats:
-            facts.append(f"Der {p['name'].split(' (')[0]} am {fmt(p['date'], 'at')} ist in {name} kein gesetzlicher Feiertag. "
+            facts.append(f"Der {p['name'].split(' (')[0]} am {fmt(p['date'], 'at')} ist {in_name} kein gesetzlicher Feiertag. "
                          "Geschäfte haben geöffnet, an den Schulen ist aber in der Regel unterrichtsfrei, und viele Landesdienststellen geben frei.")
         facts.append("Der 24. und der 31. Dezember sind keine Feiertage. Viele Kollektivverträge sehen an diesen Tagen aber ganz oder ab Mittag frei vor.")
         facts.append("Den Karfreitag gibt es in Österreich seit 2019 nicht mehr als Feiertag. Stattdessen kann jede und jeder einen persönlichen Feiertag festlegen, der vom Urlaub abgezogen wird.")
@@ -153,7 +164,7 @@ def region_facts(country, region, year):
         extra = [r["name"] for r in legal if r["name"] not in {
             "Neujahr", "Karfreitag", "Ostermontag", "Tag der Arbeit", "Christi Himmelfahrt", "Pfingstmontag",
             "Tag der Deutschen Einheit", "1. Weihnachtsfeiertag", "2. Weihnachtsfeiertag"}]
-        facts.append(f"{name} hat {year} {len(legal)} gesetzliche Feiertage, {len(wkd)} davon an Werktagen von Montag bis Freitag. "
+        facts.append(f"{H.cap(H.region_nom(region, name))} hat {year} {len(legal)} gesetzliche Feiertage, {len(wkd)} davon an Werktagen von Montag bis Freitag. "
                      + (f"Zusätzlich zu den neun bundesweiten Feiertagen gilt hier: {', '.join(extra)}." if extra
                         else "Es gelten nur die neun bundesweit einheitlichen Feiertage."))
         note = H.de_partial_notes(code)
@@ -180,7 +191,8 @@ def build_home():
           next={"rel": rel, "name": nxt["name"], "date": fmt(nxt["date"], "at")}, band=band_view("at", "", CUR),
           bridge_list=bridge_view("at", "", CUR), rows=rows, year_attr=CUR,
           at_regions=list(H.AT_REGIONS.items()), de_regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()],
-          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/")
+          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/",
+          skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Brückentagen und Urlaubsplaner
 
 
 def ferien_teaser(country, slug, name):
@@ -188,7 +200,7 @@ def ferien_teaser(country, slug, name):
     ps = [p for p in F.periods(country, slug) if not p["single"]]
     su = F.summer(country, slug)
     lng = max((p for p in ps if p["name"] != "Sommerferien"), key=lambda p: p["days"])
-    return {"text": f"Im Schuljahr {F.SCHOOLYEAR} hat {name} {len(ps)} Ferienblöcke mit insgesamt {F.total_days(country, slug)} Ferientagen. "
+    return {"text": f"Im Schuljahr {F.SCHOOLYEAR} hat {H.region_nom(slug, name)} {len(ps)} Ferienblöcke mit insgesamt {F.total_days(country, slug)} Ferientagen. "
                     f"Die Sommerferien 2027 dauern von {fmt(su['start'], country)} bis {fmt(su['end'], country)}. "
                     f"Die längsten Ferien nach dem Sommer sind die {lng['name']} mit {lng['days']} Tagen ({fmt(lng['start'], country, wd=False)} bis {fmt(lng['end'], country, wd=False)}). "
                     f"Wer Brückentage und Ferien kombiniert, kann Familienurlaub besonders effizient planen.",
@@ -208,10 +220,11 @@ def build_regions(year):
                     + (f" – der beste: {singles[0]['take']}, {singles[0]['free']} Tage frei mit einem Urlaubstag." if singles else ".")
                     + " Mit Jahresübersicht und Kalender-Export.")
             path = f"feiertage-{year}-{slug}.html"
+            in_name = H.region_in(slug, name)
             crumbs = [("/", "Start"), (f"/feiertage-{year}-{cslug}.html", f"Feiertage {year} {cname}"), ("/" + path, name)]
             write(path, "region.html", title=f"Feiertage {year} {name}: alle Termine & Brückentage | Kalenderkompass 24",
-                  description=f"Feiertage {year} in {name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, Brückentage und Urlaubstipps – mit Kalender-Download.",
-                  h1=f"Feiertage {year} in {name}", lead=lead, name=name, slug=slug, country=country,
+                  description=f"Feiertage {year} {in_name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, Brückentage und Urlaubstipps – mit Kalender-Download.",
+                  h1=f"Feiertage {year} {in_name}", lead=lead, name=name, in_name=in_name, slug=slug, country=country,
                   country_slug=cslug, country_name=cname, legal_count=len(legal),
                   weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
                   band=band_view(country, slug, year), rows=rows, bridge_list=bl, facts=region_facts(country, slug, year),
@@ -219,9 +232,11 @@ def build_regions(year):
                   ferien=ferien_teaser(country, slug, name) if year == 2027 else None,
                   other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
                   crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
-                  # AT-Bundesländer haben identische gesetzliche Feiertage, Folgejahr-Seiten sind Vorschau:
-                  # beides bleibt für Besucher erreichbar, wird aber nicht als eigene Suchseite angeboten.
-                  robots="noindex,follow" if (country == "at" or year != CUR) else None,
+                  # AT-Bundesländer haben identische gesetzliche Feiertage, Folgejahr-Seiten sind Vorschau,
+                  # DE-Länder ohne eigenen Länderteil (content/laender.py) sind zu dünn:
+                  # alles bleibt für Besucher erreichbar, wird aber nicht als eigene Suchseite angeboten.
+                  robots="noindex,follow" if (country == "at" or year != CUR or not LAND.get(slug)) else None,
+                  checked=CHECKED,
                   jsonld=[crumbs_ld(crumbs), holiday_ld(country, slug, year, rows)], active="/", priority=0.8 if year == CUR else 0.6)
 
 
@@ -248,13 +263,14 @@ def build_country(year):
                  "Der Karfreitag ist seit 2019 kein Feiertag mehr. An seine Stelle trat der persönliche Feiertag, den jede und jeder einmal pro Jahr selbst festlegen kann."],
           regions=list(H.AT_REGIONS.items()), region_year=year if year in (2027, 2028) else CUR, country="at",
           other_years=[y for y in YEARS if y != year], slug="oesterreich", country_name="Österreich",
-          crumbs=crumbs, jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
+          crumbs=crumbs, checked=CHECKED, jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
 
     # Deutschland
     nat = rows_for("de", "", year)
     allh = {}
     for slug, (name, code) in H.DE_REGIONS.items():
         for r in H.region_holidays("de", slug, year):
+            if r["kind"] != "legal": continue          # schulfreie Tage (z. B. Buß- und Bettag in Bayern) sind keine Feiertage
             allh.setdefault((r["date"], r["name"]), set()).add(code)
     codes = [v[1] for v in H.DE_REGIONS.values()]
     mrows = [{"name": n, "day": fmt(d, "de", year=False), "cells": [c in s for c in codes]} for (d, n), s in sorted(allh.items())]
@@ -273,7 +289,7 @@ def build_country(year):
           facts=["Feiertage sind in Deutschland Ländersache. Nur der Tag der Deutschen Einheit ist durch Bundesrecht festgelegt; die übrigen bundesweiten Feiertage stehen in allen Landesgesetzen."],
           regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()], region_year=year if year in (2027, 2028) else CUR, country="de",
           other_years=[y for y in YEARS if y != year], slug="deutschland", country_name="Deutschland",
-          crumbs=crumbs, jsonld=[crumbs_ld(crumbs), holiday_ld("de", "", year, nat)], lang_at=False, priority=0.9 if year == CUR else 0.6)
+          crumbs=crumbs, checked=CHECKED, jsonld=[crumbs_ld(crumbs), holiday_ld("de", "", year, nat)], lang_at=False, priority=0.9 if year == CUR else 0.6)
 
 
 def build_bridges(year):
@@ -321,7 +337,8 @@ def build_planner():
           tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=True, year_attr=CUR,
           related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "urlaubsanspruch-oesterreich-deutschland", "persoenlicher-feiertag-oesterreich")],
           jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Urlaubsplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/urlaubsplaner.html"}],
-          active="/urlaubsplaner.html", priority=0.9)
+          active="/urlaubsplaner.html", priority=0.9,
+          skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Planer und Ergebnisliste
 
 
 def build_familie():
@@ -367,7 +384,8 @@ def build_familie():
           h1="Familienplaner 2027", lead="Gestalte euren Familienkalender mit Feiertagen und Schulferien deines Bundeslandes – und den Geburtstagen der Familie, auf Wunsch mit Foto.",
           tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen",)],
           jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Familienplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/familienplaner.html"}],
-          active="/familienplaner.html", priority=0.9)
+          active="/familienplaner.html", priority=0.9,
+          skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben dem Formular
 
 
 def build_workdays():
@@ -470,11 +488,11 @@ def build_articles():
         crumbs = [("/", "Start"), ("/" + a["slug"] + ".html", a["title"])]
         related = [x for x in ARTICLES if x["slug"] != a["slug"]][:3]
         ld = [crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "Article", "headline": a["title"],
-              "description": a["description"], "inLanguage": "de", "datePublished": "2026-10-29", "dateModified": "2026-10-29",
+              "description": a["description"], "inLanguage": "de", "datePublished": "2026-10-29", "dateModified": CHECKED_ISO,
               "author": {"@type": "Organization", "name": "Redaktion Kalenderkompass 24", "url": SITE + "/about.html"},
               "publisher": {"@type": "Organization", "name": "AdStern"}, "mainEntityOfPage": SITE + "/" + a["slug"] + ".html"}]
         write(a["slug"] + ".html", "page.html", title=f"{a['title']} | Kalenderkompass 24", description=a["description"],
-              h1=a["title"], lead=a["teaser"], body=a["body"], related=related, crumbs=crumbs, jsonld=ld, active="", priority=0.7)
+              h1=a["title"], lead=a["teaser"], body=a["body"], related=related, crumbs=crumbs, jsonld=ld, active="", priority=0.7, checked=CHECKED)
 
 
 LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
@@ -534,7 +552,7 @@ def build_static():
     (OUT / "google9bf1079fd4bf073e.html").write_text("google-site-verification: google9bf1079fd4bf073e.html")
     (OUT / "ads.txt").write_text("google.com, pub-7811071715414905, DIRECT, f08c47fec0942fa0\n")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
-    urls = "".join(f"<url><loc>{SITE}{p}</loc><lastmod>2026-10-29</lastmod><priority>{pr}</priority></url>" for p, pr in PAGES)
+    urls = "".join(f"<url><loc>{SITE}{p}</loc><lastmod>{CHECKED_ISO}</lastmod><priority>{pr}</priority></url>" for p, pr in PAGES)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
 

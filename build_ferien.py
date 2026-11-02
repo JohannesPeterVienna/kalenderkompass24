@@ -92,24 +92,25 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
         order = rank_summer(c)
         for slug, name in regs.items():
             d = data[(c, slug)]
+            in_name, nom = H.region_in(slug, name), H.region_nom(slug, name)
             su = d["summer"]
             pos = order.index(slug) + 1
-            same = [regs[s] for s in regs if s != slug and data[(c, s)]["summer"]["start"] == su["start"]]
+            same = [H.region_dat(s, regs[s]) for s in regs if s != slug and data[(c, s)]["summer"]["start"] == su["start"]]
             upcoming = [r for r in d["rows"] if r["end"] >= TODAY]
             nxt = upcoming[0] if upcoming else d["rows"][-1]
             longest_non_summer = max((r for r in d["rows"] if r["cls"] != "su"), key=lambda r: r["days"])
             gap = d["wd"] - leave[c]
             facts = []
-            facts.append(f"Im Schuljahr {F.SCHOOLYEAR} haben Schülerinnen und Schüler in {name} insgesamt {d['total']} Ferientage "
+            facts.append(f"Im Schuljahr {F.SCHOOLYEAR} haben Schülerinnen und Schüler {in_name} insgesamt {d['total']} Ferientage "
                          f"(Kalendertage inklusive Wochenenden). Die Sommerferien dauern {su['days']} Tage, von {fmt(su['start'], c)} bis {fmt(su['end'], c)}.")
             if c == "de":
-                facts.append(f"Mit dem Sommerferienbeginn liegt {name} auf Platz {pos} von 16 Ländern"
-                             + (f" – gemeinsam mit {', '.join(same)}" if same else "") + ". "
+                facts.append(f"Mit dem Sommerferienbeginn liegt {nom} auf Platz {pos} von 16 Ländern"
+                             + (f" – gemeinsam mit {', '.join(same[:-1]) + ' und ' + same[-1] if len(same) > 1 else same[0]}" if same else "") + ". "
                              "Die Länder staffeln die Sommerferien, damit nicht ganz Deutschland gleichzeitig verreist; die Reihenfolge wechselt von Jahr zu Jahr.")
             else:
                 grp = "Burgenland, Niederösterreich und Wien" if su["start"] == date(2027, 7, 3) else "Kärnten, Oberösterreich, Salzburg, Steiermark, Tirol und Vorarlberg"
-                facts.append(f"In Österreich beginnen die Sommerferien in zwei Gruppen: zuerst in Burgenland, Niederösterreich und Wien, eine Woche später "
-                             f"in den übrigen Bundesländern. {name} gehört zur Gruppe {grp}. Herbst-, Weihnachts-, Oster- und Pfingstferien sind österreichweit gleich, "
+                facts.append(f"In Österreich beginnen die Sommerferien in zwei Gruppen: zuerst im Burgenland, in Niederösterreich und in Wien, eine Woche später "
+                             f"in den übrigen Bundesländern. {H.cap(nom)} gehört zur Gruppe {grp}. Herbst-, Weihnachts-, Oster- und Pfingstferien sind österreichweit gleich, "
                              f"die Semesterferien sind auf drei Wochen im Februar verteilt.")
             facts.append(f"Die längsten Ferien nach dem Sommer sind die {longest_non_summer['name']} mit {longest_non_summer['days']} Tagen.")
             two = 2 * leave[c]
@@ -129,13 +130,14 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
                           "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode", "eventStatus": "https://schema.org/EventScheduled",
                           "location": {"@type": "AdministrativeArea", "name": f"{name}, {country_label[c]}"}} for r in d["rows"] if not r["single"]]
             write(path, "ferien_region.html",
-                  # AT: Bundesländer unterscheiden sich nur in Semester- und Sommerferienbeginn -> nicht einzeln indexieren
-                  robots="noindex,follow" if c == "at" else None,
+                  # Länderseiten wiederholen im Kern die Übersicht (AT: nur Semester- und Sommerferienbeginn verschieden,
+                  # DE: dünn) -> für Besucher erreichbar, aber nicht einzeln indexieren; die Übersicht bleibt indexiert.
+                  robots="noindex,follow", checked="2. November 2026",
                   title=f"Schulferien {F.SCHOOLYEAR} {name}: alle Termine | Kalenderkompass 24",
-                  description=f"Schulferien {F.SCHOOLYEAR} in {name}: alle Ferientermine mit Dauer, Sommerferien {fmt(su['start'], c, wd=False)} – {fmt(su['end'], c, wd=False)}, Zeitstrahl, Kalender-Download und Urlaubstage-Bedarf für Eltern.",
-                  h1=f"Schulferien {F.SCHOOLYEAR} in {name}",
+                  description=f"Schulferien {F.SCHOOLYEAR} {in_name}: alle Ferientermine mit Dauer, Sommerferien {fmt(su['start'], c, wd=False)} – {fmt(su['end'], c, wd=False)}, Zeitstrahl, Kalender-Download und Urlaubstage-Bedarf für Eltern.",
+                  h1=f"Schulferien {F.SCHOOLYEAR} {in_name}",
                   lead=f"{len([r for r in d['rows'] if not r['single']])} Ferienblöcke, {d['total']} Ferientage, Sommerferien ab {fmt(su['start'], c)}. Amtliche Termine, mit Zeitstrahl und Kalender-Export.",
-                  name=name, slug=slug, country=c, d=d, nxt=nxt, axis=axis_ctx(c), facts=facts, ics_json=json.dumps(ics, ensure_ascii=False),
+                  name=name, in_name=in_name, slug=slug, country=c, d=d, nxt=nxt, axis=axis_ctx(c), facts=facts, ics_json=json.dumps(ics, ensure_ascii=False),
                   siblings=[(s, n) for s, n in regs.items() if s != slug], cslug=cslug, country_name=country_label[c],
                   src=F.SRC_AT if c == "at" else F.SRC_DE, sy=F.SCHOOLYEAR, sy_slug=F.SY_SLUG, crumbs=crumbs, lang_at=(c == "at"),
                   jsonld=[crumbs_ld(crumbs)], active=f"/schulferien-{F.SY_SLUG}.html", priority=0.8)
@@ -148,7 +150,7 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
     for c in ("at", "de"):
         for s, n in F.regions(c).items():
             su = data[(c, s)]["summer"]
-            summer_rows.append({"name": n, "country": country_label[c], "href": f"/schulferien-{F.SY_SLUG}-{s}.html",
+            summer_rows.append({"name": n, "slug": s, "country": country_label[c], "href": f"/schulferien-{F.SY_SLUG}-{s}.html",
                                 "start": su["start"], "end": su["end"], "days": su["days"],
                                 "span": f"{fmt(su['start'], c, year=False)} – {fmt(su['end'], c, year=False)}", "short": short(su["start"], su["end"]), "c": c})
     summer_rows.sort(key=lambda r: (r["start"], r["name"]))
@@ -159,7 +161,7 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
           h1=f"Schulferien {F.SCHOOLYEAR}",
           lead="Alle amtlichen Ferientermine für Österreich und Deutschland auf einem Zeitstrahl – so siehst du sofort, wann wo Ferien sind und wo sie sich überschneiden.",
           axis_at=axis_ctx("at"), axis_de=axis_ctx("de"), gantt_at=gantt("at"), gantt_de=gantt("de"), summer_rows=summer_rows,
-          src_at=F.SRC_AT, src_de=F.SRC_DE, sy=F.SCHOOLYEAR, sy_slug=F.SY_SLUG, crumbs=crumbs,
+          src_at=F.SRC_AT, src_de=F.SRC_DE, sy=F.SCHOOLYEAR, sy_slug=F.SY_SLUG, crumbs=crumbs, checked="2. November 2026",
           jsonld=[crumbs_ld(crumbs)], active=f"/schulferien-{F.SY_SLUG}.html", priority=0.9)
 
     # ---------------- Sommerferien 2027
@@ -174,8 +176,23 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
     for r in summer_rows:
         p = {"name": "Sommerferien", "start": r["start"], "end": r["end"]}
         srows.append(dict(r, bars=bars([p], s0, s1)))
-    earliest, latest = summer_rows[0], summer_rows[-1]
-    longest = max(summer_rows, key=lambda r: r["days"]); shortest = min(summer_rows, key=lambda r: r["days"])
+    def names(rows, form):
+        """Namensliste mit Gleichständen: „Hessen, Rheinland-Pfalz und im Saarland“ / „… und das Saarland“."""
+        if len(rows) == 9 and all(r["c"] == "at" for r in rows):
+            return {"in": "in allen neun österreichischen Bundesländern", "nom": "alle neun österreichischen Bundesländer"}[form]
+        if form == "in":
+            parts = [H.region_in(r["slug"], r["name"]) for r in rows]
+            parts = [parts[0]] + [p[3:] if p.startswith("in ") else p for p in parts[1:]]   # „in A, B und im C“
+        else:
+            parts = [H.region_nom(r["slug"], r["name"]) for r in rows]
+        return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " und " + parts[-1]
+    first_start, last_start = summer_rows[0]["start"], summer_rows[-1]["start"]
+    earliest = [r for r in summer_rows if r["start"] == first_start]
+    latest = [r for r in summer_rows if r["start"] == last_start]
+    max_days, min_days = max(r["days"] for r in summer_rows), min(r["days"] for r in summer_rows)
+    longest = [r for r in summer_rows if r["days"] == max_days]
+    shortest = [r for r in summer_rows if r["days"] == min_days]
+    c0, c1 = earliest[0]["c"], latest[0]["c"]
     # Tage, an denen in mindestens einem Land Sommerferien sind
     first, last = min(r["start"] for r in summer_rows), max(r["end"] for r in summer_rows)
     peak_day, peak_n = None, 0
@@ -189,9 +206,14 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE):
           title="Sommerferien 2027: alle Termine in Österreich & Deutschland | Kalenderkompass 24",
           description="Sommerferien 2027 in allen 25 Bundesländern Österreichs und Deutschlands – sortiert nach Beginn, mit Dauer und Zeitstrahl. Wer startet zuerst, wo sind sie am längsten?",
           h1="Sommerferien 2027",
-          lead=f"Den Anfang macht {earliest['name']} am {fmt(earliest['start'], earliest['c'])}, als Letzte starten {latest['name']} am {fmt(latest['start'], latest['c'])}. "
-               f"Am {fmt(peak_day, 'de')} sind in {peak_n} von 25 Ländern gleichzeitig Ferien.",
-          rows=srows, weeks=weeks, longest=longest, shortest=shortest, peak_day=fmt(peak_day, "de"), peak_n=peak_n,
-          span_all=f"{fmt(first, 'de', wd=False)} bis {fmt(last, 'de', wd=False)}",
-          src_at=F.SRC_AT, src_de=F.SRC_DE, sy_slug=F.SY_SLUG, crumbs=crumbs, lang_at=False,
+          lead=(f"Den Anfang {'machen' if len(earliest) > 1 else 'macht'} {H.cap(names(earliest, 'nom'))} am {fmt(first_start, c0)}, "
+                f"als {'Letzte starten' if len(latest) > 1 else 'Letztes startet'} {names(latest, 'nom')} am {fmt(last_start, c1)}. ")
+               +
+               (f"Am {fmt(peak_day, 'de')}, sind in {peak_n} von 25 Ländern gleichzeitig Ferien." if peak_n < 25
+                else f"Am {fmt(peak_day, 'de')}, sind in allen 25 Ländern gleichzeitig Ferien."),
+          rows=srows, weeks=weeks, peak_day=fmt(peak_day, "de"), peak_n=peak_n,
+          longest={"names": names(longest, "in"), "days": max_days, "n": len(longest)},
+          shortest={"names": names(shortest, "in"), "days": min_days, "n": len(shortest)},
+          span_all=f"{fmt(first, 'de', wd=False, year=False)} und {fmt(last, 'de', wd=False, year=False)}",
+          src_at=F.SRC_AT, src_de=F.SRC_DE, sy_slug=F.SY_SLUG, crumbs=crumbs, lang_at=False, checked="2. November 2026",
           jsonld=[crumbs_ld(crumbs)], active=f"/schulferien-{F.SY_SLUG}.html", priority=0.9)

@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {{ m.crumbs(crumbs) }}
 <section class="hero" style="padding-top:20px"><div class="wrap">
@@ -6,6 +6,7 @@
     <div>
       <h1>{{ h1 }}</h1>
       <p class="lead">{{ lead }}</p>
+      {{ m.checked_line([src]) }}
     </div>
     <div class="next" data-ferien-next data-today="{{ nxt.start.isoformat() }}">
       <div class="small muted">Nächste Ferien</div>
@@ -17,8 +18,8 @@
 </div></section>
 <div class="wrap">
   <section class="band">
-    <div class="band-head"><h2>Das Schuljahr {{ sy }} in {{ name }}</h2><span class="small muted">September bis September</span></div>
-    {{ m.gantt([{"href": "#termine", "name": name, "bars": d.bars}], axis, "Zeitstrahl der Schulferien " ~ sy ~ " in " ~ name) }}
+    <div class="band-head"><h2>Das Schuljahr {{ sy }} {{ in_name }}</h2><span class="small muted">September bis September</span></div>
+    {{ m.gantt([{"href": "#termine", "name": name, "bars": d.bars}], axis, "Zeitstrahl der Schulferien " ~ sy ~ " " ~ in_name) }}
     {{ m.flegend() }}
   </section>
 </div>
@@ -46,7 +47,7 @@
     <ul class="tiles">{% for s,n in siblings %}<li><a href="/schulferien-{{ sy_slug }}-{{ s }}.html">{{ n }}</a></li>{% endfor %}</ul>
   </div>
   <aside class="side">
-    <div class="box"><h3>Feiertage in {{ name }}</h3><ul><li><a href="/feiertage-2027-{{ slug }}.html">Feiertage 2027 {{ name }}</a></li><li><a href="/brueckentage-2027.html">Brückentage 2027</a></li><li><a href="/sommerferien-2027.html">Sommerferien 2027 im Vergleich</a></li><li><a href="/schulferien-{{ sy_slug }}.html">Alle Schulferien {{ sy }}</a></li></ul></div>
+    <div class="box"><h3>Feiertage {{ in_name }}</h3><ul><li><a href="/feiertage-2027-{{ slug }}.html">Feiertage 2027 {{ name }}</a></li><li><a href="/brueckentage-2027.html">Brückentage 2027</a></li><li><a href="/sommerferien-2027.html">Sommerferien 2027 im Vergleich</a></li><li><a href="/schulferien-{{ sy_slug }}.html">Alle Schulferien {{ sy }}</a></li></ul></div>
     {{ m.ad("half") }}{{ m.ad("sky") }}
   </aside>
 </div>

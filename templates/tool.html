@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {{ m.crumbs(crumbs) }}
 <section class="hero" style="padding-top:20px"><div class="wrap">
@@ -9,8 +9,9 @@
 <div class="wrap layout">
   <div>
     {{ tool | safe }}
+    <div class="prose">{{ body_first | safe }}</div>
     {{ m.ad("rect") }}
-    <div class="prose">{{ body | safe }}</div>
+    {% if body_rest %}<div class="prose">{{ body_rest | safe }}</div>{% endif %}
     {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}
   </div>
   <aside class="side">

@@ -1,5 +1,9 @@
 {% macro ad(kind) -%}
-<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true"></div>
+{% if slots and kind not in skip_ads %}<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true"></div>{% endif %}
+{%- endmacro %}
+
+{% macro checked_line(srcs=None) -%}
+{% if checked %}<p class="small muted checked">Geprüft am {{ checked }}{% if srcs %} · Quelle{{ 'n' if srcs|length > 1 }}: {% for s in srcs %}<a href="{{ s[1] }}" rel="noopener">{{ s[0] }}</a>{{ '; ' if not loop.last }}{% endfor %}{% endif %}</p>{% endif %}
 {%- endmacro %}
 
 {% macro picker(years, show_year=True, country='at') -%}

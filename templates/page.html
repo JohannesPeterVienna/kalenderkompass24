@@ -1,10 +1,11 @@
-{% extends "base.html" %}{% import "macros.html" as m %}
+{% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {% if crumbs %}{{ m.crumbs(crumbs) }}{% endif %}
 <div class="wrap layout" style="padding-top:28px">
   <article class="prose" style="max-width:none">
     <h1>{{ h1 }}</h1>
     {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
+    {{ m.checked_line() }}
     {% if ads %}{{ m.ad("billboard") }}{% endif %}
     <div class="prose">{{ body | safe }}</div>
     {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}

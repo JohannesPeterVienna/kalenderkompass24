@@ -79,6 +79,35 @@ AT_PATRONS = {
 }
 
 
+# Länder mit Artikel: (Nominativ/Akkusativ, Dativ mit „in“). Alle anderen stehen ohne Artikel („in Wien“).
+REGION_ARTICLE = {
+    "burgenland": ("das", "im"),
+    "saarland": ("das", "im"),
+    "steiermark": ("die", "in der"),
+}
+
+
+def region_in(slug: str, name: str) -> str:
+    """„im Saarland“, „in der Steiermark“, „in Wien“."""
+    return f"{REGION_ARTICLE.get(slug, ('', 'in'))[1]} {name}"
+
+
+def region_nom(slug: str, name: str) -> str:
+    """„das Saarland“, „die Steiermark“, „Wien“ (Nominativ/Akkusativ)."""
+    art = REGION_ARTICLE.get(slug, ("", ""))[0]
+    return f"{art} {name}" if art else name
+
+
+def region_dat(slug: str, name: str) -> str:
+    """„dem Saarland“, „der Steiermark“, „Wien“ (Dativ ohne Präposition)."""
+    art = {"das": "dem", "die": "der"}.get(REGION_ARTICLE.get(slug, ("", ""))[0], "")
+    return f"{art} {name}" if art else name
+
+
+def cap(s: str) -> str:
+    return s[:1].upper() + s[1:]
+
+
 def at_holidays(year: int):
     e = easter(year)
     return [
@@ -163,6 +192,10 @@ def region_holidays(country: str, region: str, year: int):
         if code:
             for d, n, note in de_holidays(year, code):
                 out.append({"date": d, "name": n, "note": note, "kind": "legal"})
+            if code == "BY":
+                # In Bayern unterrichtsfrei, aber kein gesetzlicher Feiertag
+                out.append({"date": buss_und_bettag(year), "name": "Buß- und Bettag",
+                            "note": "schulfrei (kein gesetzlicher Feiertag)", "kind": "patron"})
         else:
             # bundesweit einheitliche Feiertage
             for d, n, note in de_holidays(year, "XX"):
@@ -232,8 +265,13 @@ def selftest():
     for y, (m, d) in known.items():
         assert easter(y) == date(y, m, d), y
     assert buss_und_bettag(2027) == date(2027, 11, 17)
+    assert buss_und_bettag(2028) == date(2028, 11, 22)
+    for y in range(2025, 2031):   # Mittwoch 11 Tage vor dem 1. Advent
+        advent1 = date(y, 12, 24) - timedelta(days=(date(y, 12, 24).weekday() + 1) % 7 + 21)
+        assert buss_und_bettag(y) == advent1 - timedelta(days=11), y
     assert len(at_holidays(2027)) == 13
     assert len(de_holidays(2027, "XX")) == 9
+    assert region_in("saarland", "Saarland") == "im Saarland" and region_in("wien", "Wien") == "in Wien"
 
 
 if __name__ == "__main__":

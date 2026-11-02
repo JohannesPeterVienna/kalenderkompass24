@@ -143,6 +143,15 @@
     const c = DATA.countries[country];
     return region ? c.regions[region] : c.label;
   }
+  // Präposition/Artikel je Land aus dem Datenmodell: „im Saarland“, „in der Steiermark“, „in Wien“
+  function regionIn(country, region){
+    const art = region && DATA.art && DATA.art[region];
+    return `${art ? art[1] : "in"} ${regionLabel(country, region)}`;
+  }
+  function regionAcc(country, region){
+    const art = region && DATA.art && DATA.art[region];
+    return `${art ? art[0] + " " : ""}${regionLabel(country, region)}`;
+  }
 
   function renderNext(){
     const el = $("[data-next]"); if (!el) return;
@@ -158,7 +167,7 @@
   function renderBridges(){
     $$("[data-bridges]").forEach(el => {
       const list = bridges(state.country, state.region, state.year);
-      if (!list.length){ el.innerHTML = `<li class="empty">Für ${regionLabel(state.country,state.region)} gibt es ${state.year} keine Brückentage mit ein oder zwei Urlaubstagen.</li>`; return; }
+      if (!list.length){ el.innerHTML = `<li class="empty">Für ${regionAcc(state.country,state.region)} gibt es ${state.year} keine Brückentage mit ein oder zwei Urlaubstagen.</li>`; return; }
       el.innerHTML = list.map(b => {
         const take = b.days.map(d => `${WD[d.getDay()]} ${d.getDate()}. ${(state.country==="at"?MSHORT:MSHORT_DE)[d.getMonth()]}`).join(" + ");
         return `<li class="bridge"><span class="chip">${b.vacation}</span><div><div class="take">${take}</div><div class="muted small">rund um ${b.holiday} · frei von ${fmt(b.start,state.country,{year:false})} bis ${fmt(b.end,state.country,{year:false})}</div></div><div class="ratio"><b>${b.free}</b><span class="small muted">Tage frei</span></div></li>`;
@@ -176,6 +185,7 @@
     });
     $$("[data-year-label]").forEach(e => e.textContent = state.year);
     $$("[data-region-label]").forEach(e => e.textContent = regionLabel(state.country, state.region));
+    $$("[data-region-in]").forEach(e => e.textContent = regionIn(state.country, state.region));
   }
 
   function renderBands(){

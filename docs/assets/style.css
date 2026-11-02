@@ -30,7 +30,7 @@ img,svg{max-width:100%}
 .brand svg{width:30px;height:30px;flex:none}
 .nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
 .nav a{text-decoration:none;padding:8px 12px;border-radius:8px;font-size:.95rem;color:var(--muted)}
-.nav a:hover,.nav a[aria-current=page]{color:var(--ink);background:var(--soft)}
+.nav a:hover,.nav a[aria-current=page],.nav a.on{color:var(--ink);background:var(--soft)}
 
 /* Typografie */
 h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.015em;line-height:1.15;margin:0 0 .5em}
