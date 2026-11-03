@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import holidays as H
 from content.articles import ARTICLES
 from content.laender import LAND
+from content.oesterreich import LAND_AT, CLAIMS_AT
 from content.werkzeuge import URLAUBSPLANER
 
 ROOT = Path(__file__).parent
@@ -17,6 +18,9 @@ V = "20261102a"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
+CHECKED_NEW = "3. November 2026"      # Seiten, die am 3.11.2026 inhaltlich überarbeitet wurden
+METHODIK = "/quellen-methodik.html"
+RIS = "https://www.ris.bka.gv.at/"
 TODAY = date(2026, 10, 29)
 CUR = 2027                      # Hauptjahr der Seite (Planung läuft aufs nächste Jahr)
 YEARS = [2026, 2027, 2028]
@@ -156,7 +160,7 @@ def region_facts(country, region, year):
         pats = [r for r in rows if r["kind"] == "patron"]
         for p in pats:
             facts.append(f"Der {p['name'].split(' (')[0]} am {fmt(p['date'], 'at')} ist {in_name} kein gesetzlicher Feiertag. "
-                         "Geschäfte haben geöffnet, an den Schulen ist aber in der Regel unterrichtsfrei, und viele Landesdienststellen geben frei.")
+                         "Geschäfte haben geöffnet, an den Schulen ist aber in der Regel unterrichtsfrei. Ob Betriebe oder Dienststellen freigeben, regeln Kollektivvertrag, Betriebsvereinbarung oder Dienstrecht.")
         facts.append("Der 24. und der 31. Dezember sind keine Feiertage. Viele Kollektivverträge sehen an diesen Tagen aber ganz oder ab Mittag frei vor.")
         facts.append("Den Karfreitag gibt es in Österreich seit 2019 nicht mehr als Feiertag. Stattdessen kann jede und jeder einen persönlichen Feiertag festlegen, der vom Urlaub abgezogen wird.")
     else:
@@ -207,6 +211,18 @@ def ferien_teaser(country, slug, name):
             "href": f"/schulferien-{F.SY_SLUG}-{slug}.html", "sy": F.SCHOOLYEAR}
 
 
+def at_bridge_text(year, in_name):
+    """Kurzfassung der (bundesweit gleichen) Fenstertage für AT-Länderseiten mit eigenem Text; die volle Liste steht im Ratgeber."""
+    bl = H.bridge_days("at", "", year)
+    one = [b for b in bl if b["vacation"] == 1]
+    two = [b for b in bl if b["vacation"] == 2]
+    lst = ", ".join(fmt(b["days"][0], "at", year=False) for b in one[:-1]) + " und " + fmt(one[-1]["days"][0], "at", year=False)
+    hs = sorted({b["holiday"] for b in two})
+    return (f"Die gesetzlichen Feiertage sind in ganz Österreich gleich, deshalb gelten {in_name} dieselben Fenstertage wie im übrigen Land: "
+            f"{lst} – mit je einem Urlaubstag {one[0]['free']} freie Tage am Stück. Dazu kommen {len(two)} Zwickel aus je zwei Arbeitstagen rund um "
+            f"{' und '.join(hs)}. Der Landespatron zählt dabei nicht mit, weil er für Beschäftigte ein normaler Arbeitstag ist.")
+
+
 def build_regions(year):
     for country, regions in (("at", H.AT_REGIONS), ("de", {k: v[0] for k, v in H.DE_REGIONS.items()})):
         cslug = "oesterreich" if country == "at" else "deutschland"
@@ -221,22 +237,37 @@ def build_regions(year):
                     + " Mit Jahresübersicht und Kalender-Export.")
             path = f"feiertage-{year}-{slug}.html"
             in_name = H.region_in(slug, name)
+            own = (LAND_AT if country == "at" else LAND).get(slug) if year == CUR else None
+            srcs = [("Arbeitsruhegesetz § 7 und Schulzeitgesetz 1985 im RIS", RIS)] if country == "at" else []
+            if country == "at" and own:
+                import ferien as F
+                srcs.append(F.SRC_AT)
+                pat = [r for r in rows if r["kind"] == "patron" and r["date"].weekday() < 5]
+                sem = next(p for p in F.periods("at", slug) if p["name"] == "Semesterferien")
+                lead = (f"{len(legal)} gesetzliche Feiertage wie in ganz Österreich, dazu "
+                        + " und ".join(f"der {p['name'].split(' (')[0]} am {fmt(p['date'], 'at', year=False)}" for p in pat)
+                        + f" – an Schulen in der Regel unterrichtsfrei. Semesterferien {sem['start'].day}.–{fmt(sem['end'], 'at', wd=False, year=False)}, "
+                        f"Sommerferien ab {fmt(F.summer('at', slug)['start'], 'at', wd=False, year=False)}.")
             crumbs = [("/", "Start"), (f"/feiertage-{year}-{cslug}.html", f"Feiertage {year} {cname}"), ("/" + path, name)]
             write(path, "region.html", title=f"Feiertage {year} {name}: alle Termine & Brückentage | Kalenderkompass 24",
                   description=f"Feiertage {year} {in_name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, Brückentage und Urlaubstipps – mit Kalender-Download.",
                   h1=f"Feiertage {year} {in_name}", lead=lead, name=name, in_name=in_name, slug=slug, country=country,
                   country_slug=cslug, country_name=cname, legal_count=len(legal),
                   weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
-                  band=band_view(country, slug, year), rows=rows, bridge_list=bl, facts=region_facts(country, slug, year),
-                  land_html=LAND.get(slug) if (country == "de" and year == CUR) else None,
-                  ferien=ferien_teaser(country, slug, name) if year == 2027 else None,
+                  band=band_view(country, slug, year), rows=rows, bridge_list=bl,
+                  # Mit eigenem AT-Länderteil nur der erste, landesbezogene Satz – der Rest stünde wortgleich auf allen neun Seiten
+                  facts=region_facts(country, slug, year)[:1] if (country == "at" and own) else region_facts(country, slug, year),
+                  bridge_text=at_bridge_text(year, in_name) if (country == "at" and own) else None,
+                  land_html=own,
+                  land_title=(f"Landespatron, Ferien und Besonderheiten {in_name}" if country == "at" else f"Rechtsgrundlage und Besonderheiten {in_name}"),
+                  ferien=ferien_teaser(country, slug, name) if (year == 2027 and not (country == "at" and own)) else None,
                   other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
                   crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
-                  # AT-Bundesländer haben identische gesetzliche Feiertage, Folgejahr-Seiten sind Vorschau,
-                  # DE-Länder ohne eigenen Länderteil (content/laender.py) sind zu dünn:
-                  # alles bleibt für Besucher erreichbar, wird aber nicht als eigene Suchseite angeboten.
-                  robots="noindex,follow" if (country == "at" or year != CUR or not LAND.get(slug)) else None,
-                  checked=CHECKED,
+                  # Nur Seiten des Hauptjahres mit eigenem Länderteil (content/laender.py, content/oesterreich.py)
+                  # werden indexiert; Folgejahr-Seiten (Vorschau) und Länder ohne eigenen Text bleiben
+                  # für Besucher erreichbar, werden aber nicht als eigene Suchseite angeboten.
+                  robots=None if own else "noindex,follow",
+                  checked=CHECKED_NEW if (own and country == "at") else CHECKED, sources=srcs,
                   jsonld=[crumbs_ld(crumbs), holiday_ld(country, slug, year, rows)], active="/", priority=0.8 if year == CUR else 0.6)
 
 
@@ -263,7 +294,8 @@ def build_country(year):
                  "Der Karfreitag ist seit 2019 kein Feiertag mehr. An seine Stelle trat der persönliche Feiertag, den jede und jeder einmal pro Jahr selbst festlegen kann."],
           regions=list(H.AT_REGIONS.items()), region_year=year if year in (2027, 2028) else CUR, country="at",
           other_years=[y for y in YEARS if y != year], slug="oesterreich", country_name="Österreich",
-          crumbs=crumbs, checked=CHECKED, jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
+          crumbs=crumbs, checked=CHECKED, sources=[("Arbeitsruhegesetz § 7 im RIS", RIS)],
+          jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
 
     # Deutschland
     nat = rows_for("de", "", year)
@@ -483,6 +515,178 @@ def build_print(year):
           jsonld=[crumbs_ld(crumbs)], active=f"/kalender-{CUR}-zum-ausdrucken.html", priority=0.8)
 
 
+# ---------------------------------------------------------------- Fenstertage Österreich (Ratgeber, Hauptjahr)
+def leave_block(a, b, country="at", region=""):
+    """Freier Block von a bis b: benötigte Urlaubstage = Arbeitstage (Mo–Fr ohne gesetzliche Feiertage) darin."""
+    off = set()
+    for y in range(a.year - 1, b.year + 2):
+        off |= H.off_days(country, region, y)
+    days = [a + timedelta(i) for i in range((b - a).days + 1)]
+    take = [d for d in days if H.is_workday(d, off)]
+    # Block muss an beiden Enden an freie Tage stoßen, sonst wäre er nicht maximal gewählt
+    assert not H.is_workday(a, off) and not H.is_workday(b, off), (a, b)
+    return {"from": a, "to": b, "free": len(days), "take": take, "vacation": len(take)}
+
+
+def fenstertage_body(year=CUR):
+    import ferien as F
+    c = "at"
+    f = lambda d, wd=True, y=False: fmt(d, c, wd=wd, year=y)
+    hol = H.region_holidays(c, "", year)
+    wk = [h for h in hol if h["date"].weekday() < 5]
+    we = [h for h in hol if h["date"].weekday() >= 5]
+    br = H.bridge_days(c, "", year)
+    singles = [b for b in br if b["vacation"] == 1]
+    e = H.easter(year)
+    assert e == date(2027, 3, 28) and year == 2027, "Texte unten sind für 2027 geschrieben"
+    # Kernaussagen, auf die sich der Text stützt
+    assert [b["days"][0] for b in singles] == [date(2027, 5, 7), date(2027, 5, 28), date(2027, 10, 25)], singles
+    assert date(2027, 8, 15).weekday() == 6 and date(2027, 11, 1).weekday() == 0 and date(2027, 12, 8).weekday() == 2
+
+    rows = "".join(f"<tr class='{'we' if h['date'].weekday() >= 5 else ''}'><td class='date'>{f(h['date'], wd=False)}</td><td>{WDL[h['date'].weekday()]}</td><td>{h['name']}</td>"
+                   f"<td>{'Wochenende – kein Ersatztag' if h['date'].weekday() >= 5 else ('langes Wochenende' if h['date'].weekday() in (0, 4) else 'Fenstertag möglich')}</td></tr>" for h in hol)
+    brows = "".join(f"<tr><td class='date'>{' + '.join(f(d) for d in b['days'])}</td><td>{b['holiday']}</td><td>{b['vacation']}</td>"
+                    f"<td>{b['free']} ({f(b['start'], wd=False)} – {f(b['end'], wd=False)})</td></tr>" for b in br)
+    plans = [
+        ("Jahresstart", date(2027, 1, 1), date(2027, 1, 10), "Neujahr (Freitag) und Heilige Drei Könige (Mittwoch) rahmen die erste Woche ein."),
+        ("Karwoche", date(2027, 3, 20), date(2027, 3, 29), "Die ganze Karwoche frei bis Ostermontag; der Karfreitag ist ein Arbeitstag."),
+        ("Osterwoche", date(2027, 3, 27), date(2027, 4, 4), "Variante nach Ostern: Dienstag bis Freitag nach Ostermontag."),
+        ("Christi Himmelfahrt", date(2027, 5, 1), date(2027, 5, 9), "Staatsfeiertag fällt auf Samstag, der Donnerstag ist frei."),
+        ("Pfingsten + Fronleichnam", date(2027, 5, 15), date(2027, 5, 30), "Zwei Feiertage in zwei Wochen: Pfingstmontag und Fronleichnam."),
+        ("Nationalfeiertag + Allerheiligen", date(2027, 10, 23), date(2027, 11, 1), "Dienstag 26. Oktober und Montag 1. November."),
+        ("Mariä Empfängnis", date(2027, 12, 4), date(2027, 12, 12), "Feiertag am Mittwoch, zwei Tage davor und danach."),
+        ("Weihnachten bis Dreikönig", date(2027, 12, 25), date(2028, 1, 9), "Christtag und Stefanitag fallen aufs Wochenende; Neujahr 2028 ist ein Samstag, Heilige Drei Könige 2028 ein Donnerstag."),
+    ]
+    pl = [(n, leave_block(a, b), t) for n, a, b, t in plans]
+    prow = "".join(f"<tr><td><strong>{n}</strong><div class='small muted'>{t}</div></td><td class='date'>{f(x['from'], wd=False)} – {fmt(x['to'], c, wd=False, year=x['to'].year != year)}</td>"
+                   f"<td>{x['vacation']}</td><td>{x['free']}</td><td>{f"{x['free'] / x['vacation']:.1f}".replace('.', ',')}</td></tr>" for n, x, t in pl)
+    by = {n: x for n, x, t in pl}
+    combo = [by[k] for k in ("Jahresstart", "Karwoche", "Christi Himmelfahrt", "Pfingsten + Fronleichnam", "Nationalfeiertag + Allerheiligen")]
+    cv, cf = sum(x["vacation"] for x in combo), sum(x["free"] for x in combo)
+
+    # Bundesländer-Tabelle: Landespatron, Wochentag, Semester- und Sommerferien
+    srows = []
+    for slug, name in H.AT_REGIONS.items():
+        pats = [h for h in H.region_holidays(c, slug, year) if h["kind"] == "patron"]
+        pt = "<br>".join(f"{p['name'].split(' (')[0]}: {f(p['date'])}" for p in pats)
+        sem = next(p for p in F.periods(c, slug) if p["name"] == "Semesterferien")
+        su = F.summer(c, slug)
+        srows.append(f"<tr><td><a href='/feiertage-{year}-{slug}.html'>{name}</a></td><td>{pt}</td>"
+                     f"<td>{sem['start'].day}.–{f(sem['end'], wd=False)}</td><td>{'Ost' if su['start'] == date(2027, 7, 3) else 'West'} (ab {f(su['start'], wd=False)})</td></tr>")
+    return f"""
+<p>Ein <strong>Fenstertag</strong> ist ein Arbeitstag, der zwischen einem Feiertag und dem Wochenende liegt. Wer ihn freinimmt, verbindet beides zu einem langen Block. In Österreich gelten {year} bundesweit dieselben 13 gesetzlichen Feiertage; {len(wk)} davon fallen auf einen Werktag, {len(we)} aufs Wochenende. Daraus ergeben sich {len(singles)} klassische Fenstertage, an denen ein einziger Urlaubstag vier freie Tage bringt, und {len(br) - len(singles)} Zwickel aus je zwei Arbeitstagen. Alles auf dieser Seite ist aus denselben Daten berechnet wie unsere Feiertagstabellen – Ostersonntag {year} ist der {f(e, wd=False)}.</p>
+
+<h2>Die Fenstertage {year} auf einen Blick</h2>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Urlaub nehmen</th><th scope="col">rund um</th><th scope="col">Urlaubstage</th><th scope="col">freie Tage am Stück</th></tr></thead><tbody>{brows}</tbody></table></div>
+<p>Die drei Einzel-Fenstertage sind <strong>Freitag, 7. Mai</strong> (nach Christi Himmelfahrt am 6. Mai), <strong>Freitag, 28. Mai</strong> (nach Fronleichnam am 27. Mai) und <strong>Montag, 25. Oktober</strong> (vor dem Nationalfeiertag am Dienstag, 26. Oktober). Heilige Drei Könige und Mariä Empfängnis fallen auf einen Mittwoch – da sind es jeweils zwei Tage davor oder danach.</p>
+
+<h2>Fenstertag, Zwickeltag, Brückentag: drei Wörter, eine Sache</h2>
+<p><strong>Fenstertag</strong> sagt man in Österreich: Der Tag ist wie ein Fenster zwischen zwei freien Blöcken. <strong>Zwickeltag</strong> ist vor allem in Ostösterreich und Bayern üblich – der Tag ist zwischen Feiertag und Wochenende „eingezwickt“. <strong>Brückentag</strong> ist der Begriff in Deutschland und in der Schweiz. Gemeint ist immer dasselbe.</p>
+
+<h2>Alle Feiertage {year} und was sie bringen</h2>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Datum</th><th scope="col">Wochentag</th><th scope="col">Feiertag</th><th scope="col">Wirkung</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p>{year} ist kein starkes Feiertagsjahr: Der Staatsfeiertag ({f(date(2027, 5, 1))}), Mariä Himmelfahrt ({f(date(2027, 8, 15))}) sowie Christtag und Stefanitag fallen aufs Wochenende. Einen Ersatztag gibt es in Österreich dafür nicht. Dafür liegen Ostermontag, Pfingstmontag und Allerheiligen auf einem Montag und bringen ohne Urlaub ein langes Wochenende.</p>
+
+<h2>Urlaub effizient planen: freie Tage pro Urlaubstag</h2>
+<p>Ein einzelner Urlaubstag am Montag bringt drei freie Tage – das ist der Normalfall. Gut ist alles, was deutlich darüber liegt. Die folgenden Blöcke sind die ergiebigsten des Jahres; gezählt sind Urlaubstage bei einer Fünftagewoche (Montag bis Freitag), der 24. und 31. Dezember als normale Arbeitstage.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Block</th><th scope="col">Zeitraum</th><th scope="col">Urlaubstage</th><th scope="col">frei</th><th scope="col">Tage je Urlaubstag</th></tr></thead><tbody>{prow}</tbody></table></div>
+<p><strong>Beispielplan mit {cv} Urlaubstagen:</strong> Jahresstart, Karwoche, Christi Himmelfahrt, Pfingsten mit Fronleichnam und die Woche um den Nationalfeiertag ergeben zusammen {cf} freie Tage. Das ist der gesetzliche Mindesturlaub von fünf Wochen – in der Praxis wird man einen Teil davon für den Sommer behalten. Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> rechnet das für jede andere Zahl von Urlaubstagen durch.</p>
+<p><strong>Mit Schulkindern</strong> lohnen sich andere Blöcke: Die Osterferien dauern in ganz Österreich vom 20. bis 29. März 2027, die Pfingstferien vom 15. bis 17. Mai. Der Pfingstblock mit Fronleichnam überlappt also mit schulfreien Tagen – die Kinder sind in der Woche danach allerdings wieder in der Schule.</p>
+
+<h2>Landespatrone und Ferien nach Bundesland</h2>
+<p>Die gesetzlichen Feiertage sind in allen neun Bundesländern gleich. Unterschiede gibt es bei den Landespatronen: Ihre Festtage sind keine gesetzlichen Feiertage, an den Schulen ist aber in der Regel unterrichtsfrei. Für Eltern können sie deshalb wie ein zusätzlicher Fenstertag wirken – oder wie ein Betreuungsproblem.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Landespatron {year}</th><th scope="col">Semesterferien</th><th scope="col">Sommerferien</th></tr></thead><tbody>{''.join(srows)}</tbody></table></div>
+<ul>
+<li><strong>Josefitag, Freitag 19. März</strong> (Kärnten, Steiermark, Tirol, Vorarlberg): direkt vor den Osterferien. Schulkinder haben dort elf Tage am Stück frei.</li>
+<li><strong>Florianitag, Dienstag 4. Mai</strong> (Oberösterreich): in der Woche von Christi Himmelfahrt.</li>
+<li><strong>Rupertitag, Freitag 24. September</strong> (Salzburg): langes Schulwochenende kurz nach Schulbeginn.</li>
+<li><strong>Martinitag, Donnerstag 11. November</strong> (Burgenland) und <strong>Leopolditag, Montag 15. November</strong> (Wien, Niederösterreich).</li>
+<li><strong>Tag der Volksabstimmung</strong> in Kärnten (10. Oktober): {year} ein Sonntag, er entfällt also.</li>
+</ul>
+<p>Salzburg, Tirol und Vorarlberg haben ihre Semesterferien 2027 um eine Woche in die dritte Februarwoche verlegt. Quelle der Ferientermine: <a href="{F.SRC_AT[1]}" rel="noopener">{F.SRC_AT[0]}</a>.</p>
+
+<h2>Der persönliche Feiertag als Fenstertag</h2>
+<p>Seit 2019 darf jede Arbeitnehmerin und jeder Arbeitnehmer einmal pro Urlaubsjahr einen Urlaubstag einseitig festlegen (§ 7a Arbeitsruhegesetz) – mit mindestens drei Monaten Vorlauf, schriftlich. Für den begehrten 7. Mai heißt das: Meldung bis Anfang Februar. Für den 25. Oktober reicht Juli. Details im Beitrag <a href="/persoenlicher-feiertag-oesterreich.html">Persönlicher Feiertag in Österreich</a>.</p>
+
+<h2>Muss der Arbeitgeber am Fenstertag freigeben?</h2>
+<p>Nein. Ein Fenstertag ist ein ganz normaler Arbeitstag. Wer frei haben möchte, nimmt Urlaub oder baut Zeitguthaben ab.</p>
+<ul>
+<li><strong>Österreich:</strong> Der Zeitpunkt des Urlaubs wird zwischen Arbeitgeber und Arbeitnehmer vereinbart (§ 4 Urlaubsgesetz). Keine Seite kann ihn allein festlegen – mit Ausnahme des persönlichen Feiertags.</li>
+<li><strong>Deutschland:</strong> Der Arbeitgeber legt den Urlaub fest, muss aber die Wünsche der Beschäftigten berücksichtigen, sofern keine dringenden betrieblichen Gründe entgegenstehen (§ 7 Abs. 1 Bundesurlaubsgesetz).</li>
+</ul>
+<p>Viele Betriebe schließen an beliebten Fenstertagen trotzdem. Dann wird der Tag meist als Betriebsurlaub verbucht, der in Österreich vereinbart werden muss. Manche Kollektivverträge regeln den 24. und 31. Dezember gesondert; das ist hier nicht eingerechnet.</p>
+<div class="note">Tipp: Beliebte Fenstertage sind im Team schnell vergeben. Wer früh im Jahr plant, hat die besten Chancen. Die Brückentage aller deutschen Länder stehen bei den <a href="/brueckentage-{year}.html">Brückentagen {year}</a>, wie wir rechnen unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>.</div>
+"""
+
+
+def build_methodik():
+    import ferien as F
+    body = f"""
+<p>Kalenderkompass 24 schreibt Feiertage nicht von anderen Seiten ab. Wir berechnen sie aus den Rechtsgrundlagen, übernehmen Schulferien nur aus amtlichen Veröffentlichungen und prüfen das Ergebnis bei jedem Build automatisch. Hier steht, welche Quellen wir verwenden, wie die Berechnung funktioniert und wo die Grenzen liegen.</p>
+
+<h2>Rechtsgrundlagen Österreich</h2>
+<ul>
+<li><strong>Arbeitsruhegesetz (ARG), § 7 Abs. 2:</strong> zählt die 13 Feiertage auf, an denen Arbeitnehmerinnen und Arbeitnehmer Anspruch auf Feiertagsruhe haben – Neujahr, Heilige Drei Könige, Ostermontag, Staatsfeiertag, Christi Himmelfahrt, Pfingstmontag, Fronleichnam, Mariä Himmelfahrt, Nationalfeiertag, Allerheiligen, Mariä Empfängnis, Christtag und Stefanitag. Sie gelten in allen Bundesländern gleich.</li>
+<li><strong>Feiertagsruhegesetz 1957:</strong> legt dieselben Tage als Feiertage im Sinn des öffentlichen Rechts fest.</li>
+<li><strong>§ 7a ARG – persönlicher Feiertag:</strong> seit 2019 an Stelle des früheren Karfreitags-Feiertags für Angehörige bestimmter Kirchen. Er ist ein Urlaubstag, kein zusätzlicher Feiertag.</li>
+<li><strong>Schulzeitgesetz 1985:</strong> regelt Unterrichtsjahr, Ferien und schulfreie Tage an Bundesschulen; für Pflichtschulen gelten die Schulzeit-Ausführungsgesetze der Länder. Danach ist unter anderem der Festtag des Landespatrons schulfrei. Wir schreiben deshalb „an Schulen in der Regel unterrichtsfrei“ – einen Feiertag für Beschäftigte begründet er nicht.</li>
+</ul>
+<p>Alle Bundesgesetze sind im Rechtsinformationssystem des Bundes kostenlos abrufbar: <a href="{RIS}" rel="noopener">RIS – ris.bka.gv.at</a>.</p>
+
+<h2>Rechtsgrundlagen Deutschland</h2>
+<p>In Deutschland sind Feiertage Ländersache. Jedes der 16 Länder hat ein eigenes Sonn- und Feiertagsgesetz; nur der Tag der Deutschen Einheit am 3. Oktober ist bundesrechtlich festgelegt (Einigungsvertrag). Neun Feiertage gelten in allen Ländern, dazu kommen je nach Land Heilige Drei Könige, Frauentag, Fronleichnam, Mariä Himmelfahrt, Weltkindertag, Reformationstag, Allerheiligen oder Buß- und Bettag. Auf den Seiten der Länder mit eigenem Länderteil verlinken wir das jeweilige Landesgesetz direkt. Feiertage, die nur in einzelnen Gemeinden gelten – etwa Fronleichnam in Teilen Sachsens und Thüringens oder das Hohe Friedensfest in Augsburg –, nennen wir als Hinweis, rechnen sie aber nicht mit.</p>
+
+<h2>Schulferien</h2>
+<ul>
+<li><strong>Österreich:</strong> Ferienkalender auf oesterreich.gv.at, der die Termine des Bildungsministeriums und die Verordnungen der Länder zusammenfasst (<a href="{F.SRC_AT[1]}" rel="noopener">{F.SRC_AT[0]}</a>).</li>
+<li><strong>Deutschland:</strong> Ferienkalender der Kultusministerkonferenz (KMK), eingelesen aus den dort veröffentlichten Kalenderdateien (<a href="{F.SRC_DE[1]}" rel="noopener">{F.SRC_DE[0]}</a>).</li>
+</ul>
+<p>Wir zeigen nur Schuljahre, die amtlich veröffentlicht sind – derzeit {F.SCHOOLYEAR}. Schätzungen für spätere Jahre gibt es bei uns nicht. Schulautonome Tage legt jede Schule selbst fest; sie stehen in keinem amtlichen Kalender und sind nicht enthalten.</p>
+
+<h2>Wie wir die Termine berechnen</h2>
+<p>Feste Feiertage wie der 26. Oktober stehen direkt im Gesetz. Die beweglichen Feiertage hängen am Ostersonntag. Diesen berechnen wir mit der Gaußschen Osterformel in der heute üblichen Fassung für den gregorianischen Kalender (dem sogenannten anonymen Algorithmus, wie ihn etwa Jean Meeus beschreibt). Für {CUR} ergibt sie Sonntag, {fmt(H.easter(CUR), 'at', wd=False)}. Davon abgeleitet:</p>
+<ul>
+<li>Karfreitag: 2 Tage vor Ostern (in Deutschland Feiertag, in Österreich nicht)</li>
+<li>Ostermontag: 1 Tag nach Ostern</li>
+<li>Christi Himmelfahrt: 39 Tage nach Ostern, immer ein Donnerstag</li>
+<li>Pfingstmontag: 50 Tage nach Ostern</li>
+<li>Fronleichnam: 60 Tage nach Ostern, immer ein Donnerstag</li>
+<li>Buß- und Bettag (Sachsen): der Mittwoch vor dem 23. November</li>
+</ul>
+<p><strong>Fenster- und Brückentage</strong> sind bei uns Folgen von einem oder zwei Arbeitstagen (Montag bis Freitag, kein gesetzlicher Feiertag), die zwischen einem gesetzlichen Feiertag und einem Wochenende oder einem weiteren Feiertag liegen. Landespatrone und andere schulfreie Tage zählen dabei nicht als frei, weil sie für Beschäftigte normale Arbeitstage sind. „Freie Tage je Urlaubstag“ ist die Länge des freien Blocks geteilt durch die dafür nötigen Urlaubstage bei einer Fünftagewoche.</p>
+
+<h2>So prüfen wir</h2>
+<p>Bei jedem Build laufen Selbsttests: Ostertermine von 2000 bis 2038 gegen bekannte Daten, der Buß- und Bettag gegen eine zweite, unabhängige Rechnung, die Zahl der bundesweiten Feiertage, die Fenstertage {CUR} in Österreich und alle Datumsangaben in den Bundesländer-Texten gegen die Datentabellen. Schlägt ein Test fehl, wird die Seite nicht erzeugt. Zusätzlich gleichen wir die Ergebnisse stichprobenartig mit amtlichen Veröffentlichungen ab.</p>
+
+<h2>Stand und Grenzen</h2>
+<p>Letzte inhaltliche Prüfung: {CHECKED_NEW}. Nicht enthalten sind Regelungen aus Kollektiv- und Tarifverträgen (etwa zum 24. und 31. Dezember), betriebliche Schließtage und Feiertage einzelner Gemeinden. Alle Angaben erfolgen ohne Gewähr und ersetzen keine Rechtsberatung. Einen Fehler gefunden? Schreib an <a href="mailto:office@adstern.com">office@adstern.com</a> – wir prüfen jeden Hinweis.</p>
+"""
+    crumbs = [("/", "Start"), (METHODIK, "Quellen & Methodik")]
+    write("quellen-methodik.html", "page.html", title="Quellen & Methodik: so berechnen wir Feiertage und Ferien | Kalenderkompass 24",
+          description="Rechtsgrundlagen, amtliche Ferienquellen und Rechenweg von Kalenderkompass 24: Arbeitsruhegesetz, Schulzeitgesetz, Feiertagsgesetze der Länder, KMK und Osterformel.",
+          h1="Quellen & Methodik", lead="Woher unsere Feiertags- und Feriendaten stammen, wie wir rechnen und wie wir prüfen.",
+          body=body, related=[], crumbs=crumbs, jsonld=[crumbs_ld(crumbs)], active="", priority=0.5, checked=CHECKED_NEW)
+
+
+def check_claims():
+    """Selbsttest: Datumsangaben in den österreichischen Bundesländer-Texten stimmen mit holidays.py/ferien.py überein."""
+    import ferien as F
+    for slug, cl in CLAIMS_AT.items():
+        text = LAND_AT[slug]
+        m, d = cl["patron"]
+        pats = [h for h in H.region_holidays("at", slug, CUR) if h["kind"] == "patron"]
+        p = next(h for h in pats if (h["date"].month, h["date"].day) == (m, d))
+        wd = WDL[p["date"].weekday()]
+        assert wd in text and f"{d}. {M_AT[m-1]}" in text, (slug, wd)
+        sem = next(x for x in F.periods("at", slug) if x["name"] == "Semesterferien")
+        assert f"{sem['start'].day}." == cl["sem"][0] and f"{sem['end'].day}. Februar" == cl["sem"][1], slug
+        assert f"{cl['sem'][0]} bis Samstag, {cl['sem'][1]} 2027" in text, slug
+        su = F.summer("at", slug)
+        assert f"{su['start'].day}. Juli" == cl["summer"] and cl["summer"] in text, slug
+        assert f"{su['end'].day}. September" in text, slug
+    print("Länder-Selbsttest AT: Landespatron, Semester- und Sommerferien stimmen mit den Daten überein")
+
+
 def build_articles():
     for a in ARTICLES:
         crumbs = [("/", "Start"), ("/" + a["slug"] + ".html", a["title"])]
@@ -491,8 +695,12 @@ def build_articles():
               "description": a["description"], "inLanguage": "de", "datePublished": "2026-10-29", "dateModified": CHECKED_ISO,
               "author": {"@type": "Organization", "name": "Redaktion Kalenderkompass 24", "url": SITE + "/about.html"},
               "publisher": {"@type": "Organization", "name": "AdStern"}, "mainEntityOfPage": SITE + "/" + a["slug"] + ".html"}]
+        fenster = a["slug"] == "fenstertag-zwickeltag-brueckentag"
+        if fenster: ld[1]["dateModified"] = "2026-11-03"
         write(a["slug"] + ".html", "page.html", title=f"{a['title']} | Kalenderkompass 24", description=a["description"],
-              h1=a["title"], lead=a["teaser"], body=a["body"], related=related, crumbs=crumbs, jsonld=ld, active="", priority=0.7, checked=CHECKED)
+              h1=a["title"], lead=a["teaser"], body=fenstertage_body() if fenster else a["body"], related=related, crumbs=crumbs, jsonld=ld,
+              active="", priority=0.8 if fenster else 0.7, checked=CHECKED_NEW if fenster else CHECKED,
+              sources=[("Arbeitsruhegesetz im RIS", RIS)] if fenster else None)
 
 
 LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
@@ -586,7 +794,8 @@ def main():
     for y in YEARS: build_kw(y)
     for y in (2027, 2028): build_print(y)
     import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
-    build_articles(); build_legal(); build_static()
+    check_claims()
+    build_articles(); build_methodik(); build_legal(); build_static()
     check_years()
     print(f"{len(PAGES)} indexierbare Seiten in {OUT}")
 

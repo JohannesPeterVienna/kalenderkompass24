@@ -4,24 +4,11 @@ Rechtliche Angaben: Stand Oktober 2026, ohne Gewähr; keine Rechtsberatung."""
 ARTICLES = [
 {
 "slug": "fenstertag-zwickeltag-brueckentag",
-"title": "Fenstertag, Zwickeltag, Brückentag: Was ist der Unterschied?",
-"teaser": "Drei Wörter für denselben freien Tag – und warum es keinen Anspruch darauf gibt.",
-"description": "Fenstertag, Zwickeltag oder Brückentag: was die Begriffe bedeuten, wo man sie sagt und ob Arbeitgeber an diesen Tagen freigeben müssen.",
-"body": """
-<p>Ein Brückentag ist ein einzelner Arbeitstag, der zwischen einem Feiertag und dem Wochenende liegt. Fällt etwa Christi Himmelfahrt auf einen Donnerstag, reicht ein Urlaubstag am Freitag für vier freie Tage am Stück.</p>
-<h2>Drei Wörter, eine Sache</h2>
-<p><strong>Fenstertag</strong> sagt man in Österreich. Der Tag ist wie ein Fenster zwischen zwei freien Blöcken. <strong>Zwickeltag</strong> ist vor allem in Ostösterreich und Bayern üblich, der Tag ist zwischen Feiertag und Wochenende „eingezwickt“. <strong>Brückentag</strong> ist der Begriff in Deutschland und in der Schweiz.</p>
-<h2>Muss der Arbeitgeber freigeben?</h2>
-<p>Nein. In Österreich und Deutschland ist ein Brückentag ein ganz normaler Arbeitstag. Wer frei haben möchte, nimmt Urlaub oder baut Zeitguthaben ab.</p>
-<ul>
-<li><strong>Österreich:</strong> Der Zeitpunkt des Urlaubs wird zwischen Arbeitgeber und Arbeitnehmer vereinbart (§ 4 Urlaubsgesetz). Keine Seite kann ihn allein festlegen.</li>
-<li><strong>Deutschland:</strong> Der Arbeitgeber legt den Urlaub fest, muss aber die Wünsche der Beschäftigten berücksichtigen, sofern keine dringenden betrieblichen Gründe entgegenstehen (§ 7 Abs. 1 Bundesurlaubsgesetz).</li>
-</ul>
-<p>Viele Betriebe schließen an beliebten Brückentagen trotzdem. Dann wird der Tag meist als Betriebsurlaub verbucht, der in Österreich vereinbart und in Deutschland mit dem Betriebsrat abgestimmt sein muss.</p>
-<h2>Warum Brückentage so wertvoll sind</h2>
-<p>Ein Urlaubstag am Brückentag bringt vier freie Tage. Das ist doppelt so effizient wie ein normaler Urlaubstag am Montag, der nur ein langes Wochenende von drei Tagen ergibt. Zwei Urlaubstage rund um einen Feiertag am Mittwoch bringen fünf freie Tage.</p>
-<div class="note">Tipp: Beliebte Brückentage sind im Team schnell vergeben. Wer früh im Jahr plant, hat die besten Chancen. Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> zeigt dir die effizientesten Termine für dein Bundesland.</div>
-""",
+"title": "Fenstertage 2027 Österreich: Zwickeltage, Landespatrone & Urlaubstipps",
+"teaser": "Alle Fenstertage 2027, die Landespatrone jedes Bundeslandes und die Urlaubsblöcke mit den meisten freien Tagen pro Urlaubstag.",
+"description": "Fenstertage 2027 Österreich: 7. Mai, 28. Mai und 25. Oktober, alle Zwickel, Landespatrone und Ferien je Bundesland und Urlaubspläne mit den meisten freien Tagen.",
+# Der Text wird in build.py (fenstertage_body) aus holidays.py und ferien.py erzeugt.
+"body": """""",
 },
 {
 "slug": "persoenlicher-feiertag-oesterreich",

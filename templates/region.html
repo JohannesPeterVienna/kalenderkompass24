@@ -22,13 +22,14 @@
     <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>Feiertage {{ year }} in den Kalender (.ics)</button></p>
 
     <h2>Brückentage {{ year }} {{ in_name }}</h2>
-    {{ m.bridges(bridge_list, country) }}
+    {% if bridge_text %}<p>{{ bridge_text }} <a href="/fenstertag-zwickeltag-brueckentag.html">Alle Fenstertage {{ year }} mit Urlaubsplänen</a></p>
+    {% else %}{{ m.bridges(bridge_list, country) }}{% endif %}
 
     {{ m.ad("rect") }}
 
     <h2>Was {{ in_name }} gilt</h2>
     <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
-    {% if land_html %}<h2>Rechtsgrundlage und Besonderheiten {{ in_name }}</h2>
+    {% if land_html %}<h2>{{ land_title }}</h2>
     <div class="prose">{{ land_html | safe }}</div>{% endif %}
 
     {% if ferien %}<h2>Schulferien {{ ferien.sy }} {{ in_name }}</h2>
