@@ -230,3 +230,7 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 
 /* Abstand Superbanner – Fußzeilen-Knopf (≥ 150 px) */
 .ad--superbanner{margin-bottom:120px}
+
+/* Abstand Billboard – Seitenleisten-Knopf und Half-Page – Kasten darüber (≥ 150 px zu Bedienelementen) */
+.ad--billboard{margin-bottom:64px}
+.side .ad--half{margin-top:128px}
