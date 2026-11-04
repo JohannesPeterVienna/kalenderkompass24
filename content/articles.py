@@ -71,26 +71,59 @@ ARTICLES = [
 "teaser": "25 oder 20 Tage – was das Gesetz sagt und wann der Urlaub verfällt.",
 "description": "Gesetzlicher Urlaubsanspruch in Österreich und Deutschland: Werktage und Arbeitstage, Teilzeit, Verjährung und Verfall verständlich erklärt.",
 "body": """
-<p>In Österreich stehen Vollzeitbeschäftigten fünf Wochen Urlaub zu, in Deutschland gesetzlich mindestens vier Wochen. In Tagen gerechnet sind das bei einer Fünf-Tage-Woche 25 beziehungsweise 20 Urlaubstage.</p>
-<h2>Österreich</h2>
+<p>In Österreich stehen Vollzeitbeschäftigten fünf Wochen Urlaub zu, in Deutschland gesetzlich mindestens vier Wochen. In Tagen gerechnet sind das bei einer Fünftagewoche 25 beziehungsweise 20 Urlaubstage. Beide Gesetze rechnen allerdings in <strong>Werktagen</strong> – und genau daraus entstehen die meisten Missverständnisse, vor allem bei Teilzeit. Hier steht, was die Gesetze tatsächlich sagen, wie man umrechnet und wann Urlaub verfällt oder verjährt.</p>
+
+<h2>Österreich: Urlaubsgesetz</h2>
+<p><strong>Ausmaß (§ 2 Abs. 1 UrlG):</strong> „Das Urlaubsausmaß beträgt bei einer Dienstzeit von weniger als 25 Jahren 30 Werktage und erhöht sich nach Vollendung des 25. Jahres auf 36 Werktage.“ Werktage sind die sechs Tage von Montag bis Samstag. Wer regelmäßig an fünf Tagen arbeitet, rechnet in Arbeitstage um: 30 Werktage entsprechen 25 Arbeitstagen, 36 Werktage 30 Arbeitstagen. Gemeint sind in beiden Fällen fünf beziehungsweise sechs Wochen.</p>
 <ul>
-<li><strong>Anspruch:</strong> 30 Werktage pro Arbeitsjahr (§ 2 Urlaubsgesetz). Werktage sind Montag bis Samstag. Bei einer Fünf-Tage-Woche entspricht das 25 Arbeitstagen.</li>
-<li><strong>Nach 25 Dienstjahren:</strong> 36 Werktage, also 30 Arbeitstage.</li>
-<li><strong>Erstes Arbeitsjahr:</strong> In den ersten sechs Monaten entsteht der Anspruch anteilig, danach in voller Höhe.</li>
-<li><strong>Verjährung:</strong> Nicht verbrauchter Urlaub verjährt zwei Jahre nach Ende des Urlaubsjahres, in dem er entstanden ist.</li>
+<li><strong>Erstes Arbeitsjahr (§ 2 Abs. 2 UrlG):</strong> In den ersten sechs Monaten entsteht der Anspruch im Verhältnis zur zurückgelegten Dienstzeit, nach sechs Monaten in voller Höhe. Ab dem zweiten Arbeitsjahr entsteht der ganze Anspruch schon am ersten Tag des Arbeitsjahres.</li>
+<li><strong>Urlaubsjahr:</strong> Grundsätzlich ist das Arbeitsjahr maßgeblich, also das Jahr ab dem Eintrittsdatum. Viele Betriebe stellen per Vereinbarung auf das Kalenderjahr um; das Gesetz regelt, wie der Übergang berechnet wird.</li>
+<li><strong>Sechste Urlaubswoche früher:</strong> Auf die 25 Jahre werden unter bestimmten Voraussetzungen auch Zeiten bei früheren Arbeitgebern, Schul- und Studienzeiten angerechnet (§ 3 UrlG). Wie viel davon zählt, ist begrenzt; Wirtschaftskammer und Arbeiterkammer erklären die Details.</li>
+<li><strong>Zeitpunkt:</strong> Wann der Urlaub genommen wird, vereinbaren Arbeitgeber und Arbeitnehmer (§ 4 UrlG). Keine Seite kann ihn allein festlegen. Die Ausnahme ist der persönliche Feiertag nach § 7a Arbeitsruhegesetz, den man einmal im Jahr selbst bestimmen darf.</li>
+<li><strong>Verjährung:</strong> Nicht verbrauchter Urlaub verjährt zwei Jahre nach dem Ende des Urlaubsjahres, in dem er entstanden ist; die Frist verlängert sich um Zeiten einer Elternkarenz. Wer Urlaub nimmt, verbraucht immer zuerst den ältesten offenen Anspruch. Nach jüngerer Rechtsprechung des Europäischen Gerichtshofs muss der Arbeitgeber zum Verbrauch auffordern und auf den drohenden Verlust hinweisen, bevor Urlaub verloren geht.</li>
 </ul>
-<h2>Deutschland</h2>
+
+<h2>Deutschland: Bundesurlaubsgesetz</h2>
+<p><strong>Dauer (§ 3 BUrlG):</strong> „Der Urlaub beträgt jährlich mindestens 24 Werktage.“ Und weiter: „Als Werktage gelten alle Kalendertage, die nicht Sonn- oder gesetzliche Feiertage sind.“ Das Gesetz geht also von einer Sechstagewoche aus. Bei fünf Arbeitstagen pro Woche ergibt das 24 ÷ 6 × 5 = 20 Urlaubstage – vier Wochen.</p>
 <ul>
-<li><strong>Anspruch:</strong> 24 Werktage pro Kalenderjahr (§ 3 Bundesurlaubsgesetz), gerechnet auf eine Sechs-Tage-Woche. Bei fünf Arbeitstagen sind das 20 Urlaubstage.</li>
-<li><strong>Tarif und Vertrag:</strong> Viele Tarifverträge sehen 28 bis 30 Tage vor. Es gilt die günstigere Regel.</li>
-<li><strong>Übertragung:</strong> Urlaub ist grundsätzlich im laufenden Jahr zu nehmen. Bei dringenden Gründen kann er bis 31. März des Folgejahres übertragen werden (§ 7 Abs. 3 BUrlG).</li>
-<li><strong>Verfall nur mit Hinweis:</strong> Seit Urteilen von Europäischem Gerichtshof und Bundesarbeitsgericht verfällt Urlaub nur, wenn der Arbeitgeber rechtzeitig und konkret auf den drohenden Verfall hingewiesen hat.</li>
+<li><strong>Wartezeit (§ 4 BUrlG):</strong> Den vollen Anspruch erwirbt man erstmals nach sechs Monaten im Arbeitsverhältnis. Wer vorher ausscheidet oder im Eintrittsjahr die sechs Monate nicht mehr erreicht, bekommt für jeden vollen Monat ein Zwölftel (§ 5 BUrlG). Bruchteile, die mindestens einen halben Tag ergeben, werden dabei aufgerundet.</li>
+<li><strong>Festlegung (§ 7 Abs. 1 BUrlG):</strong> Der Arbeitgeber legt den Urlaub fest, muss die Wünsche der Beschäftigten aber berücksichtigen, außer dringende betriebliche Belange oder sozial vorrangige Wünsche anderer stehen entgegen.</li>
+<li><strong>Am Stück (§ 7 Abs. 2 BUrlG):</strong> Urlaub ist zusammenhängend zu gewähren. Muss er geteilt werden und stehen mehr als zwölf Werktage zu, muss ein Teil mindestens zwölf aufeinanderfolgende Werktage umfassen – also zwei Wochen.</li>
+<li><strong>Übertragung (§ 7 Abs. 3 BUrlG):</strong> Urlaub ist im laufenden Kalenderjahr zu nehmen. Nur bei dringenden betrieblichen oder persönlichen Gründen darf er übertragen werden und muss dann in den ersten drei Monaten des Folgejahres genommen werden, also bis 31. März.</li>
+<li><strong>Verfall nur nach Hinweis:</strong> Seit den Urteilen des Europäischen Gerichtshofs (2018) und des Bundesarbeitsgerichts (2019) verfällt Urlaub in der Regel nur, wenn der Arbeitgeber rechtzeitig und konkret aufgefordert hat, ihn zu nehmen, und auf den Verfall hingewiesen hat.</li>
+<li><strong>Abgeltung (§ 7 Abs. 4 BUrlG):</strong> Kann Urlaub wegen des Endes des Arbeitsverhältnisses nicht mehr genommen werden, ist er auszuzahlen.</li>
 </ul>
-<h2>Teilzeit</h2>
-<p>Der Anspruch wird in beiden Ländern auf die Zahl der Arbeitstage umgerechnet. Wer an drei Tagen pro Woche arbeitet, hat in Österreich 15 und in Deutschland gesetzlich 12 Urlaubstage. Die Wochen Urlaub bleiben gleich.</p>
-<h2>Feiertage zählen nicht als Urlaub</h2>
-<p>Fällt ein gesetzlicher Feiertag in deinen Urlaub, wird dafür kein Urlaubstag abgezogen. Genau deshalb lohnt es sich, den Urlaub um Feiertage herum zu legen. Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> rechnet das für dein Bundesland aus.</p>
-<p class="small muted">Diese Darstellung ersetzt keine Rechtsberatung. Kollektivverträge, Tarifverträge und Arbeitsverträge können mehr Urlaub vorsehen.</p>
+<p><strong>Mehr als das Minimum:</strong> Das Gesetz regelt nur den Mindesturlaub. Arbeits- und Tarifverträge sehen oft 25 bis 30 Tage vor; von §§ 1, 2 und 3 Abs. 1 darf aber auch ein Tarifvertrag nicht nach unten abweichen (§ 13 BUrlG). Schwerbehinderte Menschen haben zusätzlich fünf Arbeitstage Urlaub (§ 208 SGB IX), Jugendliche je nach Alter mindestens 25 bis 30 Werktage (§ 19 Jugendarbeitsschutzgesetz).</p>
+
+<h2>Werktage, Arbeitstage und die Umrechnung</h2>
+<p>Die Formel ist in beiden Ländern dieselbe: <strong>gesetzlicher Anspruch in Werktagen ÷ 6 × eigene Arbeitstage pro Woche</strong>. Entscheidend ist die Zahl der Tage, an denen man arbeitet, nicht die Stundenzahl. Wer an fünf Tagen je vier Stunden arbeitet, hat deshalb genauso viele Urlaubstage wie Vollzeitkräfte – jeder Urlaubstag ersetzt ja nur einen kurzen Arbeitstag.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Arbeitstage pro Woche</th><th scope="col">Österreich (30 Werktage)</th><th scope="col">Österreich ab 25 Dienstjahren (36)</th><th scope="col">Deutschland (24 Werktage)</th></tr></thead><tbody>
+<tr><td>6</td><td>30</td><td>36</td><td>24</td></tr>
+<tr><td>5</td><td>25</td><td>30</td><td>20</td></tr>
+<tr><td>4</td><td>20</td><td>24</td><td>16</td></tr>
+<tr><td>3</td><td>15</td><td>18</td><td>12</td></tr>
+<tr><td>2</td><td>10</td><td>12</td><td>8</td></tr>
+<tr><td>1</td><td>5</td><td>6</td><td>4</td></tr>
+</tbody></table></div>
+<p>In Wochen gerechnet bleibt es immer gleich: fünf (bzw. sechs) Wochen in Österreich, vier Wochen in Deutschland. Wer drei Tage pro Woche arbeitet und 15 Urlaubstage nimmt, ist genau fünf Wochen weg.</p>
+
+<h2>Teilzeit: drei Beispiele</h2>
+<p><strong>Beispiel 1 – Wien, vier Tage pro Woche:</strong> Eine Angestellte arbeitet Montag bis Donnerstag. Ihr Anspruch: 30 ÷ 6 × 4 = 20 Arbeitstage. Nimmt sie eine Woche frei, verbraucht sie vier Urlaubstage, nicht fünf – der Freitag war ohnehin frei.</p>
+<p><strong>Beispiel 2 – Köln, drei Tage pro Woche, Vertrag mit 30 Urlaubstagen:</strong> Der Vertrag rechnet 30 Tage auf eine Fünftagewoche. Für drei Arbeitstage ergibt das 30 ÷ 5 × 3 = 18 Urlaubstage. Der gesetzliche Mindestanspruch läge bei 24 ÷ 6 × 3 = 12 Tagen; es gilt der Vertrag, weil er günstiger ist.</p>
+<p><strong>Beispiel 3 – wechselnde Wochen:</strong> Wer abwechselnd eine Woche vier und eine Woche zwei Tage arbeitet, kommt im Schnitt auf drei Arbeitstage. In Deutschland sind das gesetzlich 12, in Österreich 15 Urlaubstage. Bei sehr unregelmäßigen Dienstplänen wird oft über das ganze Jahr gerechnet oder – in Österreich ausdrücklich zulässig, wenn vereinbart – in Stunden. Wie mit Bruchteilen von Tagen umzugehen ist, hängt vom Einzelfall und vom Vertrag ab.</p>
+<p><strong>Wechsel zwischen Vollzeit und Teilzeit:</strong> Nach der Rechtsprechung des Europäischen Gerichtshofs darf Urlaub, der während der Vollzeit erworben wurde, beim Wechsel in Teilzeit nicht nachträglich gekürzt werden. Wer das betrifft, sollte die Umrechnung mit der Personalabteilung schriftlich klären.</p>
+
+<h2>Krank im Urlaub, Feiertage im Urlaub</h2>
+<p>Wer im Urlaub krank wird und das ärztlich nachweist, verliert die Krankheitstage nicht: In Deutschland werden sie nach § 9 BUrlG nicht auf den Urlaub angerechnet, in Österreich nach § 5 UrlG, wenn die Erkrankung länger als drei Kalendertage dauert. Fällt ein gesetzlicher Feiertag in den Urlaub, wird dafür ebenfalls kein Urlaubstag abgezogen. Genau deshalb lohnt es sich, Urlaub um Feiertage herum zu legen – der <a href="/urlaubsplaner.html">Urlaubsplaner</a> rechnet das für jedes Bundesland durch, und der <a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a> zeigt, wie viele Arbeitstage ein Zeitraum enthält.</p>
+
+<h2>Quellen</h2>
+<ul>
+<li><a href="https://www.gesetze-im-internet.de/burlg/BJNR000020963.html" rel="noopener">Bundesurlaubsgesetz (BUrlG) auf gesetze-im-internet.de</a></li>
+<li><a href="https://www.gesetze-im-internet.de/sgb_9_2018/__208.html" rel="noopener">§ 208 SGB IX – Zusatzurlaub</a> und <a href="https://www.gesetze-im-internet.de/jarbschg/__19.html" rel="noopener">§ 19 Jugendarbeitsschutzgesetz</a></li>
+<li><a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&amp;Gesetzesnummer=10008376" rel="noopener">Urlaubsgesetz (UrlG) im Rechtsinformationssystem des Bundes (RIS)</a></li>
+<li><a href="https://www.wko.at/arbeitsrecht/urlaubsanspruch" rel="noopener">Wirtschaftskammer Österreich: Urlaubsanspruch</a></li>
+</ul>
+<p class="small muted">Stand 4. November 2026. Diese Darstellung ersetzt keine Rechtsberatung. Kollektivverträge, Tarifverträge, Betriebsvereinbarungen und Arbeitsverträge können mehr Urlaub vorsehen; für Beamtinnen und Beamte gelten eigene Regeln.</p>
 """,
 },
 {
@@ -149,20 +182,48 @@ ARTICLES = [
 "teaser": "Feiertage zuerst, dann Brückentage, dann die großen Blöcke – eine Methode, die jedes Jahr funktioniert.",
 "description": "Urlaub clever planen: Mit Feiertagen und Brückentagen mehr freie Tage aus deinem Urlaubsanspruch holen – eine Schritt-für-Schritt-Methode.",
 "body": """
-<p>Die meisten freien Tage pro Urlaubstag holst du rund um Feiertage heraus. Wer seinen Urlaub dort ansetzt, kommt mit 25 Urlaubstagen leicht auf mehr als 50 freie Tage am Stück – zusätzlich zu den normalen Wochenenden.</p>
+<p>Die meisten freien Tage pro Urlaubstag holst du rund um Feiertage heraus. Wer seinen Urlaub dort ansetzt, kommt mit 25 Urlaubstagen leicht auf mehr als 50 freie Tage am Stück – zusätzlich zu den normalen Wochenenden. Die folgende Methode funktioniert jedes Jahr; die Zahlen unten sind für 2027 aus denselben Daten berechnet wie unsere Feiertagstabellen.</p>
+
 <h2>1. Feiertage deines Bundeslandes kennen</h2>
-<p>Die Feiertage unterscheiden sich vor allem in Deutschland stark: In Bayern sind es bis zu 13 gesetzliche Feiertage, in Augsburg sogar 14, in Berlin dagegen 10. Wähle auf der <a href="/">Startseite</a> dein Bundesland.</p>
+<p>In Österreich gelten in allen Bundesländern dieselben 13 gesetzlichen Feiertage; Landespatrone sind keine Feiertage, an den Schulen aber meist frei. In Deutschland unterscheiden sich die Länder stark: In Bayern sind es bis zu 13 gesetzliche Feiertage, in Augsburg mit dem Hohen Friedensfest sogar 14, in Berlin, Bremen, Hamburg, Hessen, Niedersachsen und Schleswig-Holstein dagegen 10. Maßgeblich sind die Feiertage am <strong>Arbeitsort</strong>, nicht am Wohnort – wer über eine Landesgrenze pendelt, plant mit dem Kalender des Arbeitgebers. Wähle auf der <a href="/">Startseite</a> dein Bundesland.</p>
+
 <h2>2. Brückentage zuerst sichern</h2>
-<p>Ein einzelner Urlaubstag zwischen Feiertag und Wochenende bringt vier freie Tage. Diese Termine sind im Team am begehrtesten – trag sie früh ein.</p>
-<h2>3. Ostern und Pfingsten verlängern</h2>
-<p>Rund um Ostern liegen zwei Feiertage nahe beieinander (in Deutschland Karfreitag und Ostermontag, in Österreich der Ostermontag). Vier Urlaubstage in der Osterwoche ergeben in Deutschland zehn, in Österreich neun freie Tage am Stück.</p>
+<p>Ein einzelner Urlaubstag zwischen Feiertag und Wochenende bringt vier freie Tage. Diese Termine sind im Team am begehrtesten – trag sie früh ein, am besten gleich bei der Jahresplanung im Herbst oder Winter. Einen Anspruch auf Freistellung an Brückentagen gibt es nicht: In Österreich wird der Urlaub vereinbart, in Deutschland legt ihn der Arbeitgeber unter Berücksichtigung deiner Wünsche fest. In Österreich kannst du einen Tag pro Jahr als <a href="/persoenlicher-feiertag-oesterreich.html">persönlichen Feiertag</a> selbst bestimmen, musst ihn aber mindestens drei Monate vorher schriftlich bekannt geben.</p>
+
+<h2>3. Ostern, Pfingsten und die Donnerstage im Mai verlängern</h2>
+<p>Rund um Ostern liegen zwei Feiertage nahe beieinander (in Deutschland Karfreitag und Ostermontag, in Österreich der Ostermontag). Christi Himmelfahrt und Fronleichnam fallen immer auf einen Donnerstag. Die Tabelle zeigt für 2027, was ein und was vier Urlaubstage bringen – für Österreich und als deutsches Beispiel für Nordrhein-Westfalen, das Land mit den meisten Einwohnern.</p>
+<!--PLAN-->
+<p>Gezählt ist mit einer Fünftagewoche. Die Werte gelten für Beschäftigte; Schulkinder haben je nach Land zusätzlich Ferien oder schulfreie Tage, die die Rechnung für Familien verändern.</p>
+
 <h2>4. Den großen Block legen</h2>
-<p>Für die Erholung zählt ein längerer Urlaub am Stück. Zwei bis drei Wochen im Sommer oder rund um Weihnachten sind sinnvoll – Weihnachten ist besonders effizient, wenn die Feiertage auf Werktage fallen.</p>
+<p>Für die Erholung zählt ein längerer Urlaub am Stück. Das deutsche Bundesurlaubsgesetz sieht sogar vor, dass Urlaub grundsätzlich zusammenhängend gewährt wird und bei einer Teilung ein Teil mindestens zwölf aufeinanderfolgende Werktage – also zwei Wochen – umfasst. Zwei bis drei Wochen im Sommer oder rund um Weihnachten sind sinnvoll. Weihnachten ist besonders effizient, wenn die Feiertage auf Werktage fallen; liegen sie wie 2027 auf dem Wochenende, kostet die Woche zwischen den Jahren fünf volle Urlaubstage.</p>
+<p>Wer flexibel ist, legt den großen Block bewusst außerhalb der Ferien des eigenen Landes und der Nachbarländer. In Deutschland sind die Sommerferien gestaffelt: Die Länder wechseln sich nach einer Vereinbarung der Kultusministerkonferenz mit frühen und späten Terminen ab, nur Bayern und Baden-Württemberg liegen stets spät. In Österreich beginnen Wien, Niederösterreich und das Burgenland eine Woche früher als die übrigen Bundesländer.</p>
+
 <h2>5. Den Rest verteilen</h2>
-<p>Ein paar Tage Reserve für Unvorhergesehenes sind klug. Den Rest legst du als verlängerte Wochenenden über das Jahr.</p>
-<div class="note">Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> übernimmt die Schritte 1 bis 3 automatisch: Du gibst deine Urlaubstage ein und siehst sofort die effizientesten Termine.</div>
+<p>Ein paar Tage Reserve für Unvorhergesehenes sind klug – ein krankes Kind, ein Umzug, ein Behördentermin. Den Rest legst du als verlängerte Wochenenden über das Jahr. Ein freier Freitag oder Montag pro Monat bringt jeweils drei Tage am Stück und verteilt die Erholung gleichmäßiger als ein einzelner langer Urlaub.</p>
+<div class="note">Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> übernimmt die Schritte 1 bis 3 automatisch: Du gibst deine Urlaubstage ein und siehst sofort die effizientesten Termine für dein Bundesland.</div>
+
 <h2>Schulferien beachten</h2>
-<p>Familien sind an die Schulferien gebunden. Wer keine schulpflichtigen Kinder hat, profitiert umgekehrt davon, außerhalb der Ferien zu reisen: Unterkünfte und Flüge sind dann oft deutlich günstiger.</p>
+<p>Familien sind an die Schulferien gebunden. Für sie ist die wichtigste Frage nicht, wie viele freie Tage ein Urlaubstag bringt, sondern an welchen Tagen die Kinder ohnehin frei haben. Unsere Seiten zu den <a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a> zeigen alle amtlichen Termine; der <a href="/familienplaner.html">Familienplaner</a> trägt Feiertage und Ferien in einen Kalender zum Ausdrucken ein. Achte auf Tage, die nur an den Schulen frei sind – etwa Landespatrone in Österreich, den Buß- und Bettag in Bayern oder einzelne Brückentage nach Christi Himmelfahrt. Dort brauchen berufstätige Eltern Urlaub oder Betreuung, obwohl im Kalender kein Feiertag steht.</p>
+<p>Wer keine schulpflichtigen Kinder hat, profitiert umgekehrt davon, außerhalb der Ferien zu reisen: Unterkünfte und Flüge sind dann oft günstiger, und Ausflugsziele sind leerer.</p>
+
+<h2>Häufige Planungsfehler</h2>
+<ul>
+<li><strong>Werktage und Arbeitstage verwechseln:</strong> Gesetze rechnen den Urlaub in Werktagen (Montag bis Samstag). Wer fünf Tage pro Woche arbeitet, hat in Österreich 25 und in Deutschland gesetzlich 20 Urlaubstage – mehr dazu im Beitrag <a href="/urlaubsanspruch-oesterreich-deutschland.html">Wie viel Urlaub steht mir zu?</a></li>
+<li><strong>Den 24. und 31. Dezember als Feiertag einplanen:</strong> Beide sind keine gesetzlichen Feiertage. Ob sie frei sind, regeln Kollektiv- oder Tarifvertrag und Betrieb.</li>
+<li><strong>Feiertage am Wochenende übersehen:</strong> Fällt ein Feiertag auf Samstag oder Sonntag, gibt es weder in Österreich noch in Deutschland einen Ersatztag. Ein Jahr mit vielen Feiertagen am Wochenende braucht mehr Urlaub für dieselben freien Tage.</li>
+<li><strong>Zu spät beantragen:</strong> Gerade Brückentage und die Ferienwochen sind in vielen Teams schnell vergeben. Wer früh plant, hat die Wahl.</li>
+<li><strong>Resturlaub verfallen lassen:</strong> In Deutschland ist Urlaub grundsätzlich im Kalenderjahr zu nehmen, in Österreich verjährt er nach zwei Jahren ab Ende des Urlaubsjahres. Ein Blick auf den Kontostand im Herbst lohnt sich.</li>
+</ul>
+
+<h2>Checkliste für die Jahresplanung</h2>
+<ol>
+<li>Feiertage des Arbeitsorts für das ganze Jahr ansehen und markieren, welche auf Werktage fallen.</li>
+<li>Brückentage und die besten Blöcke um Ostern und im Mai auswählen.</li>
+<li>Den großen Sommer- oder Winterblock festlegen und mit den Schulferien abgleichen.</li>
+<li>Reserve von drei bis fünf Tagen zurückhalten.</li>
+<li>Alles früh mit dem Team abstimmen und schriftlich festhalten.</li>
+</ol>
 """,
 },
 {

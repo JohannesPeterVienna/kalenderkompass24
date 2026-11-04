@@ -37,6 +37,7 @@
     {% if bridge_note %}<p class="muted">{{ bridge_note }}</p>{% endif %}
 
     <div class="prose">{% for p in facts %}<p>{{ p }}</p>{% endfor %}</div>
+    {% if extra_html %}<div class="prose">{{ extra_html | safe }}</div>{% endif %}
 
     <h2>Feiertage {{ year }} nach Bundesland</h2>
     <ul class="tiles">{% for s,n in regions %}<li><a href="/feiertage-{{ region_year }}-{{ s }}.html">{{ n }}</a></li>{% endfor %}</ul>

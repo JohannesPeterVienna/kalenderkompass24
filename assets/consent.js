@@ -17,10 +17,14 @@
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== "function") window.gtag = function(){ window.dataLayer.push(arguments); };
   window[GA_OFF] = true;
-  gtag("consent", "default", {
-    ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied",
-    analytics_storage: "denied", wait_for_update: 500
-  });
+  // Indexierbare Seiten setzen die Grundwerte schon inline im <head> (vor dem statischen AdSense-Skript).
+  if (!window.kkConsentDefault) {
+    gtag("consent", "default", {
+      ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied",
+      analytics_storage: "denied", wait_for_update: 500
+    });
+    window.kkConsentDefault = true;
+  }
   window.googlefc = window.googlefc || {};
   window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
 
@@ -33,11 +37,14 @@
   const gpc = navigator.globalPrivacyControl === true;
 
   function loadAds(){
-    if (gpc) return;
-    const s = document.createElement("script");
-    s.async = true; s.crossOrigin = "anonymous";
-    s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUB}`;
-    document.head.appendChild(s);
+    if (gpc) { (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1; return; }
+    // Auf indexierbaren Seiten steht das AdSense-Skript schon statisch im <head> – nicht doppelt laden.
+    if (!document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) {
+      const s = document.createElement("script");
+      s.async = true; s.crossOrigin = "anonymous";
+      s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUB}`;
+      document.head.appendChild(s);
+    }
     document.querySelectorAll(".ad[data-ad]").forEach(box => {
       const id = SLOTS[box.dataset.ad];
       if (!id) return;

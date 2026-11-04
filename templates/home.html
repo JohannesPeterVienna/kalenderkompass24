@@ -8,7 +8,9 @@
       {{ m.picker(years) }}
     </div>
     <div class="next" data-next aria-live="polite">
-      <div class="when">{{ next.rel }}</div><div class="what">{{ next.name }}</div><div class="rel">{{ next.date }} · Österreich</div>
+      <div class="what">Die nächsten Feiertage in Österreich</div>
+      <ul class="next-list">{% for n in next_list %}<li><strong>{{ n.name }}</strong><span>{{ n.date }}</span></li>{% endfor %}</ul>
+      <div class="rel small">Stand {{ next_asof }} · gesetzliche Feiertage nach § 7 Arbeitsruhegesetz</div>
     </div>
   </div>
 </div></section>

@@ -52,6 +52,7 @@ small,.small{font-size:.875rem}
 .next .when{font:600 clamp(2.4rem,6vw,4rem)/1 var(--display);letter-spacing:-.03em;color:var(--red)}
 .next .what{font-size:1.15rem;font-weight:600;margin-top:6px}
 .next .rel{color:var(--muted)}
+.next-list{list-style:none;margin:10px 0 8px;padding:0}.next-list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;padding:6px 0;border-bottom:1px solid var(--line)}.next-list li:last-child{border-bottom:0}.next-list span{color:var(--muted)}
 .picker{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
 .picker label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
 select,input[type=number],input[type=date]{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-height:44px}
