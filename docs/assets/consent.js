@@ -221,6 +221,10 @@
     schreiben(e){
       this.notfall = e;
       try { localStorage.setItem(BLATT_KEY, JSON.stringify(e)); } catch (_) {}
+    },
+    loeschen(){
+      this.notfall = null;
+      try { localStorage.removeItem(BLATT_KEY); } catch (_) {}
     }
   };
 
@@ -279,12 +283,13 @@
 <div class="kk-blatt__wahl"><button type="button" class="kk-blatt__knopf" data-kk-wahl="zu">Schließen</button></div>`;
       const w = regel.eigeneWahl(ablage.lesen(), Date.now());
       const e = ablage.lesen();
-      const stand = w === "ja" ? `Stand: zugestimmt am ${this.datum(e.zeit)}`
-        : w === "nein" ? `Stand: abgelehnt am ${this.datum(e.zeit)}`
-        : this.ausloeser ? "Stand: keine Auswahl, Statistik aus" : "";
-      return kopf + `<h2 id="kk-blatt-titel" tabindex="-1">Seitenaufrufe messen – einverstanden?</h2>
-<div id="kk-blatt-text"><p>Reine Reichweitenmessung mit Google Analytics (Google Ireland Ltd.): Google setzt dafür Cookies, Daten auch in den USA möglich. Keine Zustimmung zu Werbung. Widerruf jederzeit über „Datenschutz-Einstellungen“ im Seitenfuß. <a href="/privacy.html#statistik-fenster">Datenschutzerklärung</a></p></div>
-${stand ? `<p class="kk-blatt__stand">${stand}</p>` : ""}
+      const stand = w === "ja" ? `Zugestimmt am ${this.datum(e.zeit)}`
+        : w === "nein" ? `Abgelehnt am ${this.datum(e.zeit)}`
+        : this.ausloeser ? "Noch keine Auswahl" : "";
+      const hier = ohneWerbung ? ". Hier wird nichts gemessen; die Wahl gilt für die Inhaltsseiten." : "";
+      return kopf + `<h2 id="kk-blatt-titel" tabindex="-1">Statistik erlauben?</h2>
+<div id="kk-blatt-text"><p>Reine Reichweitenmessung mit Google Analytics (Google Ireland Ltd.): Google setzt Cookies, Daten auch in den USA möglich. Keine Zustimmung zu Werbung. Widerruf jederzeit unten über „Datenschutz-Einstellungen“. <a href="/privacy.html#statistik-fenster">Datenschutzerklärung</a></p></div>
+${stand || hier ? `<p class="kk-blatt__stand">${stand}${stand ? hier : hier.slice(3)}</p>` : ""}
 <div class="kk-blatt__wahl"><button type="button" class="kk-blatt__knopf" data-kk-wahl="ja">Zustimmen</button><button type="button" class="kk-blatt__knopf" data-kk-wahl="nein">Ablehnen</button></div>
 <button type="button" class="kk-blatt__zu" data-kk-wahl="zu" aria-label="Schließen, ohne zu entscheiden">×</button>`;
     },
@@ -350,7 +355,8 @@ ${stand ? `<p class="kk-blatt__stand">${stand}</p>` : ""}
 
     // jede TCF-Meldung: echte Google-Entscheidung ersetzt die eigene Wahl (wird gelöscht, nur der Zeitpunkt bleibt)
     tcfMeldung(tc){
-      if (regel.echteEntscheidung(tc) && tc.gdprApplies !== false) ablage.schreiben({ v: BLATT_VERSION, google: Date.now() });
+      if (tc.gdprApplies === false) ablage.loeschen();          // DSGVO gilt laut Google nicht: bestehende Logik, eigene Wahl weg
+      else if (regel.echteEntscheidung(tc)) ablage.schreiben({ v: BLATT_VERSION, google: Date.now() });
       const l = this.lageJetzt();
       if ((l === "google" || l === "warten") && this.offen() && this.el.dataset.art !== "gpc") this.schliessen();
     },

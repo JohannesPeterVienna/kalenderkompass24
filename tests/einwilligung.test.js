@@ -129,6 +129,10 @@ test("Regel: Lage je nach CMP, GPC und eigener Wahl", () => {
   assert.equal(L({ tc: versteckt }), "fragen");                                // hidden ohne Entscheidung
   assert.equal(L({ tc: Object.assign({}, versteckt, { displayStatus: "disabled" }) }), "fragen");
   assert.equal(L({ tc: Object.assign({}, versteckt, { eventStatus: "cmpuishown", displayStatus: "visible" }) }), "warten");
+  // cmpuishown mit hidden/disabled gilt NICHT als sichtbarer Google-Dialog
+  assert.equal(L({ tc: Object.assign({}, versteckt, { eventStatus: "cmpuishown", displayStatus: "hidden" }) }), "fragen");
+  assert.equal(L({ tc: Object.assign({}, versteckt, { eventStatus: "cmpuishown", displayStatus: "disabled" }) }), "fragen");
+  assert.equal(L({ tc: { gdprApplies: true, eventStatus: "cmpuishown" } }), "warten");   // ohne displayStatus: Dialog angenommen
   assert.equal(L({ tc: googleNein, eintrag: eigeneJa() }), "google");          // CMP schlägt eigene Wahl
   assert.equal(L({ tc: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" } }), "google");
   assert.equal(L({ gpc: true, eintrag: eigeneJa() }), "gpc");
@@ -256,6 +260,7 @@ test("Schließen-Knopf ×: kleiner, neutral, speichert nichts; Platz unten frei 
   const p = seite();
   p.laufen(BLATT_WARTEN + 10);
   const html = p.blatt().innerHTML;
+  assert.doesNotMatch(html, /nichts gemessen/, "Hinweis nur auf Seiten ohne Werbung");
   assert.match(html, /<button type="button" class="kk-blatt__zu" data-kk-wahl="zu" aria-label="Schließen, ohne zu entscheiden">×<\/button>/);
   assert.ok(html.indexOf('data-kk-wahl="nein"') < html.indexOf('data-kk-wahl="zu"'), "× nach den Entscheidungsknöpfen im Tab-Ablauf");
   assert.equal(p.doc.body.style.paddingBottom, "324px", "Platzhalter unter dem Seitenfuß");
@@ -272,10 +277,18 @@ test("Google-Dialog sichtbar: kein eigenes Blatt", () => {
   assert.equal(p.offen(), false); assert.equal(p.gtm(), 0);
 });
 
-test("gdprApplies false: bestehende Logik, kein Blatt", () => {
-  const p = seite({ tcf: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" } });
+test("gdprApplies false: bestehende Logik, kein Blatt, eigene Wahl gelöscht", () => {
+  const p = seite({ tcf: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" }, gespeichert: eigeneJa() });
   p.laufen(10000);
   assert.equal(p.offen(), false);
+  assert.equal(p.gespeichert(), null, "eigener Eintrag entfernt");
+  assert.equal(p.gtm(), 0, "eigenes Ja zählt nicht; Consent-Mode-Wert fehlt → bestehende Logik sperrt");
+});
+
+test("cmpuishown mit displayStatus hidden: Blatt erscheint trotzdem", () => {
+  const p = seite({ tcf: { gdprApplies: true, eventStatus: "cmpuishown", displayStatus: "hidden", tcString: "" } });
+  p.laufen(BLATT_WARTEN + 10);
+  assert.equal(p.offen(), true);
 });
 
 test("GPC: kein Blatt, keine Statistik – auch mit gespeichertem Ja; Einstellungen erklären GPC", () => {
@@ -302,7 +315,7 @@ test("Widerruf über Datenschutz-Einstellungen: GA aus, _ga-Cookies weg, andere 
   assert.equal(p.gtm(), 1);
   p.einstellungen();
   assert.equal(p.offen(), true);
-  assert.match(p.blatt().innerHTML, /Stand: zugestimmt am 3\. November 2026/);
+  assert.match(p.blatt().innerHTML, /Zugestimmt am 3\. November 2026/);
   assert.equal(p.doc.activeElement !== null, true, "Fokus springt ins Blatt");
   p.waehlen("nein");
   assert.equal(p.gaAus(), true);
@@ -331,6 +344,7 @@ test("Seite ohne Werbung: kein Google-Skript, kein Blatt von selbst, Widerruf m�
   assert.equal(p.werbung(), 0); assert.equal(p.gtm(), 0); assert.equal(p.offen(), false);
   p.einstellungen();
   assert.equal(p.offen(), true);
+  assert.match(p.blatt().innerHTML, /Hier wird nichts gemessen; die Wahl gilt für die Inhaltsseiten\./);
   p.waehlen("nein");
   assert.equal(p.gespeichert().wahl, "nein");
   assert.equal(p.jar.has("_ga"), false);
