@@ -305,3 +305,28 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .shop{list-style:none;padding:0;margin:0;display:grid;gap:14px}
 .shop-item{border:1px solid var(--line);border-top:2px solid var(--ink);background:var(--card);padding:18px}
 .shop-item h3{margin-top:0}
+/* Statistik-Blatt (consent.js): Übergangsfenster wie ein Abreißblatt vom Wandkalender – rote Kopfleiste,
+   Perforation, zwei gleichwertige Knöpfe. Unten rechts fixiert, blockiert die Seite nicht, kein Layout-Shift. */
+.kk-blatt{position:fixed;z-index:60;right:16px;bottom:16px;width:min(430px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 12px 32px rgba(21,35,59,.22);
+  padding:0 20px 18px;font-size:.92rem;line-height:1.55}
+.kk-blatt[hidden]{display:none}
+.kk-blatt .kk-blatt__kopf{display:flex;justify-content:space-between;gap:12px;margin:0 -20px 14px;padding:9px 20px 10px;background:var(--red);color:var(--card);
+  font:600 .72rem/1.2 var(--text);letter-spacing:.08em;text-transform:uppercase;border-bottom:2px dashed color-mix(in srgb,var(--card) 70%,transparent)}
+.kk-blatt h2{font:600 1.22rem/1.25 var(--display);letter-spacing:-.01em;margin:0 0 .45em;padding-right:28px}
+.kk-blatt h2:focus{outline:none}.kk-blatt h2:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.kk-blatt p{margin:0 0 .6em}
+.kk-blatt a{color:var(--ink)}
+.kk-blatt .kk-blatt__stand{color:var(--muted);font-size:.82rem;line-height:1.3;border-left:3px solid var(--sea);padding-left:10px;margin:0}
+.kk-blatt__wahl{display:flex;gap:10px;margin-top:14px}
+.kk-blatt__knopf{flex:1 1 0;min-height:44px;font:600 .95rem var(--text);border:1px solid var(--ink);background:var(--ink);color:var(--card);
+  border-radius:999px;padding:10px 14px;cursor:pointer}
+.kk-blatt__knopf:hover{background:color-mix(in srgb,var(--ink) 86%,var(--card))}
+.kk-blatt__zu{position:absolute;top:44px;right:8px;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:transparent;
+  color:var(--muted);font:400 1.3rem/1 var(--text);cursor:pointer}
+.kk-blatt__zu:hover{background:var(--soft);color:var(--ink)}
+.kk-blatt-ansage{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0}
+@media (max-width:520px){.kk-blatt{left:10px;right:10px;bottom:10px;width:auto;padding:0 14px 14px;font-size:.85rem;line-height:1.45}
+  .kk-blatt .kk-blatt__kopf{margin:0 -14px 10px;padding:7px 14px}.kk-blatt h2{font-size:1.08rem}.kk-blatt p{margin:0 0 .45em}.kk-blatt__wahl{margin-top:10px}}
+@media (max-width:480px){.kk-blatt{padding-top:12px;border-top:5px solid var(--red)}.kk-blatt .kk-blatt__kopf{display:none}.kk-blatt__zu{top:6px;right:4px}}
+@media print{.kk-blatt{display:none!important}}
