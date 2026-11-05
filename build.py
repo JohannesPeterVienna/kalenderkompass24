@@ -574,7 +574,7 @@ def build_mein_kalender():
 def build_shop():
     cards = []
     for pr in PRODUCTS:
-        buy = (f'<a class="btn" href="{pr["checkout"]}" rel="noopener">Kaufen · {pr["price"]}</a>' if pr["checkout"] and pr["price"]
+        buy = (f'<a class="btn" href="{pr["checkout"]}" rel="noopener" data-shop-buy="{pr["slug"]}">Kaufen · {pr["price"]}</a>' if pr["checkout"] and pr["price"]
                else '<span class="small muted">In Vorbereitung</span>')
         cards.append(f'<li class="shop-item"><h3>{pr["title"]}</h3><p>{pr["text"]}</p><p class="small muted">{pr["format"]}</p>{buy}</li>')
     tool = '<ul class="shop">' + "".join(cards) + "</ul>"

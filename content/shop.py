@@ -13,27 +13,27 @@ PRODUCTS = [
         "slug": "wandkalender-2027",
         "title": "Wandkalender 2027 – Druckvorlage",
         "text": "Zwölf Monatsblätter und eine Jahresübersicht im Kalenderblatt-Stil: Feiertage rot, Fenster- bzw. Brückentage markiert, "
-                "viel Platz zum Eintragen. Für dein Bundesland, in A4 und A3, druckfertig als PDF.",
+                "viel Platz zum Eintragen. Alle 25 Bundesländer (Österreich und Deutschland) in A4 und A3, druckfertig als PDF.",
         "format": "PDF · A4 und A3 · 13 Seiten",
-        "price": "",          # Vorschlag 4,90 € – Entscheidung Johannes
+        "price": "2,90 €",    # Preis festgelegt von Johannes am 5.11.2026
         "checkout": "",       # Checkout-Link des Zahlungsanbieters, erst nach Freigabe eintragen
     },
     {
         "slug": "familienplaner-2027",
         "title": "Familienplaner 2027 – Druckvorlage",
-        "text": "Monatsplaner mit bis zu fünf Spalten für Familienmitglieder, Schulferien deines Bundeslandes und Feiertagen. "
-                "Zum Aufhängen an der Kühlschranktür.",
+        "text": "Ein Blatt pro Monat mit fünf Spalten für Familienmitglieder, den Feiertagen deines Bundeslandes und den amtlichen "
+                "Schulferien des Schuljahres 2026/2027 (bis Ende der Sommerferien). Zum Aufhängen an der Kühlschranktür.",
         "format": "PDF · A4 und A3 · 12 Seiten",
-        "price": "",          # Vorschlag 6,90 €
+        "price": "4,90 €",
         "checkout": "",
     },
     {
         "slug": "urlaubsplan-team-2027",
         "title": "Urlaubsplan 2027 fürs Team",
-        "text": "Jahresübersicht für bis zu 20 Personen mit Feiertagen und Fenstertagen, damit im Team früh sichtbar ist, "
-                "wer wann frei hat. Zum Ausdrucken oder als ausfüllbares PDF.",
-        "format": "PDF · A3 quer · ausfüllbar",
-        "price": "",          # Vorschlag 9,90 €
+        "text": "Vier Quartalsblätter für bis zu 20 Personen mit Feiertagen und Fenster- bzw. Brückentagen deines Bundeslandes, "
+                "damit im Team früh sichtbar ist, wer wann frei hat. Namen lassen sich direkt ins PDF tippen.",
+        "format": "PDF · A3 quer · 4 Seiten · Namen ausfüllbar",
+        "price": "6,90 €",
         "checkout": "",
     },
 ]

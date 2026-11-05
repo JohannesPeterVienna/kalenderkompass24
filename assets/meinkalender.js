@@ -19,6 +19,8 @@
   const WDS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const uid = () => Math.random().toString(36).slice(2, 10);
+  // Ereignis an Google Analytics – wirkt nur, wenn die Statistik-Einwilligung erteilt ist (consent.js)
+  const track = (name, p = {}) => { try { if (typeof window.gtag === "function") window.gtag("event", name, p); } catch {} };
 
   function load(){
     try {
@@ -169,15 +171,15 @@ ${saveOk ? "" : `<p class="mk-err">Dein Browser erlaubt hier kein Speichern (z. 
       else if (t.closest("[data-mk-editcat]")){ view.editCat = t.closest("[data-mk-editcat]").dataset.mkEditcat; renderAll(); }
       else if (t.closest("[data-mk-color]")){
         if (!view.editCat){ const i = root.querySelector("[data-mk-editinfo]"); if (i) i.textContent = "Wähle zuerst links eine Kategorie aus."; return; }
-        catOf(view.editCat).color = t.closest("[data-mk-color]").dataset.mkColor; save(); renderAll();
+        catOf(view.editCat).color = t.closest("[data-mk-color]").dataset.mkColor; save(); renderAll(); track("mk_farbe", { quelle: "palette" });
       }
       else if (t.closest("[data-mk-addcat]")){ if (M.cats.length < MAX_CATS){ const c = { id: "k" + uid(), name: "Neue Kategorie", color: "#5E5E5A" }; M.cats.push(c); view.editCat = c.id; save(); renderAll(); } }
       else if (t.closest("[data-mk-delcat]")){
         const id = t.closest("[data-mk-delcat]").dataset.mkDelcat; if (M.cats.length < 2) return;
         M.cats = M.cats.filter(c => c.id !== id); M.entries.forEach(e => { if (e.cat === id) e.cat = M.cats[0].id; }); if (view.editCat === id) view.editCat = ""; save(); renderAll();
       }
-      else if (t.closest("[data-mk-ics]")) exportICS(!!(root.querySelector("[data-mk-icshol]") || {}).checked);
-      else if (t.closest("[data-mk-print]")){ document.body.classList.add("mk-printing"); window.print(); setTimeout(() => document.body.classList.remove("mk-printing"), 500); }
+      else if (t.closest("[data-mk-ics]")){ exportICS(!!(root.querySelector("[data-mk-icshol]") || {}).checked); track("mk_ics_export"); }
+      else if (t.closest("[data-mk-print]")){ track("mk_drucken"); document.body.classList.add("mk-printing"); window.print(); setTimeout(() => document.body.classList.remove("mk-printing"), 500); }
       else if (t.closest("[data-mk-backup]")) download(new Blob([JSON.stringify(M, null, 1)], { type: "application/json" }), "mein-kalender-sicherung.json");
     });
     document.addEventListener("submit", ev => {
@@ -189,6 +191,7 @@ ${saveOk ? "" : `<p class="mk-err">Dein Browser erlaubt hier kein Speichern (z. 
       if (!text && !f.cat.value) return err(root, "Gib einen Text ein oder wähle eine Kategorie.");
       if (M.entries.length >= MAX_ENTRIES) return err(root, "Die Höchstzahl an Einträgen ist erreicht. Lösche alte Einträge.");
       M.entries.push({ id: uid(), from, to: to || from, text: text.slice(0, 40), cat: f.cat.value });
+      track("mk_eintrag", { mehrtaegig: !!(to && to !== from) });
       const d = new Date(from + "T12:00:00"); view.y = d.getFullYear(); view.m = d.getMonth(); view.sel = from;
       save(); renderAll();
     });
