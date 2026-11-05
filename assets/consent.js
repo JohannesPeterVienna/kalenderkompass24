@@ -29,10 +29,20 @@
   window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
 
   // Anzeigenblöcke: Block-IDs werden nach der AdSense-Freigabe hier eingetragen.
-  const SLOTS = { billboard: "", rect: "", half: "", superbanner: "", sky: "" };
-  // Feste IAB-Formate: Superbanner 728×90, Wide Skyscraper 160×600. Die übrigen Plätze sind responsiv
-  // (Billboard 970×250 / Leaderboard 728×90 / Mobile 320×100, Half Page 300×600, Medium Rectangle 300×250).
-  const FIXED = { superbanner: [728, 90], sky: [160, 600] };
+  // AdSense-Anzeigenblöcke (Konto pub-7811071715414905, angelegt 17.10. und 5.11.2026):
+  //   billboard → „Themen-Websites – zwischen Werkzeug und Inhalt – responsiv“
+  //   rect, half → „Themen-Websites – nach dem Inhalt – responsiv“ (half als vertikales Format)
+  //   superbanner, sky, rect2, mbanner → feste IAB-Größen, Blocknamen „Themen-Websites – …“
+  const SLOTS = { billboard: "7497607759", rect: "1292301217", rect2: "9522484334", half: "1292301217",
+                  superbanner: "5774811012", sky: "5064364572", mbanner: "5396758258" };
+  // IAB-Standardformate (Werbeformen-Katalog IAB Austria / IAB-Standardgrößen), alle über AdSense-Blöcke:
+  //   Desktop:  Billboard 970×250 (responsiv, fällt auf Leaderboard 728×90 zurück), Superbanner 728×90,
+  //             Wide Skyscraper 160×600, Half Page Ad 300×600, Medium Rectangle 300×250 (rect, rect2)
+  //   Mobil:    Mobile Content Ad (Billboard-Platz responsiv 320×100/320×50), Medium Rectangle 300×250,
+  //             Mobile Banner 320×100 am Seitenende (mbanner), Anker- und Vignette-Anzeigen über Auto Ads.
+  // Sonderformate wie Wallpaper, Sitebar oder Understitial gibt es in AdSense nicht; sie bräuchten einen
+  // Ad-Server (z. B. Google Ad Manager) und Direktbuchungen – dafür ist hier bewusst kein leerer Platz reserviert.
+  const FIXED = { superbanner: [728, 90], sky: [160, 600], rect2: [300, 250], mbanner: [320, 100] };
 
   const gpc = navigator.globalPrivacyControl === true;
 

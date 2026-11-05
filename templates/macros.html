@@ -2,6 +2,8 @@
 {% if slots and kind not in skip_ads %}<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true"></div>{% endif %}
 {%- endmacro %}
 
+
+
 {% macro checked_line(srcs=None) -%}
 {% set srcs = srcs or sources %}
 {% if checked %}<p class="small muted checked">Geprüft am {{ checked }}{% if srcs %} · Quelle{{ 'n' if srcs|length > 1 }}: {% for s in srcs %}<a href="{{ s[1] }}" rel="noopener">{{ s[0] }}</a>{{ '; ' if not loop.last }}{% endfor %}{% endif %}{% if path != '/quellen-methodik.html' %} · <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>{% endif %}</p>{% endif %}
@@ -17,18 +19,19 @@
 
 {% macro band(b, title, live=True) -%}
 <section class="band" aria-labelledby="band-{{ b.year }}">
-  <div class="band-head"><h2 id="band-{{ b.year }}">{{ title }}</h2><span class="small muted">Jedes Kästchen ist ein Tag</span></div>
-  <div class="yr" role="img" aria-label="Jahresübersicht {{ b.year }}: Feiertage rot, Brückentage gelb"{% if live %} data-band{% endif %}>
+  <div class="band-head"><h2 id="band-{{ b.year }}"{% if live %} data-band-title{% endif %}>{{ title }}</h2><span class="small muted">Jedes Kästchen ist ein Tag</span></div>
+  <div class="yr" role="img" aria-label="Jahresübersicht {{ b.year }}: Feiertage rot, {{ 'Fenstertage' if lang_at else 'Brückentage' }} schwarz umrandet"{% if live %} data-band{% endif %}>
   {%- for m in b.months -%}<span class="m">{{ m.label }}</span>{% for c in m.cells %}<span class="{{ c.cls }}"{% if c.title %} title="{{ c.title }}"{% endif %}></span>{% endfor %}{%- endfor -%}
   </div>
-  <div class="legend"><span><i style="background:var(--red)"></i>gesetzlicher Feiertag</span><span><i style="background:var(--red-soft);box-shadow:inset 0 0 0 1.5px var(--red)"></i>Landespatron / schulfrei</span><span><i style="background:var(--sun)"></i>Brückentag</span><span><i style="background:var(--weekend)"></i>Wochenende</span></div>
+  <div class="legend"><span><i style="background:var(--red)"></i>gesetzlicher Feiertag</span><span><i style="background:var(--red-soft);box-shadow:inset 0 0 0 1.5px var(--red)"></i>Landespatron / schulfrei</span><span><i style="background:var(--card);box-shadow:inset 0 0 0 2px var(--ink)"></i><span data-bt-sg>{{ 'Fenstertag' if lang_at else 'Brückentag' }}</span></span><span><i style="background:var(--sea)"></i>dein Eintrag (Farbe wählbar)</span><span><i style="background:var(--weekend)"></i>Wochenende</span></div>
 </section>
 {%- endmacro %}
 
 {% macro bridges(list, country, live=True) -%}
+<div class="bridges-head"><span>Datum · Urlaub nehmen</span><span>Urlaub → frei</span></div>
 <ol class="bridges"{% if live %} data-bridges{% endif %}>
-{% for b in list %}<li class="bridge"><span class="chip">{{ b.vacation }}</span><div><div class="take">{{ b.take }}</div><div class="muted small">rund um {{ b.holiday }} · frei von {{ b.from }} bis {{ b.to }}</div></div><div class="ratio"><b>{{ b.free }}</b><span class="small muted">Tage frei</span></div></li>
-{% else %}<li class="empty">Keine Brückentage mit ein oder zwei Urlaubstagen.</li>{% endfor %}
+{% for b in list %}<li class="bridge"><span class="dt">{{ b.dt }}</span><div><div class="take">{{ b.take }}</div><div class="muted small">rund um {{ b.holiday }} · frei von {{ b.from }} bis {{ b.to }}</div></div><div class="ratio"><b{% if b.free / b.vacation >= 4 %} class="best"{% endif %}>{{ b.vacation }} → {{ b.free }}</b><span class="muted">Tage</span></div></li>
+{% else %}<li class="empty">Keine {{ 'Fenstertage' if country == 'at' else 'Brückentage' }} mit ein oder zwei Urlaubstagen.</li>{% endfor %}
 </ol>
 {%- endmacro %}
 

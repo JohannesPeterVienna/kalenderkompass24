@@ -4,25 +4,37 @@
   <div class="hero-grid">
     <div>
       <h1>Wann ist der nächste freie Tag?</h1>
-      <p class="lead">Feiertage, Brückentage und der beste Zeitpunkt für deinen Urlaub – für jedes Bundesland in Österreich und Deutschland, auf einen Blick.</p>
+      <p class="lead">Feiertage, Fenstertage und dein eigener Kalender – für jedes Bundesland in Österreich und Deutschland, auf einem Blatt.</p>
       {{ m.picker(years) }}
     </div>
-    <div class="next" data-next aria-live="polite">
-      <div class="what">Die nächsten Feiertage in Österreich</div>
-      <ul class="next-list">{% for n in next_list %}<li><strong>{{ n.name }}</strong><span>{{ n.date }}</span></li>{% endfor %}</ul>
-      <div class="rel small">Stand {{ next_asof }} · gesetzliche Feiertage nach § 7 Arbeitsruhegesetz</div>
+    <div class="next plain" data-next aria-live="polite">
+      <div class="sheet-wrap">
+        <div>
+          <div class="rel">Die nächsten Feiertage in Österreich</div>
+          <ul class="next-list">{% for n in next_list %}<li><strong>{{ n.name }}</strong><span>{{ n.date }}</span></li>{% endfor %}</ul>
+          <div class="rel small">Stand {{ next_asof }} · gesetzliche Feiertage nach § 7 Arbeitsruhegesetz</div>
+        </div>
+        <div class="sheet" aria-hidden="true"><div class="sm-h">{{ next_sheet.month }}</div><div class="sm-d">{{ next_sheet.day }}</div><div class="sm-w">{{ next_sheet.wd }}</div></div>
+      </div>
     </div>
   </div>
 </div></section>
 
-<div class="wrap">{{ m.band(band, "Dein Jahr " ~ band.year ~ " in Farbe") }}</div>
+<div class="wrap">{{ m.band(band, "Dein Jahr " ~ band.year ~ " auf einen Blick") }}</div>
 <div class="wrap">{{ m.ad("billboard") }}</div>
 
 <div class="wrap layout">
   <div>
-    <h2>Brückentage <span data-year-label>{{ year }}</span> <span data-region-in>in Österreich</span></h2>
-    <p class="muted">Ein oder zwei Urlaubstage zwischen Feiertag und Wochenende – sortiert nach Datum. Die Zahl links sind die nötigen Urlaubstage, rechts die freien Tage am Stück.</p>
+    <h2><span data-bt>Fenstertage</span> <span data-year-label>{{ year }}</span> <span data-region-in>in Österreich</span></h2>
+    <p class="muted">Ein oder zwei Urlaubstage zwischen Feiertag und Wochenende, sortiert nach Datum. Rechts: nötige Urlaubstage → freie Tage am Stück. Rot markiert sind die Tage, bei denen ein Urlaubstag mindestens vier freie Tage bringt.</p>
     {{ m.bridges(bridge_list, "at") }}
+
+    <h2>Mein Kalender</h2>
+    <p>Trag eigene Termine, Urlaube und Schultage ein – in deinen Farben, passend zu dem Kalender, den du schon verwendest. Feiertage bleiben rot. Alles bleibt in deinem Browser, ohne Anmeldung.</p>
+    <div class="mk" data-mk data-mk-compact></div>
+    <p class="small muted" style="margin-top:10px"><a href="/mein-kalender.html">Mein Kalender öffnen: Jahresansicht, Farben, Export und Druck</a></p>
+
+    {{ m.ad("rect2") }}
 
     <h2>Urlaub mit System</h2>
     <div class="planner" data-planner>
@@ -54,7 +66,7 @@
   </div>
   <aside class="side">
     <div class="box"><h3>Diese Woche</h3><div class="kw-now" data-kw-now><b>KW {{ kw.week }}</b></div><p class="small muted" style="margin:8px 0 0"><a href="/kalenderwochen-{{ kw.year }}.html">Alle Kalenderwochen {{ kw.year }}</a></p></div>
-    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/brueckentage-{{ year }}.html">Brückentage {{ year }}</a></li></ul></div>
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/mein-kalender.html">Mein Kalender</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li><li><a href="/brueckentage-{{ year }}.html">Fenster- und Brückentage {{ year }}</a></li></ul></div>
     {{ m.ad("half") }}{{ m.ad("sky") }}
   </aside>
 </div>
