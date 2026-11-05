@@ -1,8 +1,9 @@
 """Kleiner Shop für digitale Druckvorlagen (PDF). Bezahlung über einen gehosteten Checkout (Vorschlag: Lemon Squeezy
 als Merchant of Record – übernimmt Umsatzsteuer/OSS und Rechnung; alternativ Stripe Payment Links).
 
-Solange kein Produkt einen Checkout-Link hat, bleibt der Shop unsichtbar: noindex, nicht in Sitemap und Menü,
-kein Link im Seitenfuß. Freigabe, Preise, Produktdateien und Rechtstexte entscheidet Johannes.
+Solange kein Produkt einen Checkout-Link hat, gibt es den Shop nicht: shop.html wird nicht gebaut (404),
+kein Link im Seitenfuß, nicht in der Sitemap. Wieder an: Checkout-Link und Preis eintragen und SHOP_FREIGEGEBEN
+auf True setzen, sobald ein echter Kauf (nicht nur der Testmodus) funktioniert. Freigabe, Preise, Produktdateien und Rechtstexte entscheidet Johannes.
 
 Der Checkout ist ein normaler Link zur Bezahlseite des Anbieters – auf kalenderkompass24.de wird dafür kein
 fremdes Skript geladen (keine zusätzliche Einwilligung nötig).
@@ -38,4 +39,8 @@ PRODUCTS = [
     },
 ]
 
-SHOP_LIVE = any(p["checkout"] and p["price"] for p in PRODUCTS)
+# Schalter für den Shop: bleibt False, bis ein echter Kauf durchgeht (AdSense-Prüfung 5.11.2026: keine Seiten
+# „In Vorbereitung“). Test-Checkout-Links allein schalten den Shop nicht frei.
+SHOP_FREIGEGEBEN = False
+
+SHOP_LIVE = SHOP_FREIGEGEBEN and any(p["checkout"] and p["price"] for p in PRODUCTS)

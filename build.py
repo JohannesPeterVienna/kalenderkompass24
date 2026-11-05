@@ -15,7 +15,7 @@ from content.shop import PRODUCTS, SHOP_LIVE
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261105b"
+V = "20261105c"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
@@ -572,6 +572,10 @@ def build_mein_kalender():
 
 
 def build_shop():
+    # Ohne funktionierenden Kauf wird die Seite gar nicht gebaut (404) – „In Vorbereitung“-Seiten wertet AdSense
+    # als Inhalt ohne Mehrwert. Wieder an über SHOP_FREIGEGEBEN in content/shop.py.
+    if not SHOP_LIVE:
+        return
     cards = []
     for pr in PRODUCTS:
         buy = (f'<a class="btn" href="{pr["checkout"]}" rel="noopener" data-shop-buy="{pr["slug"]}">Kaufen · {pr["price"]}</a>' if pr["checkout"] and pr["price"]

@@ -253,6 +253,14 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .ad--billboard{margin-bottom:64px}
 .side .ad--half{margin-top:128px}
 
+/* Leere Werbeflächen: Platz, Mindesthöhe, Abstände und „Werbung“ erst zeigen, wenn Google wirklich eine Anzeige
+   liefert (data-ad-status="filled"). Bis dahin Höhe 0 – die Breite bleibt, damit AdSense den Platz messen kann.
+   Grundlage :has(); ohne :has() setzt consent.js .ad--ohne-has auf <html> und .ad--gefuellt auf den Platz. */
+.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"])),
+.ad--ohne-has .ad.on:not(.ad--gefuellt){height:0!important;min-height:0!important;margin-top:0!important;margin-bottom:0!important;padding:0!important;border:0!important;overflow:hidden!important}
+.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"]))::before,
+.ad--ohne-has .ad.on:not(.ad--gefuellt)::before{display:none}
+
 /* Mein Kalender: Monatsblatt mit eigenen Einträgen in selbst gewählten Farben */
 .mk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
 .mk-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px}

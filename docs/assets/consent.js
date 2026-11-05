@@ -125,8 +125,18 @@
         ins.dataset.fullWidthResponsive = "true";
       }
       box.appendChild(ins);
+      zeigeWennGefuellt(box, ins);
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     });
+  }
+
+  // Leere Werbefläche bleibt zusammengeklappt (style.css, :has()); für Browser ohne :has() setzt dieser
+  // Beobachter .ad--gefuellt, sobald Google data-ad-status="filled" meldet.
+  function zeigeWennGefuellt(box, ins){
+    if (!(window.CSS && CSS.supports && CSS.supports("selector(:has(a))"))) document.documentElement.classList.add("ad--ohne-has");
+    const pruefe = () => box.classList.toggle("ad--gefuellt", ins.getAttribute("data-ad-status") === "filled");
+    if (typeof MutationObserver === "function") new MutationObserver(pruefe).observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
+    pruefe();
   }
 
   // Statistik-Zustand: "unentschieden" → "aktiv" / "gesperrt"
