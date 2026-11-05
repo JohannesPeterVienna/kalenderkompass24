@@ -241,6 +241,9 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 /* Mobile Banner 320×100 nur auf dem Handy, Medium Rectangle 300×250 überall – beide mit Abstand zu Bedienelementen */
 .ad--mbanner{width:320px;min-height:100px;margin-bottom:120px}.ad--rect2{width:300px;min-height:250px;margin:150px auto 64px}
 @media (min-width:768px){.ad--mbanner{display:none!important}}
+/* 320 px Banner nur, wenn er samt Seitenrand Platz hat (sonst seitliches Scrollen auf 320-px-Geräten) */
+.ad--mbanner{max-width:100%}
+@media (max-width:359px){.ad--mbanner{display:none!important}}
 @media (max-width:960px){.ad--sky{display:none!important}}
 
 /* Abstand Superbanner – Fußzeilen-Knopf (≥ 150 px) */

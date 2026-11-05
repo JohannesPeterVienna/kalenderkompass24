@@ -20,7 +20,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const uid = () => Math.random().toString(36).slice(2, 10);
   // Ereignis an Google Analytics – wirkt nur, wenn die Statistik-Einwilligung erteilt ist (consent.js)
-  const track = (name, p = {}) => { try { if (typeof window.gtag === "function") window.gtag("event", name, p); } catch {} };
+  const track = (name, p = {}) => { try { if (typeof window.gtag === "function" && window["ga-disable-G-T00HRG2YVF"] === false) window.gtag("event", name, p); } catch {} };
 
   function load(){
     try {
@@ -73,8 +73,9 @@
       let cls = "mk-d"; if (we) cls += " we"; if (hol && hol.kind === "legal") cls += " ho"; else if (hol) cls += " pa";
       if (info.br.has(k)) cls += " br"; if (k === tk) cls += " to"; if (k === view.sel) cls += " sel";
       let tags = hol ? `<span class="mk-hol">${esc(hol.name)}</span>` : (info.br.has(k) ? `<span class="mk-br">${bt}</span>` : "");
-      for (const e of entriesOn(k)){ const c = catOf(e.cat); tags += `<span class="mk-tag" style="--c:${c.color}" title="${esc(c.name)}">${esc(e.text || c.name)}</span>`; }
-      h += `<button type="button" class="${cls}" data-mk-day="${k}" aria-label="${d}. ${monthName(m)}${hol ? ", " + esc(hol.name) : ""}"><span class="n">${d}</span>${tags}</button>`;
+      const eigene = entriesOn(k).map(e => { const c = catOf(e.cat); tags += `<span class="mk-tag" style="--c:${c.color}" title="${esc(c.name)}">${esc(e.text || c.name)}</span>`; return esc(c.name + (e.text ? ": " + e.text : "")); });
+      const label = `${d}. ${monthName(m)}${hol ? ", " + esc(hol.name) : (info.br.has(k) ? ", " + bt : "")}${eigene.length ? ", " + eigene.join(", ") : ""}`;
+      h += `<button type="button" class="${cls}" data-mk-day="${k}" aria-label="${label}" aria-pressed="${k === view.sel}"><span class="n">${d}</span>${tags}</button>`;
     }
     return h;
   }
@@ -137,6 +138,9 @@ ${saveOk ? "" : `<p class="mk-err">Dein Browser erlaubt hier kein Speichern (z. 
 
   function renderAll(){ document.querySelectorAll("[data-mk]").forEach(render); }
 
+  function falten(z){ const enc = new TextEncoder(); if (enc.encode(z).length <= 75) return z; let out = "", teil = "", n = 0;
+    for (const ch of z){ const b = enc.encode(ch).length; if (n + b > (out ? 74 : 75)){ out += (out ? "\r\n " : "") + teil; teil = ""; n = 0; } teil += ch; n += b; }
+    return out + "\r\n " + teil; }
   function icsEscape(s){ return String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
   function exportICS(withHol){
     const K = kk(), stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
@@ -152,7 +156,7 @@ ${saveOk ? "" : `<p class="mk-err">Dein Browser erlaubt hier kein Speichern (z. 
         L.push("BEGIN:VEVENT", `UID:fei-${h.iso.replace(/-/g, "")}-${country}-${region || "all"}@kalenderkompass24.de`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.iso.replace(/-/g, "")}`, `DTEND;VALUE=DATE:${next(h.iso)}`, `SUMMARY:${icsEscape(h.name)}`, "CATEGORIES:Feiertag", "TRANSP:TRANSPARENT", "END:VEVENT");
     }
     L.push("END:VCALENDAR");
-    download(new Blob([L.join("\r\n")], { type: "text/calendar" }), "mein-kalender.ics");
+    download(new Blob([L.map(falten).join("\r\n")], { type: "text/calendar" }), "mein-kalender.ics");
   }
   function download(blob, name){
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
@@ -179,7 +183,7 @@ ${saveOk ? "" : `<p class="mk-err">Dein Browser erlaubt hier kein Speichern (z. 
         M.cats = M.cats.filter(c => c.id !== id); M.entries.forEach(e => { if (e.cat === id) e.cat = M.cats[0].id; }); if (view.editCat === id) view.editCat = ""; save(); renderAll();
       }
       else if (t.closest("[data-mk-ics]")){ exportICS(!!(root.querySelector("[data-mk-icshol]") || {}).checked); track("mk_ics_export"); }
-      else if (t.closest("[data-mk-print]")){ track("mk_drucken"); document.body.classList.add("mk-printing"); window.print(); setTimeout(() => document.body.classList.remove("mk-printing"), 500); }
+      else if (t.closest("[data-mk-print]")){ track("mk_drucken"); document.body.classList.add("mk-printing"); const fertig = () => { document.body.classList.remove("mk-printing"); window.removeEventListener("afterprint", fertig); }; window.addEventListener("afterprint", fertig); window.print(); }
       else if (t.closest("[data-mk-backup]")) download(new Blob([JSON.stringify(M, null, 1)], { type: "application/json" }), "mein-kalender-sicherung.json");
     });
     document.addEventListener("submit", ev => {
