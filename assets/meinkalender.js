@@ -73,8 +73,9 @@
       let cls = "mk-d"; if (we) cls += " we"; if (hol && hol.kind === "legal") cls += " ho"; else if (hol) cls += " pa";
       if (info.br.has(k)) cls += " br"; if (k === tk) cls += " to"; if (k === view.sel) cls += " sel";
       let tags = hol ? `<span class="mk-hol">${esc(hol.name)}</span>` : (info.br.has(k) ? `<span class="mk-br">${bt}</span>` : "");
-      for (const e of entriesOn(k)){ const c = catOf(e.cat); tags += `<span class="mk-tag" style="--c:${c.color}" title="${esc(c.name)}">${esc(e.text || c.name)}</span>`; }
-      h += `<button type="button" class="${cls}" data-mk-day="${k}" aria-label="${d}. ${monthName(m)}${hol ? ", " + esc(hol.name) : ""}"><span class="n">${d}</span>${tags}</button>`;
+      const eigene = entriesOn(k).map(e => { const c = catOf(e.cat); tags += `<span class="mk-tag" style="--c:${c.color}" title="${esc(c.name)}">${esc(e.text || c.name)}</span>`; return esc(c.name + (e.text ? ": " + e.text : "")); });
+      const label = `${d}. ${monthName(m)}${hol ? ", " + esc(hol.name) : (info.br.has(k) ? ", " + bt : "")}${eigene.length ? ", " + eigene.join(", ") : ""}`;
+      h += `<button type="button" class="${cls}" data-mk-day="${k}" aria-label="${label}" aria-pressed="${k === view.sel}"><span class="n">${d}</span>${tags}</button>`;
     }
     return h;
   }
