@@ -15,7 +15,7 @@ from content.shop import PRODUCTS, SHOP_LIVE
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261105c"
+V = "20261105d"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"

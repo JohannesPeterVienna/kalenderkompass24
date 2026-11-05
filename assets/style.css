@@ -253,13 +253,17 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .ad--billboard{margin-bottom:64px}
 .side .ad--half{margin-top:128px}
 
-/* Leere Werbeflächen: Platz, Mindesthöhe, Abstände und „Werbung“ erst zeigen, wenn Google wirklich eine Anzeige
-   liefert (data-ad-status="filled"). Bis dahin Höhe 0 – die Breite bleibt, damit AdSense den Platz messen kann.
-   Grundlage :has(); ohne :has() setzt consent.js .ad--ohne-has auf <html> und .ad--gefuellt auf den Platz. */
-.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"])){height:0!important;min-height:0!important;margin-top:0!important;margin-bottom:0!important;padding:0!important;border:0!important;overflow:hidden!important}
-.ad--ohne-has .ad.on:not(.ad--gefuellt){height:0!important;min-height:0!important;margin-top:0!important;margin-bottom:0!important;padding:0!important;border:0!important;overflow:hidden!important}
-.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"]))::before{display:none}
+/* Werbeflächen ohne Antwort von Google: Das <ins class="adsbygoogle"> bleibt immer sichtbar und ungeschnitten
+   (AdSense-Hilfe 10762946: Anzeigenblöcke nicht anfangs versteckt laden). Nur das Beiwerk – „Werbung“, Mindesthöhe,
+   Polster und Abstände – erscheint erst bei data-ad-status="filled" oder "unfill-optimized". Responsive Blöcke
+   haben bis dahin von selbst Höhe 0, feste Formate behalten ihre Größe. Grundlage :has(); ohne :has() setzt
+   consent.js .ad--ohne-has auf <html> und .ad--gefuellt auf den Platz (eigene Regeln, damit alte Browser nichts verwerfen). */
+.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"])):not(:has(ins.adsbygoogle[data-ad-status="unfill-optimized"])){min-height:0!important;margin-top:0!important;margin-bottom:0!important;padding:0!important;border:0!important;background:none!important}
+.ad--ohne-has .ad.on:not(.ad--gefuellt){min-height:0!important;margin-top:0!important;margin-bottom:0!important;padding:0!important;border:0!important;background:none!important}
+.ad.on:not(:has(ins.adsbygoogle[data-ad-status="filled"])):not(:has(ins.adsbygoogle[data-ad-status="unfill-optimized"]))::before{display:none}
 .ad--ohne-has .ad.on:not(.ad--gefuellt)::before{display:none}
+/* Googles Muster für nicht gefüllte Anzeigenblöcke (AdSense-Hilfe 10762946) */
+ins.adsbygoogle[data-ad-status="unfilled"]{display:none!important}
 
 /* Mein Kalender: Monatsblatt mit eigenen Einträgen in selbst gewählten Farben */
 .mk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}

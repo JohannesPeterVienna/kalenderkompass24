@@ -130,11 +130,11 @@
     });
   }
 
-  // Leere Werbefläche bleibt zusammengeklappt (style.css, :has()); für Browser ohne :has() setzt dieser
-  // Beobachter .ad--gefuellt, sobald Google data-ad-status="filled" meldet.
+  // Beschriftung und Abstände der Werbefläche erst bei Googles Antwort (style.css, :has()); das <ins> selbst bleibt
+  // immer sichtbar. Für Browser ohne :has() setzt dieser Beobachter .ad--gefuellt bei "filled" oder "unfill-optimized".
   function zeigeWennGefuellt(box, ins){
     if (!(window.CSS && CSS.supports && CSS.supports("selector(:has(a))"))) document.documentElement.classList.add("ad--ohne-has");
-    const pruefe = () => box.classList.toggle("ad--gefuellt", ins.getAttribute("data-ad-status") === "filled");
+    const pruefe = () => box.classList.toggle("ad--gefuellt", ["filled", "unfill-optimized"].includes(ins.getAttribute("data-ad-status")));
     if (typeof MutationObserver === "function") new MutationObserver(pruefe).observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
     pruefe();
   }
