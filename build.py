@@ -292,7 +292,7 @@ def build_home():
     ld = [{"@context": "https://schema.org", "@type": "WebSite", "name": "Kalenderkompass 24", "url": SITE + "/",
            "inLanguage": "de", "description": "Feiertage, Brückentage und Urlaubsplanung für Österreich und Deutschland."},
           holiday_ld("at", "", CUR, rows)]
-    write("index.html", "home.html", title=f"Feiertage & Fenstertage {CUR}: Österreich und Deutschland | Kalenderkompass 24",
+    write("index.html", "home.html", title=f"Feiertage, Fenster- & Brückentage {CUR}: Österreich & Deutschland",
           description=f"Alle Feiertage {CUR} mit Fenstertagen (Österreich) und Brückentagen (Deutschland) für jedes Bundesland – mit eigenem Kalender, Urlaubsplaner und Export.",
           next_list=[{"name": r["name"], "date": fmt(r["date"], "at")} for r in nxt], next_sheet={"month": M_AT[nxt[0]["date"].month-1], "day": nxt[0]["date"].day, "wd": WDS[nxt[0]["date"].weekday()] + " · KW " + str(nxt[0]["date"].isocalendar()[1])}, next_asof=fmt(t, "at", wd=False), band=band_view("at", "", CUR),
           bridge_list=bridge_view("at", "", CUR), rows=rows, year_attr=CUR,

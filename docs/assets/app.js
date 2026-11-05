@@ -319,7 +319,7 @@
       renderAll();
     });
     document.addEventListener("input", e => { if (e.target.matches("[data-budget]")) renderPlanner(); });
-    const track = (name, p = {}) => { try { if (typeof window.gtag === "function") window.gtag("event", name, p); } catch {} };
+    const track = (name, p = {}) => { try { if (typeof window.gtag === "function" && window["ga-disable-G-T00HRG2YVF"] === false) window.gtag("event", name, p); } catch {} };
     document.addEventListener("click", e => {
       if (e.target.closest("[data-ics]")){ ics(); track("feiertage_ics_export", { land: state.country, region: state.region || "alle" }); }
       if (e.target.closest("[data-print]")){ window.print(); track("kalender_drucken"); }
