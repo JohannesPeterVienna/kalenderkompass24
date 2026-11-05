@@ -3,15 +3,18 @@
    erst danach irgendein Google-Skript. Google Analytics misst nur,
    - wenn die DSGVO gilt: TCF Zweck 1 + Anbieter Google (755) zugestimmt UND Consent-Mode-Wert
      analyticsStoragePurposeConsentStatus === GRANTED (1);
-   - außerhalb der DSGVO (gdprApplies false): Analyticswert GRANTED (1) oder NOT_APPLICABLE (3) UND
-     die CMP meldet „kein US-Opt-out“ (usstatesoptout DOES_NOT_APPLY 1 / NOT_OPTED_OUT 2).
-   Fehlend, UNKNOWN (0), DENIED (2), NOT_CONFIGURED (4) oder ein Fehler einer CMP-Schnittstelle = Nein.
+   - außerhalb der DSGVO (gdprApplies false): nur bei ausdrücklicher Zustimmung – Analyticswert GRANTED (1) UND
+     die CMP meldet „kein US-Opt-out“ (usstatesoptout DOES_NOT_APPLY 1 / NOT_OPTED_OUT 2) – oder nach „Zustimmen“
+     im Statistik-Blatt (unten). NOT_APPLICABLE (3) ist keine Zustimmung: dann fragt das Blatt (seit 5.11.2026).
+     DENIED (2) oder gemeldeter US-Opt-out (3) = Nein ohne Blatt.
+   Fehlend, UNKNOWN (0), NOT_CONFIGURED (4) oder ein Fehler einer CMP-Schnittstelle = keine Zustimmung.
    Ein eindeutiges TCF-Nein schaltet sofort ab, ohne vorher weitere CMP-Schnittstellen abzufragen.
    Werte: developers.google.com/funding-choices/fc-api-docs. Signals/Werbepersonalisierung in GA aus.
 
    Übergang seit 4.11.2026 – das „Statistik-Blatt“: Liefert Googles Dialog nach 3 s keine echte TCF-Entscheidung
-   (kein __tcfapi oder Dialog "hidden"/"disabled" ohne useractioncomplete bzw. tcloaded mit tcString) und gilt
-   nicht eindeutig gdprApplies === false, fragen wir selbst – nur nach Google Analytics, nie nach Werbung.
+   (kein __tcfapi oder Dialog "hidden"/"disabled" ohne useractioncomplete bzw. tcloaded mit tcString) oder meldet
+   er gdprApplies === false ohne ausdrückliche Statistik-Entscheidung (GRANTED/DENIED/US-Opt-out), fragen wir
+   selbst – nur nach Google Analytics, nie nach Werbung.
    ad_storage/ad_user_data/ad_personalization fasst das Blatt nie an. Eine echte Google-Entscheidung hat immer
    Vorrang; dann gilt allein die Logik oben und die eigene Wahl wird ignoriert. GPC: Statistik aus, kein Blatt.
    Auf Seiten ohne Werbung (data-ohne-werbung: Impressum, Datenschutz, 404) lädt nichts von Google; dort lässt
@@ -44,9 +47,10 @@
       return tc.eventStatus === "cmpuishown" && tc.displayStatus !== "hidden" && tc.displayStatus !== "disabled";
     },
     // "gpc" | "google" (bestehende TCF-Logik gilt) | "warten" (Google-Dialog offen/erwartet) | "fragen" | "ja" | "nein"
-    lage({ tc, gpc, eintrag, jetzt }){
+    // aussen: ausdrückliche Google-Entscheidung außerhalb der DSGVO ("ja" | "nein" | null), nur bei gdprApplies === false relevant
+    lage({ tc, gpc, eintrag, jetzt, aussen = null }){
       if (gpc) return "gpc";
-      if (tc && tc.gdprApplies === false) return "google";
+      if (tc && tc.gdprApplies === false) return aussen ? "google" : regel.eigeneWahl(eintrag, jetzt) || "fragen";
       if (regel.echteEntscheidung(tc)) return "google";
       if (regel.googleZeigt(tc)) return "warten";
       if (!tc && regel.googleGewaehlt(eintrag, jetzt)) return "warten";   // früher im Google-Dialog gewählt: auf die CMP warten
@@ -155,15 +159,25 @@
       } catch (_) { return 0; }
     },
 
-    usOptOut(){
-      // googlefc.usstatesoptout.InitialUsStatesOptOutStatusEnum: 1 DOES_NOT_APPLY, 2 NOT_OPTED_OUT, 3 OPTED_OUT.
-      // Nur 1 oder 2 bestätigen "kein Opt-out"; noch nicht gemeldet (0), 3 oder ein Fehler sperren.
+    usStatus(){
+      // googlefc.usstatesoptout.InitialUsStatesOptOutStatusEnum: 0 UNKNOWN, 1 DOES_NOT_APPLY, 2 NOT_OPTED_OUT, 3 OPTED_OUT.
+      // Noch nicht gemeldet oder Fehler → 0 (keine Bestätigung).
       try {
         const u = window.googlefc.usstatesoptout;
-        if (!u || typeof u.getInitialUsStatesOptOutStatus !== "function") return true;
+        if (!u || typeof u.getInitialUsStatesOptOutStatus !== "function") return 0;
         const st = u.getInitialUsStatesOptOutStatus();
-        return st !== 1 && st !== 2;
-      } catch (_) { return true; }
+        return typeof st === "number" ? st : 0;
+      } catch (_) { return 0; }
+    },
+
+    // Außerhalb der DSGVO (gdprApplies false): ausdrückliche Entscheidung der Google-CMP – "ja" nur bei GRANTED (1)
+    // und bestätigt ohne US-Opt-out (1/2); "nein" bei DENIED (2) oder gemeldetem US-Opt-out (3); sonst null,
+    // dann entscheidet das Statistik-Blatt (NOT_APPLICABLE ist keine Einwilligung).
+    ausserhalb(){
+      const cm = this.consentMode(), us = this.usStatus();
+      if (us === 3 || cm === 2) return "nein";
+      if (cm === 1 && (us === 1 || us === 2)) return "ja";
+      return null;
     },
 
     erlaubt(){
@@ -171,9 +185,9 @@
       if (blatt.zustaendig()){ const w = blatt.wahl(); return w === "ja" ? true : w === "nein" ? false : null; }
       const tc = this.tcf;
       if (!tc) return null;                                   // CMP noch stumm: Grundwerte bleiben "denied"
-      if (tc.gdprApplies === false){
-        const cm = this.consentMode();
-        return (cm === 1 || cm === 3) && !this.usOptOut();
+      if (tc.gdprApplies === false){                        // ohne ausdrückliche Google-Entscheidung: null → Blatt
+        const a = this.ausserhalb();
+        return a === "ja" ? true : a === "nein" ? false : null;
       }
       if (tc.eventStatus !== "tcloaded" && tc.eventStatus !== "useractioncomplete") return null;
       const p1 = !!(tc.purpose && tc.purpose.consents && tc.purpose.consents[1]);
@@ -219,6 +233,8 @@
       if (ok === true && this.zustand !== "aktiv") this.starten();
       else if (ok === false && this.zustand !== "gesperrt") this.sperren(eigen);
       else if (ok === null && this.zustand === "aktiv") this.sperren(eigen);   // Dialog nach Widerruf wieder offen
+      // außerhalb der DSGVO: trifft Google doch noch eine ausdrückliche Entscheidung, hat sie Vorrang – Blatt zu
+      if (this.tcf && this.tcf.gdprApplies === false && blatt.offen() && blatt.lageJetzt() === "google") blatt.schliessen();
     }
   };
 
@@ -254,7 +270,10 @@
     el: null,
     ausloeser: null,
 
-    lageJetzt(){ return regel.lage({ tc: statistik.tcf, gpc, eintrag: ablage.lesen(), jetzt: Date.now() }); },
+    lageJetzt(){
+      const tc = statistik.tcf;
+      return regel.lage({ tc, gpc, eintrag: ablage.lesen(), jetzt: Date.now(), aussen: tc && tc.gdprApplies === false ? statistik.ausserhalb() : null });
+    },
     zustaendig(){
       if (ohneWerbung || !this.bereit) return false;
       const l = this.lageJetzt();
@@ -375,8 +394,9 @@ ${stand || hier ? `<p class="kk-blatt__stand">${stand}${stand ? hier : hier.slic
 
     // jede TCF-Meldung: echte Google-Entscheidung ersetzt die eigene Wahl (wird gelöscht, nur der Zeitpunkt bleibt)
     tcfMeldung(tc){
-      if (tc.gdprApplies === false) ablage.loeschen();          // DSGVO gilt laut Google nicht: bestehende Logik, eigene Wahl weg
-      else if (regel.echteEntscheidung(tc)) ablage.schreiben({ v: BLATT_VERSION, google: Date.now() });
+      // gdprApplies === false: die eigene Wahl bleibt gespeichert – nur eine ausdrückliche Google-Entscheidung
+      // (GRANTED/DENIED/US-Opt-out) geht ihr vor; NOT_APPLICABLE ist keine Einwilligung.
+      if (tc.gdprApplies !== false && regel.echteEntscheidung(tc)) ablage.schreiben({ v: BLATT_VERSION, google: Date.now() });
       const l = this.lageJetzt();
       if ((l === "google" || l === "warten") && this.offen() && this.el.dataset.art !== "gpc") this.schliessen();
     },

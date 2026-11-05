@@ -16,7 +16,8 @@ const MONAT = 30 * 864e5;
 const JETZT = Date.UTC(2026, 10, 4, 12, 0, 0);
 
 // ——— Schein-Browser ———
-function seite({ tcf = null, gpc = false, gespeichert = null, kekse = [], ohneWerbung = false, start = JETZT } = {}){
+// cm/us: Consent-Mode-Analyticswert (0–4) und US-Opt-out-Status (0–3) der Google-CMP; null = Schnittstelle fehlt
+function seite({ tcf = null, gpc = false, gespeichert = null, kekse = [], ohneWerbung = false, start = JETZT, cm = null, us = null } = {}){
   const uhr = { jetzt: start, timer: [] };
   const speicher = new Map(gespeichert ? [[BLATT_KEY, JSON.stringify(gespeichert)]] : []);
   const jar = new Map(kekse.map(k => [k, "1"]));
@@ -71,6 +72,9 @@ function seite({ tcf = null, gpc = false, gespeichert = null, kekse = [], ohneWe
     console
   };
   if (tcf) win.__tcfapi = (cmd, v, cb) => { if (cmd === "addEventListener"){ tcfHoerer.push(cb); if (tcf !== "still") cb(tcf, true); } };
+  if (cm !== null || us !== null) win.googlefc = { callbackQueue: [],
+    getGoogleConsentModeValues: () => ({ analyticsStoragePurposeConsentStatus: cm }),
+    usstatesoptout: { getInitialUsStatesOptOutStatus: () => us } };
   win.window = win;
   const ctx = vm.createContext(win);
   vm.runInContext(`Date.now = () => __uhr.jetzt; const __D = Date; Date = class extends __D { constructor(...a){ super(...(a.length ? a : [__uhr.jetzt])); } static now(){ return __uhr.jetzt; } };`, Object.assign(ctx, { __uhr: uhr }));
@@ -134,7 +138,11 @@ test("Regel: Lage je nach CMP, GPC und eigener Wahl", () => {
   assert.equal(L({ tc: Object.assign({}, versteckt, { eventStatus: "cmpuishown", displayStatus: "disabled" }) }), "fragen");
   assert.equal(L({ tc: { gdprApplies: true, eventStatus: "cmpuishown" } }), "warten");   // ohne displayStatus: Dialog angenommen
   assert.equal(L({ tc: googleNein, eintrag: eigeneJa() }), "google");          // CMP schlägt eigene Wahl
-  assert.equal(L({ tc: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" } }), "google");
+  // gdprApplies false: nur eine ausdrückliche Google-Entscheidung (aussen) zählt, sonst eigene Wahl oder fragen
+  assert.equal(L({ tc: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" } }), "fragen");
+  assert.equal(L({ tc: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" }, aussen: "ja" }), "google");
+  assert.equal(L({ tc: { gdprApplies: false, eventStatus: "useractioncomplete", tcString: "CQx" }, aussen: "nein", eintrag: eigeneJa() }), "google");
+  assert.equal(L({ tc: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" }, eintrag: eigeneJa() }), "ja");
   assert.equal(L({ gpc: true, eintrag: eigeneJa() }), "gpc");
   assert.equal(L({ eintrag: eigeneJa() }), "ja");
   assert.equal(L({ tc: versteckt, eintrag: { v: 1, wahl: "nein", zeit: JETZT } }), "nein");
@@ -277,12 +285,67 @@ test("Google-Dialog sichtbar: kein eigenes Blatt", () => {
   assert.equal(p.offen(), false); assert.equal(p.gtm(), 0);
 });
 
-test("gdprApplies false: bestehende Logik, kein Blatt, eigene Wahl gelöscht", () => {
-  const p = seite({ tcf: { gdprApplies: false, eventStatus: "tcloaded", tcString: "" }, gespeichert: eigeneJa() });
-  p.laufen(10000);
+const AUSSEN = { gdprApplies: false, eventStatus: "tcloaded", tcString: "" };
+
+test("gdprApplies false + NOT_APPLICABLE: kein gtag ohne Klick; Blatt fragt nach 3 s; Zustimmen lädt gtag genau einmal", () => {
+  const p = seite({ tcf: AUSSEN, cm: 3, us: 1 });
+  p.laufen(BLATT_WARTEN - 10);
+  assert.equal(p.gtm(), 0, "NOT_APPLICABLE ist keine Einwilligung");
   assert.equal(p.offen(), false);
-  assert.equal(p.gespeichert(), null, "eigener Eintrag entfernt");
-  assert.equal(p.gtm(), 0, "eigenes Ja zählt nicht; Consent-Mode-Wert fehlt → bestehende Logik sperrt");
+  p.laufen(20);
+  assert.equal(p.offen(), true, "Blatt erscheint auch außerhalb der DSGVO, solange keine Wahl gespeichert ist");
+  assert.equal(p.gtm(), 0);
+  p.waehlen("ja");
+  assert.equal(p.gtm(), 1); assert.equal(p.gaAus(), false); assert.equal(p.gespeichert().wahl, "ja");
+  p.laufen(5000); p.tcfMelden(AUSSEN); p.laufen(1000);
+  assert.equal(p.gtm(), 1, "gtag nur einmal");
+  keineWerbeFreigabe(p);
+});
+
+test("gdprApplies false + NOT_APPLICABLE: gespeichertes Ja misst ohne Blatt, gespeichertes Nein bleibt aus", () => {
+  const ja = seite({ tcf: AUSSEN, cm: 3, us: 2, gespeichert: eigeneJa() });
+  ja.laufen(10000);
+  assert.equal(ja.offen(), false); assert.equal(ja.gtm(), 1);
+  assert.deepEqual(ja.gespeichert(), eigeneJa(), "eigene Wahl bleibt gespeichert");
+  const nein = seite({ tcf: AUSSEN, cm: 3, us: 2, gespeichert: { v: 1, wahl: "nein", zeit: JETZT }, kekse: ["_ga"] });
+  nein.laufen(10000);
+  assert.equal(nein.offen(), false); assert.equal(nein.gtm(), 0); assert.equal(nein.gaAus(), true);
+  assert.equal(nein.jar.has("_ga"), false);
+});
+
+test("gdprApplies false + GRANTED ohne US-Opt-out: Google-Zustimmung misst ohne Blatt", () => {
+  const p = seite({ tcf: AUSSEN, cm: 1, us: 2 });
+  p.laufen(10000);
+  assert.equal(p.offen(), false); assert.equal(p.gtm(), 1);
+  p.einstellungen();
+  assert.equal(p.offen(), false, "Einstellungen gehen an Googles Widerrufsdialog");
+  const unbestaetigt = seite({ tcf: AUSSEN, cm: 1, us: 0 });   // US-Status noch nicht gemeldet: keine Bestätigung → Blatt
+  unbestaetigt.laufen(10000);
+  assert.equal(unbestaetigt.gtm(), 0); assert.equal(unbestaetigt.offen(), true);
+});
+
+test("gdprApplies false + DENIED oder US-Opt-out: kein gtag, kein Blatt, eigenes Ja zählt nicht", () => {
+  for (const o of [{ cm: 2, us: 1 }, { cm: 1, us: 3 }, { cm: 3, us: 3 }]){
+    const p = seite(Object.assign({ tcf: AUSSEN, gespeichert: eigeneJa() }, o));
+    p.laufen(10000);
+    assert.equal(p.gtm(), 0, JSON.stringify(o)); assert.equal(p.offen(), false, JSON.stringify(o));
+  }
+});
+
+test("gdprApplies false, Schnittstelle der CMP fehlt: kein gtag, Blatt fragt", () => {
+  const p = seite({ tcf: AUSSEN });
+  p.laufen(10000);
+  assert.equal(p.gtm(), 0); assert.equal(p.offen(), true);
+});
+
+test("gdprApplies false: Blatt offen, dann meldet Google GRANTED → Blatt zu, Messung laut Google", () => {
+  const p = seite({ tcf: AUSSEN, cm: 3, us: 1 });
+  p.laufen(BLATT_WARTEN + 10);
+  assert.equal(p.offen(), true);
+  p.win.googlefc.getGoogleConsentModeValues = () => ({ analyticsStoragePurposeConsentStatus: 1 });
+  p.tcfMelden(Object.assign({}, AUSSEN, { eventStatus: "useractioncomplete", tcString: "CQx" }));
+  p.laufen(500);
+  assert.equal(p.offen(), false); assert.equal(p.gtm(), 1);
 });
 
 test("cmpuishown mit displayStatus hidden: Blatt erscheint trotzdem", () => {
