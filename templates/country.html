@@ -32,7 +32,7 @@
 
     {{ m.ad("rect") }}
 
-    <h2>Brückentage {{ year }}</h2>
+    <h2>{{ 'Fenstertage' if lang_at else 'Brückentage' }} {{ year }}</h2>
     {% if bridge_list is not none %}{{ m.bridges(bridge_list, country, live=False) }}{% endif %}
     {% if bridge_note %}<p class="muted">{{ bridge_note }}</p>{% endif %}
 
@@ -46,7 +46,7 @@
     <ul class="tiles">{% for y in other_years %}<li><a href="/feiertage-{{ y }}-{{ slug }}.html">Feiertage {{ y }} {{ country_name }}</a></li>{% endfor %}</ul>
   </div>
   <aside class="side">
-    <div class="box"><h3>Für dein Bundesland</h3><p class="small">Auf der Startseite wählst du dein Bundesland und siehst Brückentage und den nächsten Feiertag.</p><a class="btn" href="/">Zur Übersicht</a></div>
+    <div class="box"><h3>Für dein Bundesland</h3><p class="small">Auf der Startseite wählst du dein Bundesland und siehst Fenster- bzw. Brückentage und den nächsten Feiertag.</p><a class="btn" href="/">Zur Übersicht</a></div>
     {{ m.ad("half") }}{{ m.ad("sky") }}
   </aside>
 </div>

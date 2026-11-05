@@ -10,16 +10,18 @@ from content.articles import ARTICLES
 from content.laender import LAND, CLAIMS_DE
 from content.oesterreich import LAND_AT, CLAIMS_AT
 from content.werkzeuge import URLAUBSPLANER
+from content.shop import PRODUCTS, SHOP_LIVE
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261104b"
+V = "20261105a"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
 CHECKED_NEW = "3. November 2026"      # Seiten, die am 3.11.2026 inhaltlich überarbeitet wurden
 CHECKED_0411 = "4. November 2026"     # Seiten, die am 4.11.2026 inhaltlich ausgebaut wurden
+CHECKED_0511 = "5. November 2026"     # neue Seite Mein Kalender
 LASTMOD = "2026-11-04"                # lastmod in der Sitemap
 METHODIK = "/quellen-methodik.html"
 RIS = "https://www.ris.bka.gv.at/"
@@ -35,7 +37,7 @@ MS_DE = ["Jan"] + MS_AT[1:]
 WDL = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"]
 WDS = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 
-NAV = [("/", "Feiertage"), (f"/brueckentage-{CUR}.html", "Brückentage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
+NAV = [("/", "Feiertage"), ("/mein-kalender.html", "Mein Kalender"), (f"/brueckentage-{CUR}.html", "Fenstertage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
        ("/schulferien-2026-2027.html", "Schulferien"), ("/familienplaner.html", "Familienplaner"), (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
 
 env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=True, trim_blocks=True, lstrip_blocks=True)
@@ -52,7 +54,7 @@ def fmt(d, country, wd=True, year=True):
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
                 lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None,
-                checked=None, sources=None, skip_ads=(), extra_html=None)
+                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, shop_live=SHOP_LIVE)
     m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
     if "year" not in ctx and m and int(m.group(1)) in YEARS:
         base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
@@ -84,7 +86,8 @@ def bridge_view(country, region, year):
     res = []
     for b in H.bridge_days(country, region, year):
         take = " + ".join(f"{WDS[d.weekday()]} {d.day}. {mshort(country)[d.month-1]}" for d in b["days"])
-        res.append({"take": take, "holiday": b["holiday"], "vacation": b["vacation"], "free": b["free"],
+        d0 = b["days"][0]
+        res.append({"dt": f"{d0.day:02d}.{d0.month:02d}.", "take": take, "holiday": b["holiday"], "vacation": b["vacation"], "free": b["free"],
                     "from": fmt(b["start"], country, year=False), "to": fmt(b["end"], country, year=False), "raw": b})
     return res
 
@@ -105,7 +108,7 @@ def band_view(country, region, year):
             h = hol.get(d)
             if h and h["kind"] == "legal": cls += " ho"; title += f" – {h['name']}"
             elif h: cls += " pa"; title += f" – {h['name']}"
-            if d in br: cls += " br"; title += " – Brückentag"
+            if d in br: cls += " br"; title += " – Fenstertag" if country == "at" else " – Brückentag"
             cells.append({"cls": cls, "title": title})
         months.append({"label": mshort(country)[m-1], "cells": cells})
     return {"year": year, "months": months}
@@ -289,12 +292,12 @@ def build_home():
     ld = [{"@context": "https://schema.org", "@type": "WebSite", "name": "Kalenderkompass 24", "url": SITE + "/",
            "inLanguage": "de", "description": "Feiertage, Brückentage und Urlaubsplanung für Österreich und Deutschland."},
           holiday_ld("at", "", CUR, rows)]
-    write("index.html", "home.html", title=f"Feiertage & Brückentage {CUR} – Österreich und Deutschland | Kalenderkompass 24",
-          description=f"Alle Feiertage und Brückentage {CUR} für jedes Bundesland in Österreich und Deutschland – mit Jahresübersicht, Urlaubsplaner und Kalender-Export.",
-          next_list=[{"name": r["name"], "date": fmt(r["date"], "at")} for r in nxt], next_asof=fmt(t, "at", wd=False), band=band_view("at", "", CUR),
+    write("index.html", "home.html", title=f"Feiertage & Fenstertage {CUR}: Österreich und Deutschland | Kalenderkompass 24",
+          description=f"Alle Feiertage {CUR} mit Fenstertagen (Österreich) und Brückentagen (Deutschland) für jedes Bundesland – mit eigenem Kalender, Urlaubsplaner und Export.",
+          next_list=[{"name": r["name"], "date": fmt(r["date"], "at")} for r in nxt], next_sheet={"month": M_AT[nxt[0]["date"].month-1], "day": nxt[0]["date"].day, "wd": WDS[nxt[0]["date"].weekday()] + " · KW " + str(nxt[0]["date"].isocalendar()[1])}, next_asof=fmt(t, "at", wd=False), band=band_view("at", "", CUR),
           bridge_list=bridge_view("at", "", CUR), rows=rows, year_attr=CUR,
           at_regions=list(H.AT_REGIONS.items()), de_regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()],
-          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/",
+          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/", mk=True,
           skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Brückentagen und Urlaubsplaner
 
 
@@ -331,7 +334,8 @@ def build_regions(year):
             legal = [r for r in rows if r["kind"] == "legal"]
             bl = bridge_view(country, slug, year)
             singles = [b for b in bl if b["vacation"] == 1]
-            lead = (f"{len(legal)} gesetzliche Feiertage, {len(bl)} Brückentag{'e' if len(bl) != 1 else ''}"
+            bt = "Fenstertag" if country == "at" else "Brückentag"
+            lead = (f"{len(legal)} gesetzliche Feiertage, {len(bl)} {bt}{'e' if len(bl) != 1 else ''}"
                     + (f" – der beste: {singles[0]['take']}, {singles[0]['free']} Tage frei mit einem Urlaubstag." if singles else ".")
                     + " Mit Jahresübersicht und Kalender-Export.")
             path = f"feiertage-{year}-{slug}.html"
@@ -348,8 +352,8 @@ def build_regions(year):
                         + f" – an Schulen in der Regel unterrichtsfrei. Semesterferien {sem['start'].day}.–{fmt(sem['end'], 'at', wd=False, year=False)}, "
                         f"Sommerferien ab {fmt(F.summer('at', slug)['start'], 'at', wd=False, year=False)}.")
             crumbs = [("/", "Start"), (f"/feiertage-{year}-{cslug}.html", f"Feiertage {year} {cname}"), ("/" + path, name)]
-            write(path, "region.html", title=f"Feiertage {year} {name}: alle Termine & Brückentage | Kalenderkompass 24",
-                  description=f"Feiertage {year} {in_name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, Brückentage und Urlaubstipps – mit Kalender-Download.",
+            write(path, "region.html", title=f"Feiertage {year} {name}: Termine & {bt}e | Kalenderkompass 24",
+                  description=f"Feiertage {year} {in_name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, {bt}e und Urlaubstipps – mit Kalender-Download.",
                   h1=f"Feiertage {year} {in_name}", lead=lead, name=name, in_name=in_name, slug=slug, country=country,
                   country_slug=cslug, country_name=cname, legal_count=len(legal),
                   weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
@@ -514,11 +518,11 @@ def build_bridges(year):
             "<a href='/urlaubsplaner.html'>Urlaubsplaner</a> die effizientesten längeren Blöcke.</p>"
             "<p>Ein Anspruch auf Freistellung an Brückentagen besteht weder in Österreich noch in Deutschland. Mehr dazu im Beitrag "
             "<a href='/fenstertag-zwickeltag-brueckentag.html'>Fenstertag, Zwickeltag, Brückentag</a>.</p>")
-    crumbs = [("/", "Start"), (f"/brueckentage-{year}.html", f"Brückentage {year}")]
+    crumbs = [("/", "Start"), (f"/brueckentage-{year}.html", f"Fenster- und Brückentage {year}")]
     write(f"brueckentage-{year}.html", "tool.html",
-          title=f"Brückentage {year}: Fenstertage Österreich & alle Bundesländer Deutschland | Kalenderkompass 24",
+          title=f"Fenster- & Brückentage {year}: Österreich & Deutschland | Kalenderkompass 24",
           description=f"Alle Brückentage {year}: die Fenstertage in Österreich und die Brückentage jedes deutschen Bundeslandes – mit freien Tagen pro Urlaubstag.",
-          h1=f"Brückentage {year}", lead=f"Mit wenig Urlaub viel frei: alle Brücken- und Fenstertage {year} für Österreich und jedes deutsche Bundesland.",
+          h1=f"Fenster- und Brückentage {year}", lead=f"Mit wenig Urlaub viel frei: alle Fenstertage {year} in Österreich und die Brückentage in jedem deutschen Bundesland.",
           tool="".join(str(p) for p in parts), body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "fenstertag-zwickeltag-brueckentag")],
           jsonld=[crumbs_ld(crumbs)], active=f"/brueckentage-{CUR}.html", priority=0.9 if year == CUR else 0.6)
 
@@ -528,7 +532,7 @@ def build_planner():
   <div class="row"><label class="range">Wie viele Urlaubstage willst du einsetzen?<output data-budget-out>10</output><input type="range" min="1" max="30" value="10" data-budget aria-label="Urlaubstage"></label></div>
   <p class="plan-sum" data-plan-sum>Wähle Bundesland und Jahr – der Planer zeigt sofort die effizientesten Termine.</p>
   <div class="band" style="border:0;padding:0;margin:10px 0 16px"><div class="yr" data-plan-band></div>
-  <div class="legend"><span><i style="background:var(--red)"></i>Feiertag</span><span><i style="background:var(--sea)"></i>vorgeschlagener Urlaubstag</span><span><i style="background:var(--sun)"></i>weiterer Brückentag</span></div></div>
+  <div class="legend"><span><i style="background:var(--red)"></i>Feiertag</span><span><i style="background:var(--sea)"></i>vorgeschlagener Urlaubstag</span><span><i style="background:var(--card);box-shadow:inset 0 0 0 2px var(--ink)"></i>weiterer Fenster-/Brückentag</span></div></div>
   <ol class="bridges" data-plan-list></ol>
 </div>"""
     body = URLAUBSPLANER
@@ -541,6 +545,49 @@ def build_planner():
           jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Urlaubsplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/urlaubsplaner.html"}],
           active="/urlaubsplaner.html", priority=0.9,
           skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Planer und Ergebnisliste
+
+
+def build_mein_kalender():
+    tool = '<div class="mk" data-mk></div>'
+    body = f"""<h2>So funktioniert Mein Kalender</h2>
+<p>Tipp auf einen Tag, wähle eine Kategorie und schreib einen kurzen Text dazu – fertig. Für Urlaube oder Schulwochen gibst du zusätzlich ein Enddatum an. Die gesetzlichen Feiertage deines Bundeslandes stehen schon drin und bleiben immer <strong>rot</strong>; Fenstertage (in Deutschland: Brückentage) sind schwarz umrandet. Deine eigenen Einträge erscheinen in den Farben deiner Kategorien – auch im Jahresband auf der Startseite.</p>
+<h2>Deine Farben – passend zu deinem bisherigen Kalender</h2>
+<p>Wenn du schon einen Kalender am Handy oder am Computer verwendest, musst du dich nicht umgewöhnen. Unter „Farben und Kategorien“ benennst du die Kategorien so wie dort und übernimmst die Farben: aus den Paletten von Google Kalender und Apple Kalender oder mit dem Farbwähler als beliebige eigene Farbe. Bis zu acht Kategorien sind möglich.</p>
+<h2>Aufs Handy, als PDF oder auf Papier</h2>
+<ul>
+<li><strong>Aufs Handy:</strong> „Als Kalenderdatei (.ics)“ lädt alle Einträge – auf Wunsch mit den Feiertagen – als Datei herunter. Auf dem iPhone öffnest du sie und tippst auf „Alle hinzufügen“; bei Google Kalender importierst du sie am Computer unter Einstellungen → Importieren. Die Kategorie wird als Kategorie mitgegeben, die Farbe legt die Kalender-App selbst fest.</li>
+<li><strong>Als PDF oder auf Papier:</strong> „Monat drucken“ öffnet den Druckdialog deines Browsers; dort wählst du einen Drucker oder „Als PDF sichern“. Die Farben werden mitgedruckt.</li>
+<li><strong>Sicherung:</strong> „Sicherung speichern“ legt eine kleine Datei mit allen Einträgen und Farben ab. Mit „Sicherung laden“ holst du sie auf einem anderen Gerät oder nach dem Löschen der Browserdaten zurück.</li>
+</ul>
+<h2>Datenschutz: Deine Einträge bleiben bei dir</h2>
+<p>Mein Kalender braucht kein Konto. Alle Einträge werden nur im Speicher deines Browsers auf diesem Gerät abgelegt (localStorage) und nie an unseren oder einen anderen Server übertragen. Löschst du die Browserdaten, sind auch die Einträge weg – deshalb gibt es die Sicherung. Ein anderes Gerät sieht deine Einträge erst, wenn du dort die Sicherung lädst.</p>"""
+    crumbs = [("/", "Start"), ("/mein-kalender.html", "Mein Kalender")]
+    write("mein-kalender.html", "tool.html", title=f"Mein Kalender {CUR}: eigene Termine in deinen Farben | Kalenderkompass 24",
+          description="Eigener Kalender mit Feiertagen deines Bundeslandes: Termine, Urlaub und Schule in selbst gewählten Farben eintragen, als .ics aufs Handy, drucken oder als PDF – ohne Anmeldung.",
+          h1="Mein Kalender", lead="Feiertage deines Bundeslandes plus deine eigenen Termine – in deinen Farben, ohne Anmeldung. Die Einträge bleiben in deinem Browser.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=False, mk=True,
+          jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Mein Kalender", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/mein-kalender.html"}],
+          active="/mein-kalender.html", priority=0.9, checked=CHECKED_0511,
+          skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben dem Kalender
+
+
+def build_shop():
+    cards = []
+    for pr in PRODUCTS:
+        buy = (f'<a class="btn" href="{pr["checkout"]}" rel="noopener">Kaufen · {pr["price"]}</a>' if pr["checkout"] and pr["price"]
+               else '<span class="small muted">In Vorbereitung</span>')
+        cards.append(f'<li class="shop-item"><h3>{pr["title"]}</h3><p>{pr["text"]}</p><p class="small muted">{pr["format"]}</p>{buy}</li>')
+    tool = '<ul class="shop">' + "".join(cards) + "</ul>"
+    body = """<h2>Kostenlos oder gekauft?</h2>
+<p>Alle Werkzeuge auf Kalenderkompass 24 bleiben kostenlos: Feiertage, Fenstertage, Urlaubsplaner und <a href="/mein-kalender.html">Mein Kalender</a> mit Druck, PDF und Kalenderdatei. Die Druckvorlagen im Shop sind zusätzlich gestaltete Wandkalender und Planer in Druckqualität für alle, die etwas Fertiges an die Wand hängen wollen.</p>
+<h2>Bezahlung und Rechnung</h2>
+<p>Die Bezahlung läuft über die gesicherte Bezahlseite unseres Zahlungsanbieters. Er stellt die Rechnung mit Umsatzsteuer aus und liefert den Download-Link per E-Mail. Auf dieser Website selbst werden keine Zahlungsdaten eingegeben oder gespeichert.</p>"""
+    crumbs = [("/", "Start"), ("/shop.html", "Shop")]
+    write("shop.html", "tool.html", title="Shop: Wandkalender und Planer zum Ausdrucken | Kalenderkompass 24",
+          description="Druckvorlagen von Kalenderkompass 24: Wandkalender, Familienplaner und Urlaubsplan fürs Team als PDF.",
+          h1="Shop", lead="Wandkalender und Planer im Kalenderblatt-Stil als druckfertige PDF-Vorlagen.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=False, active="/shop.html",
+          robots=None if SHOP_LIVE else "noindex,nofollow", ads=SHOP_LIVE)
 
 
 def build_familie():
@@ -1059,7 +1106,7 @@ def build_static():
     (OUT / "assets").mkdir(parents=True, exist_ok=True)
     for f in (ROOT / "assets").iterdir():
         shutil.copy(f, OUT / "assets" / f.name)
-    (OUT / "assets" / "icon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="5" width="28" height="25" rx="5" fill="#15233B"/><rect x="2" y="5" width="28" height="8" rx="4" fill="#C4122F"/><rect x="7" y="17" width="5" height="5" rx="1" fill="#F2B100"/><rect x="14" y="23.5" width="5" height="4" rx="1" fill="#0F7C80"/></svg>')
+    (OUT / "assets" / "icon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="3" y="6" width="26" height="23" rx="3" fill="#fff" stroke="#141414" stroke-width="2.4"/><rect x="3" y="6" width="26" height="7" rx="3" fill="#C4122F"/><text x="16" y="25.5" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#141414">24</text></svg>')
     (OUT / "CNAME").write_text("kalenderkompass24.de\n")
     (OUT / ".nojekyll").write_text("")
     (OUT / "google9bf1079fd4bf073e.html").write_text("google-site-verification: google9bf1079fd4bf073e.html")
@@ -1095,7 +1142,7 @@ def main():
     for y in (2027, 2028): build_regions(y)
     for y in YEARS: build_country(y)
     for y in (2027, 2028): build_bridges(y)
-    build_planner(); build_workdays(); build_familie()
+    build_planner(); build_workdays(); build_familie(); build_mein_kalender(); build_shop()
     for y in YEARS: build_kw(y)
     for y in (2027, 2028): build_print(y)
     import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)

@@ -19,6 +19,22 @@
   const days = (a, b) => Math.round((b - a) / 864e5);
 
   let DATA = null;
+  // Österreich: Fenstertag, Deutschland: Brückentag
+  const BT = (country, plural = true) => (country === "at" ? "Fenstertag" : "Brückentag") + (plural ? "e" : "");
+  // Eigene Einträge aus „Mein Kalender“ (nur im Browser gespeichert): Datum → Farbe
+  const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
+  function ownColors(){
+    try {
+      const m = JSON.parse(store.get("kk24-mein") || "null"); if (!m || !Array.isArray(m.entries)) return {};
+      const col = Object.fromEntries((m.cats || []).map(c => [c.id, c.color])), out = {};
+      for (const e of m.entries){
+        if (!ISO_RE.test(e.from || "")) continue;
+        const to = ISO_RE.test(e.to || "") && e.to >= e.from ? e.to : e.from;
+        for (let d = parse(e.from), n = 0; iso(d) <= to && n < 400; d = add(d,1), n++) if (!out[iso(d)]) out[iso(d)] = col[e.cat] || "#2F5D8A";
+      }
+      return out;
+    } catch { return {}; }
+  }
   const state = { country: "at", region: "wien", year: new Date().getFullYear() };
 
   function months(country){ return country === "at" ? MONTHS : MONTHS_DE; }
@@ -116,6 +132,7 @@
     const hol = Object.fromEntries(holidays(country, region, year).map(h => [h.iso, h]));
     const br = new Set(); bridges(country, region, year).forEach(b => b.days.forEach(d => br.add(iso(d))));
     const va = extra.vacation || new Set();
+    const own = extra.vacation ? {} : ownColors();
     const t = iso(today());
     const ms = country === "at" ? MSHORT : MSHORT_DE;
     let html = "";
@@ -130,13 +147,15 @@
         if (h && h.kind === "legal"){ c += " ho"; title += ` – ${h.name}`; }
         else if (h){ c += " pa"; title += ` – ${h.name}`; }
         if (va.has(k)){ c += " va"; title += " – Urlaubstag"; }
-        else if (br.has(k)){ c += " br"; title += " – Brückentag"; }
+        else if (br.has(k)){ c += " br"; title += ` – ${BT(country,false)}`; }
         if (k === t) c += " to";
-        html += `<span class="${c}" title="${title}"></span>`;
+        const oc = /^#[0-9a-fA-F]{6}$/.test(own[k] || "") ? own[k] : "";
+        if (oc){ c += " own"; title += " – eigener Eintrag"; }
+        html += `<span class="${c}" title="${title}"${oc ? ` style="--own:${oc}"` : ""}></span>`;
       }
     }
     el.innerHTML = html;
-    el.setAttribute("aria-label", `Jahresübersicht ${year}: Feiertage rot, Brückentage gelb`);
+    el.setAttribute("aria-label", `Jahresübersicht ${year}: Feiertage rot, ${BT(country)} schwarz umrandet, eigene Einträge farbig`);
   }
 
   function regionLabel(country, region){
@@ -160,17 +179,20 @@
       .filter(h => h.kind === "legal" && h.date >= t);
     const h = list[0]; if (!h) return;
     const n = days(t, h.date);
-    const rel = n === 0 ? "heute" : n === 1 ? "morgen" : `in ${n} Tagen`;
-    el.innerHTML = `<div class="when">${rel}</div><div class="what">${h.name}</div><div class="rel">${fmt(h.date, state.country)} · ${regionLabel(state.country, state.region)}</div>`;
+    const rel = n === 0 ? "<em>Heute.</em>" : n === 1 ? "<em>Morgen.</em>" : `In <em>${n}</em> Tagen.`;
+    const sheet = el.classList.contains("plain")
+      ? `<div class="sheet" aria-hidden="true"><div class="sm-h">${months(state.country)[h.date.getMonth()]}</div><div class="sm-d">${h.date.getDate()}</div><div class="sm-w">${WD[h.date.getDay()]} · KW ${isoWeek(h.date).week}</div></div>` : "";
+    el.innerHTML = `<div class="sheet-wrap"><div><div class="rel">Nächster freier Tag · ${regionLabel(state.country, state.region)}</div><div class="when">${rel}</div><div class="what">${h.name}</div><div class="rel">${fmt(h.date, state.country)}</div></div>${sheet}</div>`;
   }
 
   function renderBridges(){
     $$("[data-bridges]").forEach(el => {
       const list = bridges(state.country, state.region, state.year);
-      if (!list.length){ el.innerHTML = `<li class="empty">Für ${regionAcc(state.country,state.region)} gibt es ${state.year} keine Brückentage mit ein oder zwei Urlaubstagen.</li>`; return; }
+      if (!list.length){ el.innerHTML = `<li class="empty">Für ${regionAcc(state.country,state.region)} gibt es ${state.year} keine ${BT(state.country)} mit ein oder zwei Urlaubstagen.</li>`; return; }
       el.innerHTML = list.map(b => {
         const take = b.days.map(d => `${WD[d.getDay()]} ${d.getDate()}. ${(state.country==="at"?MSHORT:MSHORT_DE)[d.getMonth()]}`).join(" + ");
-        return `<li class="bridge"><span class="chip">${b.vacation}</span><div><div class="take">${take}</div><div class="muted small">rund um ${b.holiday} · frei von ${fmt(b.start,state.country,{year:false})} bis ${fmt(b.end,state.country,{year:false})}</div></div><div class="ratio"><b>${b.free}</b><span class="small muted">Tage frei</span></div></li>`;
+        const d0 = b.days[0], dt = `${String(d0.getDate()).padStart(2,"0")}.${String(d0.getMonth()+1).padStart(2,"0")}.`;
+        return `<li class="bridge"><span class="dt">${dt}</span><div><div class="take">${take}</div><div class="muted small">rund um ${b.holiday} · frei von ${fmt(b.start,state.country,{year:false})} bis ${fmt(b.end,state.country,{year:false})}</div></div><div class="ratio"><b${b.free / b.vacation >= 4 ? ' class="best"' : ""}>${b.vacation} → ${b.free}</b><span class="muted">Tage</span></div></li>`;
       }).join("");
     });
   }
@@ -186,10 +208,13 @@
     $$("[data-year-label]").forEach(e => e.textContent = state.year);
     $$("[data-region-label]").forEach(e => e.textContent = regionLabel(state.country, state.region));
     $$("[data-region-in]").forEach(e => e.textContent = regionIn(state.country, state.region));
+    $$("[data-bt]").forEach(e => e.textContent = BT(state.country));
+    $$("[data-bt-sg]").forEach(e => e.textContent = BT(state.country, false));
   }
 
   function renderBands(){
     $$("[data-band]").forEach(el => band(el, state.country, state.region, state.year));
+    $$("[data-band-title]").forEach(el => el.textContent = el.textContent.replace(/\b20\d\d\b/, state.year));
   }
 
   function renderPlanner(){
@@ -272,7 +297,16 @@
     $$("[data-country]").forEach(sel => sel.value = state.country);
     $$("[data-year]").forEach(sel => sel.value = state.year);
   }
-  function renderAll(){ renderNext(); renderBands(); renderBridges(); renderTable(); renderPlanner(); renderWorkdays(); }
+  function renderAll(){ renderNext(); renderBands(); renderBridges(); renderTable(); renderPlanner(); renderWorkdays(); navLabel();
+    document.dispatchEvent(new CustomEvent("kk:change", { detail: { ...state } })); }
+  // Menüpunkt passt sich dem Land an: Fenstertage (AT) / Brückentage (DE)
+  function navLabel(){
+    const c = DATA ? state.country : (store.get("kk24-region") || "at").split(":")[0];
+    $$('.nav a[href^="/brueckentage-"]').forEach(a => a.textContent = BT(c === "de" ? "de" : "at"));
+  }
+  // Schnittstelle für „Mein Kalender“ (meinkalender.js)
+  window.KK = { get data(){ return DATA; }, state, holidays, bridges, iso, parse, add, today, isoWeek: d => isoWeek(d), fmt, months, BT, regionLabel,
+    refreshBands(){ if (DATA) renderBands(); } };
 
   function bind(){
     document.addEventListener("change", e => {
@@ -289,9 +323,9 @@
   }
 
   async function init(){
-    renderKW();
+    renderKW(); navLabel();
     const root = document.body;
-    if (!$("[data-next],[data-bridges],[data-table],[data-planner],[data-band],[data-workdays]")) return;
+    if (!$("[data-next],[data-bridges],[data-table],[data-planner],[data-band],[data-workdays],[data-mk]")) return;
     // Seiten mit fester Region (z. B. Feiertage 2027 Wien) geben sie vor
     const fixed = root.dataset.fixed;
     if (fixed){ const [c,r,y] = fixed.split(":"); state.country = c; state.region = r; if (y) state.year = +y; }

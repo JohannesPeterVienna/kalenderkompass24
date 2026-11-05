@@ -1,17 +1,19 @@
-/* Kalenderkompass 24 — Wandkalender-Bildsprache: Feiertage rot, Brückentage sonnengelb, Urlaub petrol */
+/* Kalenderkompass 24 — Kalenderblatt: schwarz-weiß, Feiertage rot, Fenster-/Brückentage schwarz, eigene Einträge in selbst gewählten Farben */
 @font-face{font-family:"Fraunces";src:url("fraunces-latin-wght-normal.woff2") format("woff2");font-weight:300 900;font-display:swap}
 @font-face{font-family:"Inter";src:url("inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-display:swap}
 
 :root{
-  --paper:#F5F7FA;--card:#FFFFFF;--ink:#15233B;--muted:#55657D;--line:#D8DFE9;--soft:#EAEFF5;
-  --red:#C4122F;--red-soft:#FBE7EA;--sun:#F2B100;--sun-soft:#FFF4D1;--sea:#0F7C80;--sea-soft:#DDF1F1;
-  --weekend:#DCE3EC;--focus:#2457C5;
+  /* Kalenderblatt: Papier, schwarze Schrift, Rot nur für Feiertage. Fenstertage schwarz, eigener Urlaub gedämpftes Blau. */
+  --paper:#FAFAF7;--card:#FFFFFF;--ink:#141414;--muted:#5E5E5A;--line:#DEDBD3;--soft:#F1EFE9;
+  --red:#C4122F;--red-soft:#FBE9EC;--sun:#141414;--sun-soft:#F1EFE9;--sea:#2F5D8A;--sea-soft:#E7EEF5;
+  --weekend:#E6E3DB;--focus:#2457C5;
   --display:"Fraunces",Georgia,serif;--text:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:10px;--wrap:1180px;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:6px;--wrap:1180px;
 }
 @media (prefers-color-scheme:dark){:root{
-  --paper:#0E1625;--card:#152035;--ink:#E7ECF4;--muted:#9BA9BF;--line:#26344D;--soft:#1B2840;
-  --red:#FF5A6E;--red-soft:#3A1B26;--sun:#FFC83D;--sun-soft:#3A3117;--sea:#3CC2C4;--sea-soft:#123536;--weekend:#22314A;--focus:#8DB0FF;
+  --paper:#121212;--card:#1A1A1A;--ink:#EDEDEA;--muted:#A3A39E;--line:#33332F;--soft:#222220;
+  --red:#FF5A6E;--red-soft:#3A1B22;--sun:#EDEDEA;--sun-soft:#2A2A27;--sea:#8DB4DA;--sea-soft:#1D2A36;--weekend:#2A2A27;--focus:#8DB0FF;
 }}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -27,7 +29,7 @@ img,svg{max-width:100%}
 .top{border-bottom:1px solid var(--line);background:var(--card)}
 .top .wrap{display:flex;align-items:center;gap:24px;min-height:64px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 1.15rem/1 var(--display);letter-spacing:-.01em}
-.brand svg{width:30px;height:30px;flex:none}
+.brand svg{width:30px;height:30px;flex:none;color:var(--ink)}
 .nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
 .nav a{text-decoration:none;padding:8px 12px;border-radius:8px;font-size:.95rem;color:var(--muted)}
 .nav a:hover,.nav a[aria-current=page],.nav a.on{color:var(--ink);background:var(--soft)}
@@ -47,16 +49,23 @@ small,.small{font-size:.875rem}
 /* Hero */
 .hero{padding:48px 0 28px}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:end}
-.next{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;position:relative;overflow:hidden}
-.next::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--red)}
-.next .when{font:600 clamp(2.4rem,6vw,4rem)/1 var(--display);letter-spacing:-.03em;color:var(--red)}
-.next .what{font-size:1.15rem;font-weight:600;margin-top:6px}
-.next .rel{color:var(--muted)}
+.next{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px}
+.next.plain{background:none;border:0;padding:0}
+.sheet-wrap{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:24px;align-items:center}
+.next .when{font:600 clamp(2.6rem,6.5vw,4.4rem)/1 var(--display);letter-spacing:-.03em}
+.next .when em{font-style:normal;color:var(--red)}
+.next .what{font:500 1.2rem/1.3 var(--display);margin-top:8px}
+.next .rel{color:var(--muted);font-size:.92rem;margin-top:6px}
+.sheet{border:2px solid var(--ink);border-radius:4px;text-align:center;background:var(--card);overflow:hidden}
+.sheet .sm-h{background:var(--ink);color:var(--paper);font-size:.8rem;font-weight:600;padding:4px 0;letter-spacing:.04em}
+.sheet .sm-d{font:600 4.2rem/1.15 var(--display);color:var(--red)}
+.sheet .sm-w{font-size:.78rem;color:var(--muted);padding:0 0 8px}
 .next-list{list-style:none;margin:10px 0 8px;padding:0}.next-list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;padding:6px 0;border-bottom:1px solid var(--line)}.next-list li:last-child{border-bottom:0}.next-list span{color:var(--muted)}
+@media (max-width:520px){.sheet-wrap{grid-template-columns:minmax(0,1fr) 96px;gap:14px}.sheet .sm-d{font-size:2.8rem}}
 .picker{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
 .picker label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
 select,input[type=number],input[type=date]{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-height:44px}
-.btn{display:inline-flex;align-items:center;gap:8px;font:600 .95rem var(--text);border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 18px;cursor:pointer;text-decoration:none;min-height:44px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 .95rem var(--text);border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:4px;padding:10px 18px;cursor:pointer;text-decoration:none;min-height:44px}
 .btn.ghost{background:transparent;color:var(--ink)}
 .btn:hover{filter:brightness(1.1)}
 
@@ -70,9 +79,10 @@ select,input[type=number],input[type=date]{font:inherit;color:var(--ink);backgro
 .yr .d.we{background:var(--weekend)}
 .yr .d.ho{background:var(--red)}
 .yr .d.pa{background:var(--red-soft);box-shadow:inset 0 0 0 1.5px var(--red)}
-.yr .d.br{background:var(--sun)}
+.yr .d.br{background:var(--card);box-shadow:inset 0 0 0 2px var(--ink)}
 .yr .d.va{background:var(--sea)}
 .yr .d.to{box-shadow:0 0 0 2px var(--ink)}
+.yr .d.own::after{content:"";position:absolute;left:12%;right:12%;bottom:10%;height:34%;border-radius:2px;background:var(--own)}
 .yr .d.x{background:transparent}
 .yr .d[title]{cursor:help}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:12px}
@@ -85,15 +95,17 @@ select,input[type=number],input[type=date]{font:inherit;color:var(--ink);backgro
 .side .box h3{margin-top:0;font-size:1.05rem}
 .side ul{margin:0;padding-left:1.1em}
 
-/* Brückentage */
-.bridges{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.bridge{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
-.bridge .take{font:600 1.05rem var(--display)}
+/* Fenster- und Brückentage als Fahrplan */
+.bridges{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.bridge{display:grid;grid-template-columns:5.2em minmax(0,1fr) auto;gap:14px;align-items:baseline;border-bottom:1px solid var(--line);padding:11px 2px}
+.bridge .dt{font:600 .95rem var(--mono)}
+.bridge .take{font:600 1.02rem var(--text)}
 .bridge .ratio{text-align:right;white-space:nowrap}
-.bridge .ratio b{font:650 1.6rem/1 var(--display);color:var(--sea);display:block}
-.bridge .chip{display:inline-block;min-width:2.2em;text-align:center;font-weight:700;border-radius:6px;padding:4px 8px;background:var(--sun-soft);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--sun)}
-.empty{color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:var(--r);padding:16px}
-
+.bridge .ratio b{font:600 1.05rem var(--mono);display:block}
+.bridge .ratio b.best{color:var(--red)}
+.bridge .ratio span{font-size:.75rem}
+.bridges-head{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin:0 0 4px}
+.empty{color:var(--muted);border-bottom:1px solid var(--line);padding:16px 2px}
 /* Tabellen */
 .tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;font-size:.95rem}
 .tbl th,.tbl td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -111,10 +123,10 @@ select,input[type=number],input[type=date]{font:inherit;color:var(--ink);backgro
 .planner{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
 .planner .row{display:flex;gap:14px;flex-wrap:wrap;align-items:end}
 .range{display:flex;flex-direction:column;gap:6px;flex:1 1 240px;font-size:.9rem;color:var(--muted)}
-.range output{font:650 2.2rem/1 var(--display);color:var(--sea)}
+.range output{font:650 2.2rem/1 var(--display);color:var(--ink)}
 input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 .plan-sum{font-size:1.1rem;margin:16px 0 8px}
-.plan-sum b{font-family:var(--display);font-size:1.5rem;color:var(--sea)}
+.plan-sum b{font-family:var(--display);font-size:1.5rem;color:var(--ink)}
 
 /* Raster für Links */
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;list-style:none;padding:0;margin:0}
@@ -127,7 +139,7 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 
 /* Kalenderwoche */
 .kw-now{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.kw-now b{font:650 3rem/1 var(--display);color:var(--sea)}
+.kw-now b{font:650 3rem/1 var(--display);color:var(--ink)}
 
 /* Werbeflächen: bleiben ohne konfigurierte Anzeige unsichtbar */
 .ad{display:none;margin:28px auto;text-align:center}
@@ -155,8 +167,7 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 @media (max-width:520px){
   .yr{gap:2px;grid-template-columns:2.2em repeat(31,minmax(0,1fr))}
   .yr .d{border-radius:2px}
-  .bridge{grid-template-columns:1fr auto}
-  .bridge .chip{display:none}
+  .bridge{grid-template-columns:4.4em minmax(0,1fr) auto;gap:10px}
   .tbl th,.tbl td{padding:9px 10px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
@@ -190,7 +201,7 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media (max-width:640px){.tbl td.date{white-space:normal}.tbl th,.tbl td{padding:8px 10px}}
 @media (max-width:640px){.g-axis .g-track span:nth-child(even){display:none}
-  .nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%;margin:0}.nav a{text-align:center;padding:9px 4px;font-size:.88rem;background:var(--soft)}}
+  .nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:4px;width:100%;margin:0 0 8px;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.nav::-webkit-scrollbar{display:none}.nav a{flex:none;white-space:nowrap;padding:9px 12px;font-size:.88rem;background:var(--soft)}}
 .sm{display:none}
 @media (max-width:640px){.lg{display:none}.sm{display:inline}.tbl td.date{white-space:nowrap}}
 @media (max-width:640px){.tbl{font-size:.82rem}.tbl th,.tbl td{padding:8px 7px}.tbl .dot{margin-right:5px;width:8px;height:8px}}
@@ -227,6 +238,9 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 /* Werbeplätze: Superbanner 728×90 (ab Tablet), Wide Skyscraper 160×600 (nur mit Seitenleiste) */
 .ad--superbanner{max-width:728px;min-height:90px}.ad--sky{width:160px;min-height:600px}
 @media (max-width:767px){.ad--superbanner{display:none!important}}
+/* Mobile Banner 320×100 nur auf dem Handy, Medium Rectangle 300×250 überall – beide mit Abstand zu Bedienelementen */
+.ad--mbanner{width:320px;min-height:100px;margin-bottom:120px}.ad--rect2{width:300px;min-height:250px;margin:150px auto 64px}
+@media (min-width:768px){.ad--mbanner{display:none!important}}
 @media (max-width:960px){.ad--sky{display:none!important}}
 
 /* Abstand Superbanner – Fußzeilen-Knopf (≥ 150 px) */
@@ -235,3 +249,56 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 /* Abstand Billboard – Seitenleisten-Knopf und Half-Page – Kasten darüber (≥ 150 px zu Bedienelementen) */
 .ad--billboard{margin-bottom:64px}
 .side .ad--half{margin-top:128px}
+
+/* Mein Kalender: Monatsblatt mit eigenen Einträgen in selbst gewählten Farben */
+.mk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.mk-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
+.mk-title{margin:0;font-size:1.35rem}
+.mk-nav{font:600 1.4rem/1 var(--text);background:none;border:1px solid var(--line);border-radius:4px;width:44px;height:44px;cursor:pointer;color:var(--ink)}
+.mk-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.mk-wd{font-size:.75rem;color:var(--muted);text-align:center;padding:2px 0}
+.mk-d{min-height:76px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--ink);padding:4px;text-align:left;display:flex;flex-direction:column;gap:2px;cursor:pointer;font:inherit;overflow:hidden}
+.mk-d:hover{border-color:var(--ink)}
+.mk-d .n{font:600 .9rem/1.2 var(--mono)}
+.mk-d.we{background:var(--soft)}
+.mk-d.ho .n,.mk-d.pa .n{color:var(--red)}
+.mk-d.br{box-shadow:inset 0 0 0 2px var(--ink)}
+.mk-d.to .n{background:var(--ink);color:var(--paper);border-radius:3px;padding:0 4px;align-self:flex-start}
+.mk-d.sel{outline:2px solid var(--focus);outline-offset:-2px}
+.mk-hol,.mk-br,.mk-tag{font-size:.72rem;line-height:1.3;border-radius:2px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-hol{color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+.mk-br{color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.mk-tag{background:color-mix(in srgb,var(--c) 18%,var(--card));color:var(--ink);border-left:3px solid var(--c);border-radius:0}
+.mk-sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.mk-sw.lg{width:28px;height:28px;margin:0;border-radius:4px}
+.mk-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.mk-form label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.mk-form label.grow{flex:1 1 180px}
+.mk-form input[type=text],.mk-cats input[type=text]{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:9px 12px;min-height:44px;width:100%}
+.mk-err{flex-basis:100%;margin:0;color:var(--red);font-size:.9rem;min-height:1.2em}
+.mk-list{list-style:none;padding:0;margin:12px 0 0}.mk-list li{padding:6px 0;border-bottom:1px solid var(--line)}
+.mk-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.mk-chk{display:flex;gap:6px;align-items:center;font-size:.9rem}
+.mk-file{cursor:pointer}
+.mk-editor{margin-top:18px;padding-top:6px;border-top:1px solid var(--line)}
+.mk-cats{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.mk-cats li{display:grid;grid-template-columns:44px minmax(0,1fr) 52px auto;gap:10px;align-items:center;padding:4px;border-radius:4px}
+.mk-cats li.on{background:var(--soft)}
+.mk-pick{width:44px;height:44px;border:1px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;display:grid;place-items:center}
+.mk-cats input[type=color]{width:52px;height:44px;border:1px solid var(--line);border-radius:4px;background:var(--card);padding:2px;cursor:pointer}
+.mk-pal{display:grid;gap:10px;margin:10px 0}
+.mk-pal-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.mk-sw-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);cursor:pointer}
+.mono{font-family:var(--mono)}
+@media (max-width:640px){.mk{padding:12px}.mk-grid{gap:2px}.mk-d{min-height:58px;padding:3px}.mk-hol,.mk-br,.mk-tag{font-size:.62rem;padding:0 2px}.mk-cats li{grid-template-columns:44px minmax(0,1fr) 52px}.mk-cats li .linkbtn{grid-column:2}}
+@media print{
+  body.mk-printing main > :not(.wrap.layout):not(.hero){display:none!important}
+  body.mk-printing .hero .lead,body.mk-printing .picker,body.mk-printing .prose,body.mk-printing .cards,body.mk-printing h2{display:none!important}
+  .mk{border:0;padding:0}.mk-nav{display:none}.mk-d{min-height:24mm;break-inside:avoid}
+  .mk,.mk *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* Shop */
+.shop{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.shop-item{border:1px solid var(--line);border-top:2px solid var(--ink);background:var(--card);padding:18px}
+.shop-item h3{margin-top:0}
