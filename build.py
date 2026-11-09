@@ -1029,8 +1029,8 @@ def build_articles():
         related = [x for x in ARTICLES if x["slug"] != a["slug"]][:3]
         ld = [crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "Article", "headline": a["title"],
               "description": a["description"], "inLanguage": "de", "datePublished": "2026-10-29", "dateModified": CHECKED_ISO,
-              "author": {"@type": "Organization", "name": "AdStern", "url": SITE + "/about.html"},
-              "publisher": {"@type": "Organization", "name": "AdStern"}, "mainEntityOfPage": SITE + "/" + a["slug"] + ".html"}]
+              "author": {"@type": "Organization", "name": "AdStern – Agentur für digitales Marketing", "url": SITE + "/about.html"},
+              "publisher": {"@type": "Organization", "name": "AdStern – Agentur für digitales Marketing"}, "mainEntityOfPage": SITE + "/" + a["slug"] + ".html"}]
         fenster = a["slug"] == "fenstertag-zwickeltag-brueckentag"
         if fenster: ld[1]["dateModified"] = "2026-11-03"
         neu = a["slug"] in ("urlaubsanspruch-oesterreich-deutschland", "ferien-planen")   # am 4.11.2026 ausgebaut
@@ -1041,7 +1041,7 @@ def build_articles():
               sources=[("Arbeitsruhegesetz im RIS", RIS)] if fenster else None)
 
 
-LEGAL_ADDR = "AdStern :: Agentur für digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
+LEGAL_ADDR = "AdStern – Agentur für digitales Marketing<br>Seilerstätte 8/8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
 
 
 def build_legal():
@@ -1056,7 +1056,7 @@ def build_legal():
           h1="Über Kalenderkompass 24", lead="Feiertage, Brückentage und Urlaubsplanung – genau, schnell und ohne Anmeldung.", checked=CHECKED_0411,
           body=f"""<p>Kalenderkompass 24 beantwortet Fragen, die sich jedes Jahr wieder stellen: Wann ist der nächste Feiertag? Welche Brückentage gibt es? Wann sind Schulferien? Und wie hole ich aus meinem Urlaub die meisten freien Tage heraus? Die Seite deckt Österreich und Deutschland ab, jedes Bundesland einzeln, und funktioniert ohne Anmeldung.</p>
 <h2>Herausgeber</h2>
-<p>Kalenderkompass 24 ist ein Angebot von <strong>AdStern :: Agentur für digitales Marketing</strong>, Seilerstätte 8, 1010 Wien. AdStern ist Medieninhaber und Herausgeber und verantwortet alle Inhalte; die vollständigen Angaben stehen im <a href="/imprint.html">Impressum</a>. Die Seite ist unabhängig von Behörden, Kirchen und Interessenverbänden und finanziert sich über Werbung. Anzeigen sind als „Werbung“ gekennzeichnet und vom redaktionellen Inhalt getrennt.</p>
+<p>Kalenderkompass 24 ist ein Angebot von <strong>AdStern – Agentur für digitales Marketing</strong>, Seilerstätte 8/8, 1010 Wien. AdStern ist Medieninhaber und Herausgeber und verantwortet alle Inhalte; die vollständigen Angaben stehen im <a href="/imprint.html">Impressum</a>. Die Seite ist unabhängig von Behörden, Kirchen und Interessenverbänden und finanziert sich über Werbung. Anzeigen sind als „Werbung“ gekennzeichnet und vom redaktionellen Inhalt getrennt.</p>
 <h2>Was du hier findest</h2>
 <ul><li>Gesetzliche Feiertage für alle 9 österreichischen Bundesländer und alle 16 deutschen Länder, mit Landespatronen und regionalen Besonderheiten</li>
 <li>Brückentage und einen Urlaubsplaner, der Urlaubstage rund um Feiertage optimal verteilt</li>
