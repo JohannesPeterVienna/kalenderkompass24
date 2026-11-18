@@ -44,5 +44,5 @@ URLAUBSPLANER = """<h2>So benutzt du den Planer</h2>
 <h3>Zählt der Planer Teilzeit oder Schichtdienst?</h3>
 <p>Er geht von einer Fünf-Tage-Woche von Montag bis Freitag aus. Wer an anderen Tagen arbeitet, kann die Vorschläge als Orientierung nehmen, muss die Urlaubstage aber selbst nachzählen.</p>
 <h3>Werden meine Eingaben gespeichert?</h3>
-<p>Nur in deinem Browser, damit die Seite sich dein Bundesland merkt. An uns wird nichts übertragen.</p>
+<p>Nur in deinem Browser, damit die Seite sich dein Bundesland merkt. An uns wird nichts übertragen. „Link kopieren“ erzeugt eine Adresse mit Land, Bundesland, Jahr und Zahl der Urlaubstage, damit du einen Plan weitergeben kannst.</p>
 """

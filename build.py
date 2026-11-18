@@ -13,16 +13,19 @@ from content.werkzeuge import URLAUBSPLANER
 from content.shop import PRODUCTS, SHOP_LIVE
 
 ROOT = Path(__file__).parent
+FRISTEN = json.loads((ROOT / "content" / "fristen.json").read_text(encoding="utf-8"))   # Vorschriften und Beispiele des Fristenrechners
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261105d"
+V = "20261118a"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
 CHECKED_NEW = "3. November 2026"      # Seiten, die am 3.11.2026 inhaltlich überarbeitet wurden
 CHECKED_0411 = "4. November 2026"     # Seiten, die am 4.11.2026 inhaltlich ausgebaut wurden
 CHECKED_0511 = "5. November 2026"     # neue Seite Mein Kalender
-LASTMOD = "2026-11-04"                # lastmod in der Sitemap
+LASTMOD = "2026-11-04"                # lastmod in der Sitemap (Seiten ohne inhaltliche Änderung seither)
+CHECKED_1811 = "18. November 2026"    # Seiten, die am 18.11.2026 neu entstanden oder inhaltlich geändert wurden
+LASTMOD_1811 = "2026-11-18"
 METHODIK = "/quellen-methodik.html"
 RIS = "https://www.ris.bka.gv.at/"
 TODAY = date(2026, 11, 4)        # Build-Stand: nächste Feiertage auf der Startseite, laufende Ferien
@@ -54,7 +57,7 @@ def fmt(d, country, wd=True, year=True):
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
                 lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None,
-                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, shop_live=SHOP_LIVE)
+                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, fr=False, shop_live=SHOP_LIVE)
     m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
     if "year" not in ctx and m and int(m.group(1)) in YEARS:
         base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
@@ -70,7 +73,7 @@ def write(path, template, **ctx):
     html = env.get_template(template).render(**base)
     (OUT / path).write_text(html, encoding="utf-8")
     if base.get("robots") is None:
-        PAGES.append((base["path"], ctx.get("priority", 0.6)))
+        PAGES.append((base["path"], ctx.get("priority", 0.6), ctx.get("lastmod", LASTMOD)))
 
 
 def rows_for(country, region, year):
@@ -148,6 +151,7 @@ def build_data():
     import ferien as F
     sf = {f"{c}:{slug}": [[p["name"], p["start"].isoformat(), p["end"].isoformat()] for p in F.periods(c, slug)]
           for c in ("at", "de") for slug in F.regions(c)}
+    (OUT / "data" / "fristen.json").write_text(json.dumps(FRISTEN, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (OUT / "data" / "schulferien.json").write_text(json.dumps({"schuljahr": F.SCHOOLYEAR, "bis": F.SY_END.isoformat(), "f": sf}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
@@ -534,13 +538,15 @@ def build_planner():
   <div class="band" style="border:0;padding:0;margin:10px 0 16px"><div class="yr" data-plan-band></div>
   <div class="legend"><span><i style="background:var(--red)"></i>Feiertag</span><span><i style="background:var(--sea)"></i>vorgeschlagener Urlaubstag</span><span><i style="background:var(--card);box-shadow:inset 0 0 0 2px var(--ink)"></i>weiterer Fenster-/Brückentag</span></div></div>
   <ol class="bridges" data-plan-list></ol>
+  <p class="fr-knoepfe no-print"><button class="btn ghost" type="button" data-share="link">Link kopieren</button><button class="btn ghost" type="button" data-share="text">Ergebnis kopieren</button></p>
+  <p class="small muted" data-share-msg role="status"></p>
 </div>"""
     body = URLAUBSPLANER
     crumbs = [("/", "Start"), ("/urlaubsplaner.html", "Urlaubsplaner")]
     write("urlaubsplaner.html", "tool.html", title=f"Urlaubsplaner {CUR}: aus wenig Urlaub viele freie Tage machen | Kalenderkompass 24",
           description=f"Urlaubsplaner {CUR} für Österreich und Deutschland: Gib deine Urlaubstage ein und finde die Termine mit den meisten freien Tagen in deinem Bundesland.",
           h1="Urlaubsplaner", lead="Gib ein, wie viele Urlaubstage du einsetzen willst. Der Planer legt sie dorthin, wo sie mit Feiertagen und Wochenenden die meisten freien Tage ergeben.",
-          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=True, year_attr=CUR,
+          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=True, year_attr=CUR, lastmod=LASTMOD_1811,
           related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "urlaubsanspruch-oesterreich-deutschland", "persoenlicher-feiertag-oesterreich")],
           jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Urlaubsplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/urlaubsplaner.html"}],
           active="/urlaubsplaner.html", priority=0.9,
@@ -671,7 +677,9 @@ def build_workdays():
     tool = f"""<div class="planner" data-workdays>
   <div class="row"><label class="range" style="flex:0 1 200px">Von<input type="date" name="from" value="{a.isoformat()}"></label>
   <label class="range" style="flex:0 1 200px">Bis<input type="date" name="to" value="{b.isoformat()}"></label></div>
-  <div data-workdays-out style="margin-top:12px"><p class="plan-sum">Wähle zwei Daten.</p></div>
+  <div data-workdays-out style="margin-top:12px" aria-live="polite"><p class="plan-sum">Wähle zwei Daten.</p></div>
+  <p class="fr-knoepfe no-print"><button class="btn ghost" type="button" data-share="link">Link kopieren</button><button class="btn ghost" type="button" data-share="text">Ergebnis kopieren</button></p>
+  <p class="small muted" data-share-msg role="status"></p>
 </div>"""
     at = sum(1 for i in range((b - a).days + 1) if (d := a + timedelta(i)).weekday() < 5 and d not in H.off_days("at", "wien", CUR))
     def wd_month(country, region, y, m):
@@ -708,7 +716,7 @@ def build_workdays():
 <p>Der Rechner zählt Anfangs- und Enddatum mit. Er berücksichtigt Samstage und Sonntage sowie die gesetzlichen Feiertage des gewählten Bundeslandes – nicht aber Urlaub, Krankenstand, betriebliche Schließtage oder Feiertage einzelner Gemeinden.</p>
 <h2>So rechnet der Rechner</h2>
 <p>Der Rechner geht jeden Tag zwischen Anfangs- und Enddatum einzeln durch – beide Tage eingeschlossen. Ein Tag zählt als Arbeitstag, wenn er ein Montag bis Freitag ist und kein gesetzlicher Feiertag des gewählten Bundeslandes. Die Feiertage stammen aus derselben Datei wie unsere Feiertagstabellen: feste Termine aus den Feiertagsgesetzen, bewegliche aus dem Osterdatum. Landespatrone in Österreich und schulfreie Tage wie der Buß- und Bettag in Bayern sind keine gesetzlichen Feiertage und zählen deshalb als Arbeitstage. Fällt ein Feiertag auf ein Wochenende, ändert er nichts, weil Samstag und Sonntag ohnehin nicht gezählt werden.</p>
-<p>Gerechnet wird vollständig in deinem Browser; das gewählte Bundesland merkt sich die Seite lokal, sonst wird nichts gespeichert oder übertragen.</p>
+<p>Gerechnet wird vollständig in deinem Browser; das gewählte Bundesland merkt sich die Seite lokal, sonst wird nichts gespeichert oder übertragen. „Link kopieren“ erzeugt eine Adresse, die Land, Bundesland und beide Daten enthält – praktisch, um eine Rechnung weiterzugeben.</p>
 <h2>Drei Beispiele für {CUR}</h2>
 <p><strong>Ein Quartal in Wien:</strong> Vom 1. Jänner bis 31. März {CUR} zählt der Rechner {ex_q1} Arbeitstage. Abgezogen sind Neujahr ({WDL[date(CUR, 1, 1).weekday()]}) und Heilige Drei Könige ({WDL[date(CUR, 1, 6).weekday()]}); der Ostermontag fällt mit dem {fmt(H.easter(CUR) + timedelta(1), 'at', wd=False, year=False)} gerade noch ins erste Quartal.</p>
 <p><strong>Gleicher Zeitraum, anderes Land:</strong> Vom 1. Mai bis 30. Juni {CUR} hat Bayern {ex_by} Arbeitstage, Berlin {ex_be}. Der Unterschied ist Fronleichnam am {fmt(H.easter(CUR) + timedelta(60), 'de', year=False)}, der in Bayern gilt, in Berlin nicht. Wer Projekte über Landesgrenzen plant, sollte deshalb immer das Land des Arbeitsorts wählen.</p>
@@ -721,16 +729,139 @@ def build_workdays():
 <li><strong>Keine Halbtage:</strong> Der 24. und der 31. Dezember sind keine gesetzlichen Feiertage und zählen voll, auch wenn viele Betriebe dort früher schließen.</li>
 <li><strong>Keine Gemeindefeiertage:</strong> Feiertage, die nur in einzelnen Orten gelten – das Augsburger Friedensfest oder Fronleichnam in Teilen Sachsens und Thüringens –, sind nicht enthalten. Mariä Himmelfahrt in Bayern ist enthalten, obwohl er nur in Gemeinden mit überwiegend katholischer Bevölkerung gilt.</li>
 <li><strong>Keine persönlichen Abwesenheiten:</strong> Urlaub, Krankenstand, Zeitausgleich und betriebliche Schließtage kennt der Rechner nicht.</li>
-<li><strong>Fristen:</strong> Gesetzliche Fristen laufen meist in Kalendertagen, Wochen oder Monaten und haben eigene Regeln für Wochenenden und Feiertage. Für eine Frist ist der Arbeitstage-Rechner deshalb nur ein Hilfsmittel, keine verbindliche Berechnung.</li>
+<li><strong>Fristen:</strong> Gesetzliche Fristen laufen meist in Kalendertagen, Wochen oder Monaten und haben eigene Regeln für Wochenenden und Feiertage. Dafür gibt es den <a href="/fristenrechner.html">Fristenrechner</a>: Er zählt nach der jeweiligen Vorschrift und zeigt, warum sich ein Fristende verschiebt.</li>
 </ul>
 <p>Mehr zu Kalender-, Werk- und Arbeitstagen und zur Berechnung von Fristen im Beitrag <a href="/tage-richtig-zaehlen.html">Tage richtig zählen</a>.</p>"""
     crumbs = [("/", "Start"), ("/arbeitstage-rechner.html", "Arbeitstage-Rechner")]
     write("arbeitstage-rechner.html", "tool.html", title="Arbeitstage-Rechner: Arbeitstage zwischen zwei Daten zählen | Kalenderkompass 24",
           description="Arbeitstage zwischen zwei Daten berechnen – mit den Feiertagen deines Bundeslandes in Österreich oder Deutschland.",
           h1="Arbeitstage-Rechner", lead="Wie viele Arbeitstage liegen zwischen zwei Daten? Der Rechner zieht Wochenenden und die Feiertage deines Bundeslandes ab.",
-          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=False,
+          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=False, lastmod=LASTMOD_1811,
           related=[a for a in ARTICLES if a["slug"] in ("tage-richtig-zaehlen", "urlaubsanspruch-oesterreich-deutschland")],
           jsonld=[crumbs_ld(crumbs)], active="/", priority=0.8)
+
+
+def fristen_svg():
+    """Eigene Grafik: die Tage rund um das Fristende des ersten Beispiels (aus holidays.py gerechnet)."""
+    b = FRISTEN["beispiele"][0]
+    roh, ende = date.fromisoformat(b["roh"]), date.fromisoformat(b["ende"])
+    off = {h["date"]: h["name"] for h in H.region_holidays(b["land"], b["region"], roh.year) if h["kind"] == "legal"}
+    kf = H.easter(roh.year) - timedelta(days=2)
+    days = [roh + timedelta(i) for i in range(-1, (ende - roh).days + 2)]
+    w, gap = 96, 8
+    out = [f'<svg class="fr-grafik" viewBox="0 0 {len(days) * (w + gap) - gap} 150" role="img" aria-labelledby="fr-g-t fr-g-d" xmlns="http://www.w3.org/2000/svg">',
+           '<title id="fr-g-t">Verschiebung des Fristendes über Karfreitag und Ostern 2027</title>',
+           f'<desc id="fr-g-d">Rechnerisches Ende am {fmt(roh, "at")}; Karfreitag, Samstag, Sonntag und Ostermontag verschieben; letzter Tag der Frist ist {fmt(ende, "at")}.</desc>']
+    for i, d in enumerate(days):
+        x = i * (w + gap)
+        why = "Karfreitag" if d == kf else "Samstag" if d.weekday() == 5 else "Sonntag" if d.weekday() == 6 else off.get(d, "")
+        assert (roh <= d < ende) == bool(why) or d == ende and not why, (d, why)
+        cls = "z" if d == ende else "f" if why else "n"
+        out.append(f'<rect class="{cls}" x="{x + 1}" y="26" width="{w - 2}" height="92" rx="6"/>')
+        out.append(f'<text class="k" x="{x + w / 2}" y="52" text-anchor="middle">{WDS[d.weekday()]}</text>')
+        out.append(f'<text class="g" x="{x + w / 2}" y="82" text-anchor="middle">{d.day}.{d.month}.</text>')
+        if why or d == ende:
+            out.append(f'<text class="k" x="{x + w / 2}" y="106" text-anchor="middle">{"letzter Tag" if d == ende else why}</text>')
+        if d == roh: out.append(f'<text class="k" x="{x + w / 2}" y="16" text-anchor="middle">rechnerisches Ende</text>')
+        if d == ende: out.append(f'<text class="k s" x="{x + w / 2}" y="16" text-anchor="middle">Fristende</text>')
+        if roh <= d < ende:
+            out.append(f'<path class="p" d="M{x + w / 2 - 14} 136 h{w + gap + 20} m-7 -5 l7 5 l-7 5"/>')
+    return "".join(out) + "</svg>"
+
+
+def build_fristen():
+    R, B, abruf = FRISTEN["regeln"], FRISTEN["beispiele"], date.fromisoformat(FRISTEN["abruf"])
+    ids = {r["id"] for r in R}
+    for i, b in enumerate(B):
+        assert b["regel"] in ids and b["einheit"] in ("tage", "wochen", "monate", "jahre"), b["titel"]
+        check_weekdays(b["text"], date.fromisoformat(b["start"]).year, f"Fristen-Beispiel {i + 1}")
+        for k in ("roh", "ende"):   # rechnerisches und tatsächliches Ende müssen im Text stehen
+            d = date.fromisoformat(b[k])
+            assert f"{d.day}. {M_DE[d.month - 1]}" in b["text"], (b["titel"], k)
+    b0 = B[0]
+    opt = "".join(f'<option value="{r["id"]}"{" selected" if r["id"] == b0["regel"] else ""}>{r["kurz"]} – {r["name"]}</option>' for r in R if r["land"] == "at")
+    tool = f"""<form class="planner" data-fristen novalidate>
+  <div class="row">
+    <label class="fr-feld">Land<select name="land"><option value="at">Österreich</option><option value="de">Deutschland</option></select></label>
+    <label class="fr-feld">Bundesland<select name="region"><option value="">ganz Österreich</option></select></label>
+    <label class="fr-feld fr-breit">Welche Vorschrift gilt?<select name="regel">{opt}</select></label>
+  </div>
+  <div class="row">
+    <label class="fr-feld">Fristbeginn: Tag des Ereignisses<input type="date" name="start" value="{b0['start']}" min="2026-01-01" max="2030-12-20" required></label>
+    <label class="fr-feld fr-schmal">Länge<input type="number" name="n" value="{b0['n']}" min="1" max="999" step="1" inputmode="numeric" required></label>
+    <label class="fr-feld">Einheit<select name="einheit"><option value="tage">Tage</option><option value="wochen" selected>Wochen</option><option value="monate">Monate</option><option value="jahre">Jahre</option></select></label>
+    <label class="fr-feld">Der erste Tag<select name="modus"><option value="ereignis">zählt nicht mit (Zustellung, Zugang)</option><option value="tagesbeginn">zählt mit (Beginn um 0 Uhr, § 187 Abs. 2 BGB)</option></select></label>
+  </div>
+  <div data-fr-aus aria-live="polite"><p class="plan-sum">Der Rechner braucht JavaScript. Ohne JavaScript: Beispiel 1 unten zeigt die Rechnung für die voreingestellten Werte – letzter Tag ist {fmt(date.fromisoformat(b0['ende']), 'at')}.</p></div>
+  <p class="fr-knoepfe no-print"><button class="btn" type="button" data-fr="link">Link kopieren</button><button class="btn ghost" type="button" data-fr="text">Ergebnis kopieren</button><button class="btn ghost" type="button" data-fr="ics">Fristende in den Kalender (.ics)</button><button class="btn ghost" type="button" data-fr="druck">Drucken</button></p>
+  <p class="small muted" data-fr-meldung role="status"></p>
+</form>"""
+    ja = lambda v: '<td class="yes">ja</td>' if v else "<td>–</td>"
+    rows = "".join(
+        f'<tr data-land="{r["land"]}"><td><strong>{r["kurz"]}</strong><br>{", ".join(f"""<a href="{u}" rel="noopener">{n}</a>""" for n, u in r["quellen"])}</td>'
+        f'<td>{"Österreich" if r["land"] == "at" else "Deutschland"}</td><td>{r["gilt"]}</td>{ja(r["sa"])}{ja(r["so"])}{ja(r["ft"])}'
+        f'{"<td>ist Feiertag</td>" if r["land"] == "de" else ja(r["kf"])}{ja(r["d24"])}<td>{r["hinweis"]}</td></tr>' for r in R)
+    bsp = "".join(f'<li><strong>{b["titel"]}.</strong> {b["text"]} <button class="linkbtn" type="button" data-fr-beispiel="{i}">Im Rechner öffnen</button></li>' for i, b in enumerate(B))
+    stand = fmt(abruf, "at", wd=False)
+    body = f"""<h2>Sieben Rechenbeispiele zum Anklicken</h2>
+<p>Die Zustell- und Ereignistage sind angenommen, die Rechnung ist echt: Jedes Beispiel läuft in unseren Tests durch dieselbe Funktion wie der Rechner, und der Build bricht ab, wenn ein Wochentag im Text nicht zum Kalender passt.</p>
+<ol class="fr-beispiele">{bsp}</ol>
+<figure class="fr-figur">{fristen_svg()}<figcaption class="small muted">Beispiel 1: Vier Wochen ab Freitag, 26. Februar 2027, enden rechnerisch am Karfreitag. Nach § 33 Abs. 2 AVG zählen Karfreitag, Samstag, Sonntag und Ostermontag nicht als letzter Tag.</figcaption></figure>
+<h2>So rechnet der Rechner</h2>
+<ol>
+<li><strong>Der Tag des Ereignisses zählt nicht mit.</strong> Das steht in § 902 Abs. 1 ABGB, § 32 Abs. 1 AVG und § 187 Abs. 1 BGB fast wortgleich. Die Ausnahme im deutschen Recht: Ist der Beginn eines Tages maßgebend, etwa bei einer Frist „ab 1. März“, zählt dieser Tag mit (§ 187 Abs. 2 BGB).</li>
+<li><strong>Tage werden gezählt, Wochen, Monate und Jahre nicht.</strong> Eine Frist nach Wochen, Monaten oder Jahren endet an dem Tag, der nach Benennung oder Zahl dem Ereignistag entspricht – zwei Wochen ab Mittwoch also am übernächsten Mittwoch, ein Monat ab dem 13. am 13. des Folgemonats. Fehlt der Tag im letzten Monat, endet die Frist am Monatsletzten (§ 902 Abs. 2 ABGB, § 188 Abs. 2 und 3 BGB). Ein Monat ist deshalb je nach Lage 28 bis 31 Tage lang.</li>
+<li><strong>Erst am Ende wird geprüft, ob der letzte Tag verschiebt.</strong> Samstage, Sonntage und Feiertage innerhalb der Frist zählen normal mit. Nur wenn der letzte Tag auf einen der Tage fällt, die die gewählte Vorschrift nennt, rückt das Ende auf den nächsten Tag, der nicht dazugehört. Welche Tage das sind, zeigt die Tabelle.</li>
+</ol>
+<p>Die Feiertage kommen aus derselben Datei wie unsere <a href="/feiertage-{CUR}-oesterreich.html">Feiertagstabellen</a>; den Karfreitag berechnet der Rechner aus dem Osterdatum. Alles läuft in deinem Browser. Die Adresse der Seite ändert sich beim Rechnen nicht – nur wenn du „Link kopieren“ wählst, entsteht ein Link, der deine Eingaben enthält.</p>
+<h2>Welche Vorschrift verschiebt das Fristende an welchem Tag?</h2>
+<p>Aus den Gesetzestexten zusammengestellt, jede Zeile mit Link zur amtlichen Fassung. Abgerufen und vollständig gelesen am {stand}.</p>
+<div class="fr-filter no-print"><label class="fr-feld">Land<select data-fr-land><option value="">beide</option><option value="at">Österreich</option><option value="de">Deutschland</option></select></label>
+<label class="fr-feld fr-breit">Suche in der Tabelle<input type="search" data-fr-suche placeholder="z. B. Bescheid, Karfreitag, Postlauf"></label><span class="small muted" data-fr-zahl role="status">{len(R)} Vorschriften</span></div>
+<div class="scroll"><table class="tbl fr-tabelle" data-fr-tabelle><thead><tr><th scope="col">Vorschrift</th><th scope="col">Land</th><th scope="col">Gilt für</th><th scope="col">Samstag</th><th scope="col">Sonntag</th><th scope="col">Feiertag</th><th scope="col">Karfreitag</th><th scope="col">24. Dez.</th><th scope="col">Besonderheit</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p class="small muted">„ja“ heißt: Fällt der letzte Tag der Frist auf diesen Tag, endet sie erst am nächsten Tag, der nicht dazugehört. In Deutschland ist der Karfreitag in allen Ländern gesetzlicher Feiertag, in Österreich nicht.</p>
+<h2>Was dabei auffällt</h2>
+<ul>
+<li><strong>Der Karfreitag verschiebt in Österreich nur im Verfahren.</strong> AVG, BAO, ZPO und StPO nennen ihn ausdrücklich, § 903 ABGB nicht. Dieselbe Vier-Wochen-Frist endet deshalb je nach Vorschrift am 26. oder am 30. März 2027 (Beispiele 1 und 2).</li>
+<li><strong>Der 24. Dezember steht nur in § 33 AVG und § 108 BAO.</strong> In allen anderen Vorschriften der Tabelle ist er ein gewöhnlicher Tag – auch in Deutschland.</li>
+<li><strong>In Deutschland entscheidet das Bundesland.</strong> Fronleichnam, Reformationstag oder Allerheiligen verschieben nur dort, wo sie gesetzliche Feiertage sind (Beispiele 4 und 5). In Österreich sind die 13 Feiertage überall gleich; Landespatrone verschieben nichts.</li>
+<li><strong>Das frühere Sondergesetz gibt es nicht mehr.</strong> Das Bundesgesetz über die Hemmung des Fristenablaufes durch Samstage und den Karfreitag (BGBl. Nr. 37/1961) ist laut RIS mit Ablauf des 31. Dezember 2011 außer Kraft getreten. Den Samstag deckt im Zivilrecht Art. 5 des Europäischen Fristenübereinkommens ab, das im RIS mit Inkrafttreten 28. April 1983 geführt wird (BGBl. Nr. 254/1983).</li>
+</ul>
+<h2>Grenzen des Rechners</h2>
+<ul>
+<li><strong>Nur Fristen, die vorwärts laufen.</strong> Rückwärts gerechnete Fristen („spätestens drei Monate vorher“) rechnet er nicht; das Europäische Fristenübereinkommen nimmt sie in Art. 1 ausdrücklich aus.</li>
+<li><strong>Keine Stundenfristen, keine Hemmung, keine Unterbrechung, keine verlängerten Fristen.</strong></li>
+<li><strong>Sonderregeln einzelner Gesetze</strong> gehen vor – in der Tabelle stehen nur die allgemeinen Vorschriften. Für Verfahren vor deutschen Landesbehörden gelten die Verwaltungsverfahrensgesetze der Länder, die wir nicht einzeln gelesen haben.</li>
+<li><strong>Feiertage einzelner Gemeinden</strong> sind nicht in den Daten: das Augsburger Friedensfest, Fronleichnam in Teilen Sachsens und Thüringens. Fällt ein Fristende auf einen solchen Tag, weist der Rechner darauf hin. Mariä Himmelfahrt in Bayern ist enthalten, gilt aber nur in Gemeinden mit überwiegend katholischer Bevölkerung (Art. 1 Abs. 1 Nr. 2 Bayerisches Feiertagsgesetz).</li>
+<li><strong>Zeitraum:</strong> Fristen, die zwischen 1. Jänner 2026 und 20. Dezember 2030 beginnen und enden.</li>
+<li><strong>Keine Rechtsberatung.</strong> Der Rechner zeigt, was die verlinkten Vorschriften ergeben. Ob sie auf deine Frist anwendbar sind und wann sie begonnen hat – etwa der Tag der Zustellung –, musst du selbst klären; bei wichtigen Fristen nicht bis zum letzten Tag warten.</li>
+</ul>
+<h2>Quellen</h2>
+<p>Österreich: konsolidierte Fassungen aus dem Rechtsinformationssystem des Bundes (RIS), gelesen über dessen offene Datenschnittstelle; die Links führen zur jeweiligen Bestimmung im RIS. Deutschland: gesetze-im-internet.de (Bundesministerium der Justiz). Abrufdatum für alle Vorschriften: {stand}. Feiertage: <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>.</p>"""
+    crumbs = [("/", "Start"), ("/fristenrechner.html", "Fristenrechner")]
+    write("fristenrechner.html", "tool.html", title="Fristenrechner: Fristende mit Begründung für Österreich und Deutschland | Kalenderkompass 24",
+          description="Fristende berechnen nach ABGB, AVG, BAO, ZPO, BGB und VwVfG – mit den Feiertagen deines Bundeslandes, Schritt-für-Schritt-Begründung, teilbarem Link und Kalender-Export.",
+          h1="Fristenrechner", lead="Wann läuft eine Frist ab? Der Rechner zählt nach der gewählten Vorschrift, verschiebt das Ende über Wochenende und Feiertage deines Bundeslandes – und sagt, warum.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=False, show_year=False, fr=True, checked=CHECKED_1811, lastmod=LASTMOD_1811,
+          related=[a for a in ARTICLES if a["slug"] in ("tage-richtig-zaehlen", "schaltjahr-verstehen")],
+          jsonld=[crumbs_ld(crumbs)], active="", priority=0.8)
+
+
+REDIRECTS = {
+    # 18.11.2026: „Monatsplanung“ war allgemeine Planungshilfe ohne eigenen Datenkern; die Arbeitstage je Monat stehen im Arbeitstage-Rechner.
+    "monatsplanung.html": "/arbeitstage-rechner.html",
+}
+
+
+def build_redirects():
+    for src, target in REDIRECTS.items():
+        (OUT / src).write_text(f"""<!doctype html>
+<html lang="de-AT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weitergeleitet | Kalenderkompass 24</title>
+<meta name="robots" content="noindex,follow"><link rel="canonical" href="{SITE}{target}">
+<meta http-equiv="refresh" content="0; url={target}"></head>
+<body><p>Diese Seite ist umgezogen: <a href="{target}">weiter zum Arbeitstage-Rechner</a>.</p></body></html>
+""", encoding="utf-8")
 
 
 def build_kw(year):
@@ -784,7 +915,7 @@ def build_print(year):
     write(f"kalender-{year}-zum-ausdrucken.html", "tool.html", title=f"Kalender {year} zum Ausdrucken – mit Feiertagen (A4, PDF) | Kalenderkompass 24",
           description=f"Kostenloser Jahreskalender {year} zum Ausdrucken auf A4 – mit allen Feiertagen, als PDF speicherbar.",
           h1=f"Kalender {year} zum Ausdrucken", lead=f"Das ganze Jahr {year} auf einer A4-Seite, Feiertage in Rot. Kostenlos drucken oder als PDF speichern.",
-          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] == "monatsplanung"],
+          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] == "tage-richtig-zaehlen"],
           jsonld=[crumbs_ld(crumbs)], active=f"/kalender-{CUR}-zum-ausdrucken.html", priority=0.8)
 
 
@@ -937,6 +1068,9 @@ def build_methodik():
 </ul>
 <p>Wir zeigen nur Schuljahre, die amtlich veröffentlicht sind – derzeit {F.SCHOOLYEAR}. Schätzungen für spätere Jahre gibt es bei uns nicht. Schulautonome Tage legt jede Schule selbst fest; sie stehen in keinem amtlichen Kalender und sind nicht enthalten.</p>
 
+<h2>Fristen</h2>
+<p>Der <a href="/fristenrechner.html">Fristenrechner</a> stützt sich auf §§ 902 und 903 ABGB, Art. 5 des Europäischen Übereinkommens über die Berechnung von Fristen (BGBl. Nr. 254/1983), §§ 32 und 33 AVG, § 108 BAO, §§ 125 und 126 ZPO und § 84 StPO für Österreich sowie §§ 187 bis 193 BGB, § 222 ZPO, § 31 VwVfG, § 108 AO, § 26 SGB X, § 57 VwGO, § 16 FamFG und §§ 42, 43 StPO für Deutschland. Die österreichischen Bestimmungen haben wir am {CHECKED_1811} in der konsolidierten Fassung über die offene Datenschnittstelle des RIS gelesen, die deutschen auf gesetze-im-internet.de. Jede Zeile der Tabelle auf der Rechnerseite verlinkt die Bestimmung.</p>
+
 <h2>Wie wir die Termine berechnen</h2>
 <p>Feste Feiertage wie der 26. Oktober stehen direkt im Gesetz. Die beweglichen Feiertage hängen am Ostersonntag. Diesen berechnen wir mit der Gaußschen Osterformel in der heute üblichen Fassung für den gregorianischen Kalender (dem sogenannten anonymen Algorithmus, wie ihn etwa Jean Meeus beschreibt). Für {CUR} ergibt sie Sonntag, {fmt(H.easter(CUR), 'at', wd=False)}. Davon abgeleitet:</p>
 <ul>
@@ -950,16 +1084,24 @@ def build_methodik():
 <p><strong>Fenster- und Brückentage</strong> sind bei uns Folgen von einem oder zwei Arbeitstagen (Montag bis Freitag, kein gesetzlicher Feiertag), die zwischen einem gesetzlichen Feiertag und einem Wochenende oder einem weiteren Feiertag liegen. Landespatrone und andere schulfreie Tage zählen dabei nicht als frei, weil sie für Beschäftigte normale Arbeitstage sind. „Freie Tage je Urlaubstag“ ist die Länge des freien Blocks geteilt durch die dafür nötigen Urlaubstage bei einer Fünftagewoche.</p>
 
 <h2>So prüfen wir</h2>
-<p>Bei jedem Build laufen Selbsttests: Ostertermine von 2000 bis 2038 gegen bekannte Daten, der Buß- und Bettag gegen eine zweite, unabhängige Rechnung, die Zahl der bundesweiten Feiertage, die Fenstertage {CUR} in Österreich und alle Datumsangaben in den Bundesländer-Texten gegen die Datentabellen. Schlägt ein Test fehl, wird die Seite nicht erzeugt. Zusätzlich gleichen wir die Ergebnisse stichprobenartig mit amtlichen Veröffentlichungen ab.</p>
+<p>Bei jedem Build laufen Selbsttests: Ostertermine von 2000 bis 2038 gegen bekannte Daten, der Buß- und Bettag gegen eine zweite, unabhängige Rechnung, die Zahl der bundesweiten Feiertage, die Fenstertage {CUR} in Österreich und alle Datumsangaben in den Bundesländer-Texten gegen die Datentabellen. Schlägt ein Test fehl, wird die Seite nicht erzeugt.</p>
+<p>Dazu kommt eine eigene Testreihe gegen amtliche Quellen (Stand {CHECKED_1811}):</p>
+<ul>
+<li><strong>Ostern 1980 bis 2031</strong> gegen die Osterfesttabelle der Physikalisch-Technischen Bundesanstalt (<a href="https://www.ptb.de/cms/ptb/fachabteilungen/abt4/fb-44/ag-441/darstellung-der-gesetzlichen-zeit/wann-ist-ostern.html" rel="noopener">PTB – Wann ist Ostern?</a>), alle 52 Jahre; ebenso die dort genannten Abstände für Christi Himmelfahrt, Pfingsten und Fronleichnam. Auch die Osterrechnung im Browser wird gegen diese Tabelle geprüft.</li>
+<li><strong>Österreich 2026 bis 2028</strong> Tag für Tag gegen die 13 Feiertage des § 7 Abs. 2 Arbeitsruhegesetz.</li>
+<li><strong>Bayern und Berlin 2027 und 2028</strong> Tag für Tag gegen Art. 1 des Bayerischen Feiertagsgesetzes und die Feiertagsliste der Berliner Senatsverwaltung für Inneres.</li>
+<li><strong>Die übrigen 14 deutschen Länder</strong> sind in dieser Testreihe nur mit der Zahl ihrer Feiertage 2027 festgehalten. Ihre Landesgesetze haben wir am {CHECKED_1811} nicht erneut abgerufen; ein Tag-für-Tag-Abgleich steht für sie noch aus.</li>
+<li><strong>Fristenrechner:</strong> jede Rechenregel, alle Beispiele der Seite und jeder Starttag des Jahres 2027 für jede Vorschrift – das Ergebnis darf nie auf einen Tag fallen, der nach der gewählten Vorschrift verschiebt.</li>
+</ul>
 
 <h2>Stand und Grenzen</h2>
-<p>Letzte inhaltliche Prüfung: {CHECKED_NEW}. Nicht enthalten sind Regelungen aus Kollektiv- und Tarifverträgen (etwa zum 24. und 31. Dezember), betriebliche Schließtage und Feiertage einzelner Gemeinden. Alle Angaben erfolgen ohne Gewähr und ersetzen keine Rechtsberatung. Einen Fehler gefunden? Schreib an <a href="mailto:office@adstern.com">office@adstern.com</a> – wir prüfen jeden Hinweis.</p>
+<p>Letzte inhaltliche Prüfung: {CHECKED_1811}. Nicht enthalten sind Regelungen aus Kollektiv- und Tarifverträgen (etwa zum 24. und 31. Dezember), betriebliche Schließtage und Feiertage einzelner Gemeinden. Alle Angaben erfolgen ohne Gewähr und ersetzen keine Rechtsberatung. Einen Fehler gefunden? Schreib an <a href="mailto:office@adstern.com">office@adstern.com</a> – wir prüfen jeden Hinweis.</p>
 """
     crumbs = [("/", "Start"), (METHODIK, "Quellen & Methodik")]
     write("quellen-methodik.html", "page.html", title="Quellen & Methodik: so berechnen wir Feiertage und Ferien | Kalenderkompass 24",
           description="Rechtsgrundlagen, amtliche Ferienquellen und Rechenweg von Kalenderkompass 24: Arbeitsruhegesetz, Schulzeitgesetz, Feiertagsgesetze der Länder, KMK und Osterformel.",
           h1="Quellen & Methodik", lead="Woher unsere Feiertags- und Feriendaten stammen, wie wir rechnen und wie wir prüfen.",
-          body=body, related=[], crumbs=crumbs, jsonld=[crumbs_ld(crumbs)], active="", priority=0.5, checked=CHECKED_NEW)
+          body=body, related=[], crumbs=crumbs, jsonld=[crumbs_ld(crumbs)], active="", priority=0.5, checked=CHECKED_1811, lastmod=LASTMOD_1811)
 
 
 def check_claims():
@@ -1035,10 +1177,12 @@ def build_articles():
         if fenster: ld[1]["dateModified"] = "2026-11-03"
         neu = a["slug"] in ("urlaubsanspruch-oesterreich-deutschland", "ferien-planen")   # am 4.11.2026 ausgebaut
         if neu: ld[1]["dateModified"] = LASTMOD
+        frist = a["slug"] in ("tage-richtig-zaehlen", "schaltjahr-verstehen")   # am 18.11.2026 überarbeitet (Fristen)
+        if frist: ld[1]["dateModified"] = LASTMOD_1811
         write(a["slug"] + ".html", "page.html", title=f"{a['title']} | Kalenderkompass 24", description=a["description"],
               h1=a["title"], lead=a["teaser"], body=fenstertage_body() if fenster else a["body"].replace("<!--PLAN-->", ferien_planen_table()), related=related, crumbs=crumbs, jsonld=ld,
-              active="", priority=0.8 if fenster else 0.7, checked=CHECKED_NEW if fenster else CHECKED_0411 if neu else CHECKED,
-              sources=[("Arbeitsruhegesetz im RIS", RIS)] if fenster else None)
+              active="", priority=0.8 if fenster else 0.7, checked=CHECKED_NEW if fenster else CHECKED_0411 if neu else CHECKED_1811 if frist else CHECKED,
+              lastmod=LASTMOD_1811 if frist else LASTMOD, sources=[("Arbeitsruhegesetz im RIS", RIS)] if fenster else None)
 
 
 LEGAL_ADDR = "AdStern – Agentur für digitales Marketing<br>Seilerstätte 8/8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
@@ -1053,7 +1197,7 @@ def build_legal():
 <h2>Haftung</h2><p>Alle Angaben wurden sorgfältig nach den geltenden Feiertagsgesetzen berechnet und geprüft, erfolgen aber ohne Gewähr. Rechtliche Hinweise in den Ratgebern ersetzen keine Rechtsberatung.</p>""",
           ads=False, robots="noindex,follow", active="")
     write("about.html", "page.html", title="Über Kalenderkompass 24: Herausgeber, Methode und Datenquellen", description="Wer Kalenderkompass 24 herausgibt, woher die Feiertags- und Feriendaten stammen, wie sie berechnet und bei jedem Build automatisch geprüft werden.",
-          h1="Über Kalenderkompass 24", lead="Feiertage, Brückentage und Urlaubsplanung – genau, schnell und ohne Anmeldung.", checked=CHECKED_0411,
+          h1="Über Kalenderkompass 24", lead="Feiertage, Brückentage und Urlaubsplanung – genau, schnell und ohne Anmeldung.", checked=CHECKED_1811, lastmod=LASTMOD_1811,
           body=f"""<p>Kalenderkompass 24 beantwortet Fragen, die sich jedes Jahr wieder stellen: Wann ist der nächste Feiertag? Welche Brückentage gibt es? Wann sind Schulferien? Und wie hole ich aus meinem Urlaub die meisten freien Tage heraus? Die Seite deckt Österreich und Deutschland ab, jedes Bundesland einzeln, und funktioniert ohne Anmeldung.</p>
 <h2>Herausgeber</h2>
 <p>Kalenderkompass 24 ist ein Angebot von <strong>AdStern – Agentur für digitales Marketing</strong>, Seilerstätte 8/8, 1010 Wien. AdStern ist Medieninhaber und Herausgeber und verantwortet alle Inhalte; die vollständigen Angaben stehen im <a href="/imprint.html">Impressum</a>. Die Seite ist unabhängig von Behörden, Kirchen und Interessenverbänden und finanziert sich über Werbung. Anzeigen sind als „Werbung“ gekennzeichnet und vom redaktionellen Inhalt getrennt.</p>
@@ -1061,6 +1205,7 @@ def build_legal():
 <ul><li>Gesetzliche Feiertage für alle 9 österreichischen Bundesländer und alle 16 deutschen Länder, mit Landespatronen und regionalen Besonderheiten</li>
 <li>Brückentage und einen Urlaubsplaner, der Urlaubstage rund um Feiertage optimal verteilt</li>
 <li>Amtliche Schulferien-Termine mit Zeitstrahl und Kalender-Export</li>
+<li>Einen Fristenrechner, der das Fristende nach der gewählten Vorschrift berechnet und jede Verschiebung begründet</li>
 <li>Kalenderwochen, Arbeitstage-Rechner, Familienplaner und Kalender zum Ausdrucken</li>
 <li>Ratgeber zu Urlaubsanspruch, Fristen und Feiertagsregeln</li></ul>
 <h2>Woher die Daten kommen</h2>
@@ -1082,7 +1227,9 @@ def build_legal():
 <li>jeder berechnete Urlaubsblock mit einer zweiten Zählung der Arbeitstage,</li>
 <li>dass Jahresseiten in Titel und Überschriften nur ihr eigenes Jahr nennen.</li>
 </ul>
-<p>Zusätzlich gleichen wir die Ergebnisse stichprobenartig mit amtlichen Veröffentlichungen ab und prüfen die Seiten vor der Veröffentlichung in einem Browser auf Smartphone- und Desktop-Breite.</p>
+<p>Eine zweite Testreihe vergleicht die Rechnung mit amtlichen Quellen: die Osterformel mit der Osterfesttabelle der Physikalisch-Technischen Bundesanstalt für 1980 bis 2031, die österreichischen Feiertage 2026 bis 2028 mit § 7 Abs. 2 Arbeitsruhegesetz, Bayern und Berlin mit dem Bayerischen Feiertagsgesetz und der Liste der Berliner Senatsverwaltung. Was diese Reihe abdeckt und was nicht, steht unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>. Vor der Veröffentlichung prüfen wir die Seiten außerdem in einem Browser auf Smartphone- und Desktop-Breite.</p>
+<h2>Korrekturen</h2>
+<p>Stellt sich eine Angabe als falsch heraus, ändern wir die Datenquelle oder den Text, bauen die Seite neu und setzen das Prüfdatum der betroffenen Seite neu. Am {CHECKED_1811} haben wir so den Abschnitt über Samstage am Fristende im Beitrag <a href="/tage-richtig-zaehlen.html">Tage richtig zählen</a> präzisiert und die Seite „Monatsplanung“ aufgelöst, weil sie nichts enthielt, was nicht im Arbeitstage-Rechner steht.</p>
 <h2>Grenzen</h2>
 <p>Nicht enthalten sind Feiertage einzelner Gemeinden (etwa das Hohe Friedensfest in Augsburg – wir weisen auf solche Fälle hin), schulautonome Tage, betriebliche Schließtage und Regelungen aus Kollektiv- oder Tarifverträgen. Landespatrone sind in Österreich keine gesetzlichen Feiertage; wir zeigen sie getrennt an. Unsere Ratgeber erklären die Rechtslage allgemein und ersetzen keine Rechtsberatung.</p>
 <h2>KI-Werkzeuge und Prüfung</h2><p>Die Texte entstehen mit Unterstützung von KI-Werkzeugen; jede Berechnung ist durch die automatisierten Selbsttests abgesichert, und jeder Text wird vor der Veröffentlichung in einem eigenen Prüfdurchgang gegen die verlinkten Quellen geprüft. Ein Redaktionsteam gibt es nicht; verantwortlich ist AdStern.</p>
@@ -1090,10 +1237,11 @@ def build_legal():
 <h2>Fehler gefunden?</h2><p>Schreib uns an <a href="mailto:office@adstern.com">office@adstern.com</a>. Wir prüfen jeden Hinweis und korrigieren Fehler so schnell wie möglich. Stand der Daten: {UPDATED}.</p>""",
           active="", priority=0.3)
     write("privacy.html", "page.html", title="Datenschutz | Kalenderkompass 24", description="Datenschutzerklärung von Kalenderkompass 24.",
-          h1="Datenschutzerklärung", lead="Stand: 4. November 2026", ads=False, robots="noindex,follow", active="", body=f"""
+          h1="Datenschutzerklärung", lead="Stand: 18. November 2026", ads=False, robots="noindex,follow", active="", body=f"""
 <h2>Verantwortlicher</h2><p>{LEGAL_ADDR}</p>
 <h2>Hosting</h2><p>Die Website wird über GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, USA) ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten wie IP-Adresse, aufgerufene Adresse, Browserinformationen und Zeitpunkt, um die Seite auszuliefern und vor Angriffen zu schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. Die Schriften liegen auf unserem eigenen Server; es wird keine Verbindung zu Google Fonts aufgebaut.</p>
 <h2>Werkzeuge</h2><p>Kalender, Planer und Rechner arbeiten ausschließlich in deinem Browser. Deine Eingaben werden nicht an uns übertragen. Damit die Seite sich dein Bundesland merkt, speichern wir es im lokalen Speicher deines Browsers (localStorage). In „Mein Kalender“ gilt dasselbe für deine Einträge, Kategorien und Farben; sie verlassen dein Gerät nur, wenn du selbst eine Kalenderdatei oder Sicherung herunterlädst. Im Familienplaner gilt dasselbe für Namen, Geburtstage und Fotos: Fotos werden im Browser verkleinert, nicht hochgeladen und nur lokal gespeichert; das PDF entsteht auf deinem Gerät. Diese Speicherung ist für die von dir gewünschte Funktion erforderlich (§ 165 Abs. 3 TKG 2021). Du kannst sie jederzeit über die Browser-Einstellungen löschen.</p>
+<p><strong>Teilbare Links:</strong> Im Urlaubsplaner, im Arbeitstage-Rechner und im Fristenrechner kannst du mit „Link kopieren“ eine Adresse erzeugen, die deine Auswahl enthält (Land, Bundesland, Jahr, Zahl der Urlaubstage, Datumsangaben, Länge und Art der Frist). Beim Rechnen selbst ändert sich die Adresse nicht. Wird ein solcher Link geöffnet, ist die Adresse samt dieser Werte – wie bei jedem Seitenaufruf – Teil der Verbindungsdaten beim Hoster und der Seitenadresse, die Google für Anzeigen und – nur mit deiner Einwilligung – für die Statistik verarbeitet (siehe unten). Namen oder andere persönliche Angaben enthält der Link nicht.</p>
 <h2>Einwilligungsverwaltung</h2><p>Für Werbung und Statistik nutzen wir die Einwilligungsverwaltung „Datenschutz &amp; Mitteilungen“ von Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland), eine nach dem IAB Transparency &amp; Consent Framework zertifizierte Lösung. Beim ersten Besuch kannst du dort zustimmen, ablehnen oder einzelne Zwecke und Anbieter auswählen. Deine Auswahl kannst du jederzeit über „Datenschutz-Einstellungen“ im Seitenfuß ändern oder widerrufen.</p>
 <h2 id="statistik-fenster">Übergangsfenster für die Statistik</h2><p>Derzeit wird der Einwilligungsdialog von Google nicht bei jedem Besuch angezeigt. Damit du trotzdem selbst entscheiden kannst, zeigen wir in diesem Fall ein eigenes kleines Fenster unten auf der Seite: Liefert der Google-Dialog etwa drei Sekunden nach dem Aufruf keine Entscheidung und wird er nicht angezeigt, fragen wir dich, ob wir Google Analytics zur Reichweitenmessung verwenden dürfen. „Zustimmen“ und „Ablehnen“ sind gleichwertig; schließt du das Fenster mit „×“ oder triffst du keine Auswahl, bleibt die Statistik aus. Das Fenster betrifft nur Google Analytics: Es holt keine Einwilligung für Werbung, Werbe-Cookies oder Personalisierung ein, und die Werbe-Einstellungen im Google Consent Mode bleiben dabei auf „abgelehnt“. Stimmst du zu, laden wir Google Analytics 4 wie unten beschrieben (Google-Signale und Werbepersonalisierung aus). Lehnst du ab oder widerrufst du, schalten wir Google Analytics ab und löschen die Analytics-Cookies (_ga und _ga_…) unserer Domain.</p>
 <p>Deine Auswahl speichern wir im lokalen Speicher deines Browsers (localStorage) unter dem Schlüssel „kk24-statistik“: eine Versionsnummer, deine Auswahl („ja“ oder „nein“) und den Zeitpunkt. Hast du im Google-Dialog entschieden, vermerken wir dort nur den Zeitpunkt dieser Entscheidung, damit wir dich nicht doppelt fragen. Nach 12 Monaten fragen wir erneut. Diese Speicherung ist unbedingt erforderlich, um deine Entscheidung zu beachten (§ 165 Abs. 3 TKG 2021); sie wird weder an uns noch an Google übertragen. Rechtsgrundlage für Google Analytics ist auch hier deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 165 Abs. 3 TKG 2021). Widerrufen oder ändern kannst du sie jederzeit mit Wirkung für die Zukunft über „Datenschutz-Einstellungen“ unten auf jeder Seite, auch hier.</p>
@@ -1119,7 +1267,7 @@ def build_static():
     (OUT / "google9bf1079fd4bf073e.html").write_text("google-site-verification: google9bf1079fd4bf073e.html")
     (OUT / "ads.txt").write_text("google.com, pub-7811071715414905, DIRECT, f08c47fec0942fa0\n")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
-    urls = "".join(f"<url><loc>{SITE}{p}</loc><lastmod>{LASTMOD}</lastmod><priority>{pr}</priority></url>" for p, pr in PAGES)
+    urls = "".join(f"<url><loc>{SITE}{p}</loc><lastmod>{lm}</lastmod><priority>{pr}</priority></url>" for p, pr, lm in PAGES)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
 
@@ -1149,12 +1297,12 @@ def main():
     for y in (2027, 2028): build_regions(y)
     for y in YEARS: build_country(y)
     for y in (2027, 2028): build_bridges(y)
-    build_planner(); build_workdays(); build_familie(); build_mein_kalender(); build_shop()
+    build_planner(); build_workdays(); build_fristen(); build_familie(); build_mein_kalender(); build_shop()
     for y in YEARS: build_kw(y)
     for y in (2027, 2028): build_print(y)
     import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
     check_claims(); check_claims_de()
-    build_articles(); build_methodik(); build_legal(); build_static()
+    build_articles(); build_redirects(); build_methodik(); build_legal(); build_static()
     check_years()
     print(f"{len(PAGES)} indexierbare Seiten in {OUT}")
 

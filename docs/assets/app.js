@@ -286,6 +286,40 @@
     out.innerHTML = `<p class="plan-sum"><b>${work}</b> Arbeitstage zwischen ${fmt(s,state.country)} und ${fmt(e,state.country)} (beide Tage mitgezählt).</p><table class="tbl"><tbody><tr><td>Kalendertage gesamt</td><td>${total}</td></tr><tr><td>Samstage und Sonntage</td><td>${we}</td></tr><tr><td>Feiertage an Werktagen (${regionLabel(state.country,state.region)})</td><td>${hol}</td></tr><tr><td>Differenz ohne Starttag</td><td>${total-1} Tage</td></tr></tbody></table>`;
   }
 
+  /* ---------- Teilbarer Link und Ergebnis kopieren (Urlaubsplaner, Arbeitstage-Rechner) ---------- */
+  // Werte aus der Adresse übernehmen – nur geprüfte Werte, nichts davon wird als HTML eingesetzt
+  function applyShareParams(){
+    const q = new URLSearchParams(location.search);
+    const c = q.get("land"); if (c === "at" || c === "de"){ state.country = c; state.region = ""; }
+    const r = q.get("region"); if (r && Object.prototype.hasOwnProperty.call(DATA.countries[state.country].regions, r)) state.region = r;
+    const y = Number(q.get("jahr")); if (q.has("jahr") && $$("select[data-year] option").some(o => +o.value === y)) state.year = y;
+    const w = $("[data-workdays]");
+    if (w) for (const [k, n] of [["von","from"],["bis","to"]]){ const v = q.get(k) || ""; if (ISO_RE.test(v) && iso(parse(v)) === v) $(`[name=${n}]`, w).value = v; }
+    const b = $("[data-budget]"), t = Number(q.get("tage"));
+    if (b && q.has("tage") && Number.isInteger(t) && t >= +b.min && t <= +b.max) b.value = t;
+  }
+  function shareLink(){
+    const p = new URLSearchParams({ land: state.country });
+    if (state.region) p.set("region", state.region);
+    const w = $("[data-workdays]"), b = $("[data-planner] [data-budget]");
+    if (w){ p.set("von", $("[name=from]", w).value); p.set("bis", $("[name=to]", w).value); }
+    if (b){ p.set("jahr", state.year); p.set("tage", b.value); }
+    return location.origin + location.pathname + "?" + p.toString();
+  }
+  function resultText(){
+    const w = $("[data-workdays-out]"), pl = $("[data-planner]");
+    const line = el => el.innerText.split("\n").map(x => x.trim()).filter(Boolean).join(" · ");
+    let t = "";
+    if (w) t = [line($(".plan-sum", w) || w), ...$$("tr", w).map(tr => $$("td", tr).map(td => td.innerText.trim()).join(": "))].join("\n");
+    else if (pl) t = [`Urlaubsplaner ${state.year}, ${regionLabel(state.country, state.region)}: ` + line($("[data-plan-sum]", pl)), ...$$("[data-plan-list] li", pl).map(li => "– " + line(li))].join("\n");
+    return t + "\n" + shareLink();
+  }
+  function copyTo(text, msgEl, ok){
+    const say = s => { if (msgEl) msgEl.textContent = s; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => say(ok), () => say("Kopieren nicht möglich – bitte markieren: " + text));
+    else say("Kopieren nicht möglich – bitte markieren: " + text);
+  }
+
   /* ---------- Steuerung ---------- */
   function fillRegions(){
     $$("[data-region]").forEach(sel => {
@@ -323,6 +357,12 @@
     document.addEventListener("click", e => {
       if (e.target.closest("[data-ics]")){ ics(); track("feiertage_ics_export", { land: state.country, region: state.region || "alle" }); }
       if (e.target.closest("[data-print]")){ window.print(); track("kalender_drucken"); }
+      const sh = e.target.closest("[data-share]");
+      if (sh){
+        const msg = $("[data-share-msg]", sh.closest(".planner") || document);
+        if (sh.dataset.share === "link") copyTo(shareLink(), msg, "Link kopiert. Er enthält deine Auswahl.");
+        else copyTo(resultText(), msg, "Ergebnis als Text kopiert.");
+      }
       const buy = e.target.closest("[data-shop-buy]");
       if (buy) track("shop_kaufen_klick", { produkt: buy.dataset.shopBuy });
     });
@@ -345,6 +385,7 @@
       const res = await fetch("/data/feiertage.json");
       DATA = await res.json();
     } catch { return; } // ohne Daten bleibt der vorgerenderte Inhalt stehen
+    if (!fixed) applyShareParams();
     fillRegions(); bind(); renderAll();
   }
   init();

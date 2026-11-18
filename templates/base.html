@@ -32,6 +32,7 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
 {% endif %}
 <script src="/assets/app.js?v={{ v }}" defer></script>
 {% if mk %}<script src="/assets/meinkalender.js?v={{ v }}" defer></script>{% endif %}
+{% if fr %}<script src="/assets/fristen.js?v={{ v }}" defer></script>{% endif %}
 </head>
 <body{% if region_attr %} data-fixed="{{ region_attr }}"{% endif %}{% if year_attr %} data-year="{{ year_attr }}"{% endif %}>
 <a class="skip" href="#inhalt">Zum Inhalt</a>

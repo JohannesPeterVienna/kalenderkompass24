@@ -256,7 +256,14 @@ ARTICLES = [
 
 <h2>Fristen nach Gesetz</h2>
 <p>Bei Fristen wird der Tag des auslösenden Ereignisses grundsätzlich nicht mitgezählt: in Österreich nach § 902 Abs. 1 ABGB, in Deutschland nach <a href="https://www.gesetze-im-internet.de/bgb/__187.html" rel="noopener">§ 187 Abs. 1 BGB</a>. Wochen- und Monatsfristen enden an dem Tag, der „nach Benennung oder Zahl“ dem Ereignistag entspricht; fehlt dieser Tag im letzten Monat, am Monatsletzten (§ 902 Abs. 2 ABGB, <a href="https://www.gesetze-im-internet.de/bgb/__188.html" rel="noopener">§ 188 BGB</a>).</p>
-<p>Fällt das Fristende auf einen Sonntag oder Feiertag, tritt der nächste Werktag an seine Stelle (<a href="https://ris.bka.gv.at/Dokumente/Bundesnormen/NOR12018627/NOR12018627.pdf" rel="noopener">§ 903 ABGB</a>). Das deutsche Recht nennt in <a href="https://www.gesetze-im-internet.de/bgb/__193.html" rel="noopener">§ 193 BGB</a> zusätzlich ausdrücklich den Samstag. § 903 ABGB nennt den Samstag nicht; ob er in Österreich ein Fristende verschiebt, hängt von der jeweiligen Frist und dem Verfahren ab – im Zweifel lieber am Freitag erledigen.</p>
+<p>Fällt das Fristende auf einen Sonntag oder Feiertag, tritt der nächste Werktag an seine Stelle (<a href="https://www.ris.bka.gv.at/eli/jgs/1811/946/P903/NOR12018627" rel="noopener">§ 903 ABGB</a>). Das deutsche Recht nennt in <a href="https://www.gesetze-im-internet.de/bgb/__193.html" rel="noopener">§ 193 BGB</a> zusätzlich ausdrücklich den Samstag. § 903 ABGB nennt ihn nicht; in Österreich ergibt er sich im Zivilrecht aus <a href="https://www.ris.bka.gv.at/eli/bgbl/1983/254/A5/NOR12010626" rel="noopener">Art. 5 des Europäischen Übereinkommens über die Berechnung von Fristen</a>, im Verfahren aus der jeweiligen Verfahrensvorschrift.</p>
+<p>Welcher Tag verschiebt, hängt in Österreich von der Vorschrift ab:</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Letzter Tag fällt auf …</th><th scope="col">Vertrag (§ 903 ABGB, Art. 5 Übereinkommen)</th><th scope="col">Behörde (§ 33 AVG), Finanzamt (§ 108 BAO)</th><th scope="col">Zivilprozess (§ 126 ZPO)</th></tr></thead><tbody>
+<tr><td>Samstag, Sonntag, gesetzlicher Feiertag</td><td>verschiebt</td><td>verschiebt</td><td>verschiebt</td></tr>
+<tr><td>Karfreitag</td><td>nicht genannt</td><td>verschiebt</td><td>verschiebt</td></tr>
+<tr><td>24. Dezember</td><td>nicht genannt</td><td>verschiebt</td><td>nicht genannt</td></tr>
+<tr><td>Landespatron, 31. Dezember</td><td>nicht genannt</td><td>nicht genannt</td><td>nicht genannt</td></tr></tbody></table></div>
+<p>Vier Wochen ab Freitag, 26. Februar 2027, enden deshalb im Verwaltungsverfahren erst am Dienstag, 30. März 2027, aus einem Vertrag aber schon am Karfreitag, 26. März. Der <a href="/fristenrechner.html?land=at&amp;region=wien&amp;regel=at-avg&amp;start=2027-02-26&amp;n=4&amp;einheit=wochen">Fristenrechner</a> rechnet genau diesen Fall vor – und jeden anderen mit deinen Werten, samt der Vorschriften für Deutschland.</p>
 
 <h2>Österreich und Deutschland: die Unterschiede</h2>
 <ul>
@@ -323,7 +330,7 @@ ARTICLES = [
 <h2>Was der Schalttag im Alltag bedeutet</h2>
 <ul>
 <li><strong>Gehalt:</strong> Der 29. Februar 2028 ist ein Dienstag und damit ein normaler Arbeitstag. Wer ein festes Monatsgehalt bezieht, arbeitet ihn ohne zusätzliches Geld; wer nach Stunden bezahlt wird, verdient einen Tag mehr.</li>
-<li><strong>Fristen:</strong> Monatsfristen enden am entsprechenden Tag des Folgemonats. Beginnt eine Frist am 29. Jänner 2027, gibt es im Februar 2027 keinen 29. – sie endet am Monatsletzten, dem 28. Februar. Weil das ein Sonntag ist, rückt das Ende auf Montag, 1. März. Im Jahr 2028 gäbe es den 29. Februar, die Frist endete dann dort (§ 902 Abs. 2 ABGB, <a href="https://www.gesetze-im-internet.de/bgb/__188.html" rel="noopener">§ 188 Abs. 3 BGB</a>).</li>
+<li><strong>Fristen:</strong> Monatsfristen enden am entsprechenden Tag des Folgemonats. Beginnt eine Frist am 29. Jänner 2027, gibt es im Februar 2027 keinen 29. – sie endet am Monatsletzten, dem 28. Februar. Weil das ein Sonntag ist, rückt das Ende auf Montag, 1. März. Im Jahr 2028 gäbe es den 29. Februar, die Frist endete dann dort (§ 902 Abs. 2 ABGB, <a href="https://www.gesetze-im-internet.de/bgb/__188.html" rel="noopener">§ 188 Abs. 3 BGB</a>). Zum Nachrechnen: <a href="/fristenrechner.html?land=at&amp;regel=at-abgb&amp;start=2027-01-29&amp;n=1&amp;einheit=monate">dieselbe Frist im Fristenrechner</a>.</li>
 <li><strong>Geburtstag am 29. Februar:</strong> In Nicht-Schaltjahren feiern die meisten am 28. Februar oder am 1. März. Rechtlich wird man in Deutschland mit Ablauf des 28. Februar ein Jahr älter, weil der Geburtstag bei der Altersberechnung mitzählt (<a href="https://www.gesetze-im-internet.de/bgb/__187.html" rel="noopener">§ 187 Abs. 2 BGB</a>) und § 188 Abs. 3 BGB greift.</li>
 <li><strong>Zinsen und Mieten:</strong> Je nach Zinsmethode zählt ein Schaltjahr mit 366 Tagen. Die Monatsmiete bleibt gleich.</li>
 </ul>
@@ -342,55 +349,6 @@ ARTICLES = [
 <p>Im altrömischen Kalender war der Februar der letzte Monat des Jahres. Die Korrektur wurde ans Jahresende gehängt – und blieb dort, als der Jahresbeginn auf den 1. Jänner wanderte.</p>
 <h3>Ändert sich durch das Schaltjahr das Osterdatum?</h3>
 <p>Nicht direkt. Ostern ist der erste Sonntag nach dem ersten Frühlingsvollmond und hängt vom Mondzyklus ab. 2027 ist Ostersonntag am 28. März, 2028 am 16. April.</p>
-""",
-},
-{
-"slug": "monatsplanung",
-"title": "Monatsplanung: Termine, Fristen und freie Tage im Griff",
-"teaser": "Ein Blick auf den ganzen Monat spart Stress – so baust du deine Übersicht auf.",
-"description": "Monatsplanung mit Kalender: eine einfache Methode, um Termine, Fristen, Feiertage und Urlaub für den ganzen Monat im Blick zu behalten.",
-"body": """
-<p>Eine Monatsübersicht zeigt, was eine Wochenliste versteckt: Engpässe, freie Lücken und Termine, die sich gegenseitig im Weg stehen. Zehn bis fünfzehn Minuten am Monatsanfang reichen. Diese Anleitung führt in fünf Schritten durch die Planung und rechnet sie am Beispiel Mai 2027 durch – dem Monat mit den meisten Feiertagen des Jahres.</p>
-
-<h2>1. Das Feste zuerst</h2>
-<p>Trag Feiertage, Urlaub, Schulferien und Geburtstage ein. Sie verändern sich nicht und bestimmen, wie viele Arbeitstage der Monat wirklich hat. Erst danach weißt du, wie viel Zeit für alles andere bleibt.</p>
-<p><strong>Beispiel Mai 2027:</strong> Der Monat hat 21 Tage von Montag bis Freitag. In Österreich fallen Christi Himmelfahrt (Donnerstag, 6. Mai), Pfingstmontag (17. Mai) und Fronleichnam (Donnerstag, 27. Mai) auf Werktage – es bleiben <strong>18 Arbeitstage</strong>. Der Staatsfeiertag am 1. Mai ist ein Samstag und bringt keinen freien Werktag. In Berlin, Hamburg oder Niedersachsen gilt Fronleichnam nicht, dort hat der Mai 19 Arbeitstage; in Hessen, Bayern oder Nordrhein-Westfalen wieder 18.</p>
-
-<h2>2. Fristen markieren – doppelt</h2>
-<p>Steuertermine, Kündigungsfristen, Abgabetermine, Zahlungsziele: Trag jeweils das Fristende ein und zusätzlich einen Erinnerungstermin eine Woche vorher. Prüfe, ob das Ende auf ein Wochenende oder einen Feiertag fällt. Eine Zwei-Wochen-Frist ab Mittwoch, 5. Mai 2027, endet am Mittwoch, 19. Mai – einem normalen Arbeitstag. Ab Donnerstag, 13. Mai, gerechnet, endet sie am Donnerstag, 27. Mai, und damit in Österreich auf Fronleichnam; das Ende rückt auf Freitag, 28. Mai (<a href="https://ris.bka.gv.at/Dokumente/Bundesnormen/NOR12018627/NOR12018627.pdf" rel="noopener">§ 903 ABGB</a>). In Berlin bliebe es beim 27. Mai. Mehr dazu im Beitrag <a href="/tage-richtig-zaehlen.html">Tage richtig zählen</a>.</p>
-
-<h2>3. Die großen Brocken verteilen</h2>
-<p>Größere Aufgaben bekommen feste Blöcke im Kalender – nicht auf den Tag vor einer Frist, sondern mit Puffer. Arbeitstage direkt vor oder nach einem Feiertag sind oft unruhig, weil viele frei haben: Kunden antworten langsamer, Kolleginnen fehlen. Plane dort lieber Routinearbeit, Ablage oder Konzeptarbeit allein.</p>
-<p>Im Mai 2027 heißt das: Die Woche vom 10. bis 14. Mai ist die einzige volle Arbeitswoche ohne Feiertag vor Pfingsten. Wichtige Besprechungen gehören dorthin oder in die Woche ab 31. Mai – nicht auf Freitag, 7. Mai, oder Freitag, 28. Mai, an denen viele einen Brückentag nehmen.</p>
-
-<h2>4. Urlaub und Brückentage rechtzeitig festlegen</h2>
-<p>Brückentage sind im Team schnell vergeben. Wer seinen Monat früh plant, sichert sie sich. Im Mai 2027 gibt es zwei: den 7. Mai nach Christi Himmelfahrt und – in Österreich und den Ländern mit Fronleichnam – den 28. Mai. Mit fünf Urlaubstagen vom 10. bis 14. Mai entstehen außerdem zehn freie Tage vom 8. bis 17. Mai. In Österreich gilt dafür die Vereinbarung nach <a href="https://www.ris.bka.gv.at/Dokumente/Bundesnormen/NOR12097973/NOR12097973.pdf" rel="noopener">§ 4 Urlaubsgesetz</a>, in Deutschland legt der Arbeitgeber den Urlaub unter Berücksichtigung deiner Wünsche fest (<a href="https://www.gesetze-im-internet.de/burlg/__7.html" rel="noopener">§ 7 BUrlG</a>). Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> rechnet die besten Termine für dein Bundesland aus.</p>
-
-<h2>5. Platz lassen</h2>
-<p>Ein Monat, der zu 100 Prozent verplant ist, scheitert am ersten unerwarteten Termin. Halte pro Woche einen halben Tag frei. In Monaten mit vielen Feiertagen ist das besonders wichtig, weil weniger Arbeitstage für dieselbe Menge Aufgaben bleiben: 18 statt 21 Tage sind rund 14 Prozent weniger Zeit.</p>
-
-<h2>Österreich und Deutschland: worauf du achten solltest</h2>
-<ul>
-<li><strong>Landespatrone in Österreich</strong> wie der Florianitag (4. Mai, Oberösterreich) sind keine gesetzlichen Feiertage, an Schulen aber meist frei. Eltern sollten sie trotzdem eintragen.</li>
-<li><strong>Deutschland:</strong> Feiertage unterscheiden sich je nach Land stark. Im März 2027 etwa hat Berlin wegen des Frauentags (Montag, 8. März) einen Arbeitstag weniger als Brandenburg.</li>
-<li><strong>Pendler über Landesgrenzen</strong> richten sich nach den Feiertagen am Arbeitsort, Kinder nach den Schulferien am Wohnort.</li>
-</ul>
-
-<h2>Typische Fehler</h2>
-<ul>
-<li><strong>Nur Wochen planen:</strong> Wer immer nur die nächsten sieben Tage sieht, bemerkt den feiertagsreichen Mai erst, wenn er da ist.</li>
-<li><strong>Feiertage des falschen Bundeslandes:</strong> Viele Kalender-Apps zeigen nur bundesweite Feiertage – Fronleichnam oder der Reformationstag fehlen dann.</li>
-<li><strong>Fristen ohne Vorlauf:</strong> Ein Erinnerungstermin am Tag der Frist hilft nicht mehr.</li>
-</ul>
-<div class="note">Für die Wand oder den Schreibtisch: Der <a href="/kalender-2027-zum-ausdrucken.html">Kalender 2027 zum Ausdrucken</a> zeigt alle Feiertage auf einer A4-Seite. Wie viele Arbeitstage ein beliebiger Zeitraum hat, zählt der <a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a>.</div>
-
-<h2>Häufige Fragen</h2>
-<h3>Wann ist der beste Zeitpunkt für die Monatsplanung?</h3>
-<p>Am letzten Arbeitstag des Vormonats. Dann sind die meisten Termine bekannt, und du startest ohne Lücke in den neuen Monat.</p>
-<h3>Papier oder App?</h3>
-<p>Beides funktioniert. Ein ausgedruckter Monat an der Wand zeigt der ganzen Familie, was ansteht; die App erinnert dich an Fristen. Viele kombinieren beides: Feiertage und Ferien auf Papier, Termine digital.</p>
-<h3>Welcher Monat hat 2027 die wenigsten Arbeitstage?</h3>
-<p>In Österreich der Mai mit 18, gefolgt vom Jänner mit 19. In Berlin hat ebenfalls der Mai die wenigsten, nämlich 19.</p>
 """,
 },
 ]

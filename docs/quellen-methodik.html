@@ -24,10 +24,10 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
 <meta name="theme-color" content="#FAFAF7">
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/style.css?v=20261105d">
+<link rel="stylesheet" href="/assets/style.css?v=20261118a">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://kalenderkompass24.de/", "name": "Start", "position": 1}, {"@type": "ListItem", "item": "https://kalenderkompass24.de/quellen-methodik.html", "name": "Quellen \u0026 Methodik", "position": 2}]}</script>
-<script src="/assets/consent.js?v=20261105d" defer></script>
-<script src="/assets/app.js?v=20261105d" defer></script>
+<script src="/assets/consent.js?v=20261118a" defer></script>
+<script src="/assets/app.js?v=20261118a" defer></script>
 </head>
 <body>
 <a class="skip" href="#inhalt">Zum Inhalt</a>
@@ -40,7 +40,7 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
 <nav class="crumbs wrap" aria-label="Brotkrumen"><a href="/">Start</a> › <span>Quellen &amp; Methodik</span></nav><div class="wrap layout" style="padding-top:28px">
   <article class="prose" style="max-width:none">
     <h1>Quellen &amp; Methodik</h1>
-<p class="lead">Woher unsere Feiertags- und Feriendaten stammen, wie wir rechnen und wie wir prüfen.</p>    <p class="small muted checked">Geprüft am 3. November 2026</p>
+<p class="lead">Woher unsere Feiertags- und Feriendaten stammen, wie wir rechnen und wie wir prüfen.</p>    <p class="small muted checked">Geprüft am 18. November 2026</p>
 <div class="ad ad--billboard" data-ad="billboard" aria-hidden="true"></div>    <div class="prose">
 <p>Kalenderkompass 24 schreibt Feiertage nicht von anderen Seiten ab. Wir berechnen sie aus den Rechtsgrundlagen, übernehmen Schulferien nur aus amtlichen Veröffentlichungen und prüfen das Ergebnis bei jedem Build automatisch. Hier steht, welche Quellen wir verwenden, wie die Berechnung funktioniert und wo die Grenzen liegen.</p>
 
@@ -63,6 +63,9 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
 </ul>
 <p>Wir zeigen nur Schuljahre, die amtlich veröffentlicht sind – derzeit 2026/2027. Schätzungen für spätere Jahre gibt es bei uns nicht. Schulautonome Tage legt jede Schule selbst fest; sie stehen in keinem amtlichen Kalender und sind nicht enthalten.</p>
 
+<h2>Fristen</h2>
+<p>Der <a href="/fristenrechner.html">Fristenrechner</a> stützt sich auf §§ 902 und 903 ABGB, Art. 5 des Europäischen Übereinkommens über die Berechnung von Fristen (BGBl. Nr. 254/1983), §§ 32 und 33 AVG, § 108 BAO, §§ 125 und 126 ZPO und § 84 StPO für Österreich sowie §§ 187 bis 193 BGB, § 222 ZPO, § 31 VwVfG, § 108 AO, § 26 SGB X, § 57 VwGO, § 16 FamFG und §§ 42, 43 StPO für Deutschland. Die österreichischen Bestimmungen haben wir am 18. November 2026 in der konsolidierten Fassung über die offene Datenschnittstelle des RIS gelesen, die deutschen auf gesetze-im-internet.de. Jede Zeile der Tabelle auf der Rechnerseite verlinkt die Bestimmung.</p>
+
 <h2>Wie wir die Termine berechnen</h2>
 <p>Feste Feiertage wie der 26. Oktober stehen direkt im Gesetz. Die beweglichen Feiertage hängen am Ostersonntag. Diesen berechnen wir mit der Gaußschen Osterformel in der heute üblichen Fassung für den gregorianischen Kalender (dem sogenannten anonymen Algorithmus, wie ihn etwa Jean Meeus beschreibt). Für 2027 ergibt sie Sonntag, 28. März 2027. Davon abgeleitet:</p>
 <ul>
@@ -76,14 +79,22 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
 <p><strong>Fenster- und Brückentage</strong> sind bei uns Folgen von einem oder zwei Arbeitstagen (Montag bis Freitag, kein gesetzlicher Feiertag), die zwischen einem gesetzlichen Feiertag und einem Wochenende oder einem weiteren Feiertag liegen. Landespatrone und andere schulfreie Tage zählen dabei nicht als frei, weil sie für Beschäftigte normale Arbeitstage sind. „Freie Tage je Urlaubstag“ ist die Länge des freien Blocks geteilt durch die dafür nötigen Urlaubstage bei einer Fünftagewoche.</p>
 
 <h2>So prüfen wir</h2>
-<p>Bei jedem Build laufen Selbsttests: Ostertermine von 2000 bis 2038 gegen bekannte Daten, der Buß- und Bettag gegen eine zweite, unabhängige Rechnung, die Zahl der bundesweiten Feiertage, die Fenstertage 2027 in Österreich und alle Datumsangaben in den Bundesländer-Texten gegen die Datentabellen. Schlägt ein Test fehl, wird die Seite nicht erzeugt. Zusätzlich gleichen wir die Ergebnisse stichprobenartig mit amtlichen Veröffentlichungen ab.</p>
+<p>Bei jedem Build laufen Selbsttests: Ostertermine von 2000 bis 2038 gegen bekannte Daten, der Buß- und Bettag gegen eine zweite, unabhängige Rechnung, die Zahl der bundesweiten Feiertage, die Fenstertage 2027 in Österreich und alle Datumsangaben in den Bundesländer-Texten gegen die Datentabellen. Schlägt ein Test fehl, wird die Seite nicht erzeugt.</p>
+<p>Dazu kommt eine eigene Testreihe gegen amtliche Quellen (Stand 18. November 2026):</p>
+<ul>
+<li><strong>Ostern 1980 bis 2031</strong> gegen die Osterfesttabelle der Physikalisch-Technischen Bundesanstalt (<a href="https://www.ptb.de/cms/ptb/fachabteilungen/abt4/fb-44/ag-441/darstellung-der-gesetzlichen-zeit/wann-ist-ostern.html" rel="noopener">PTB – Wann ist Ostern?</a>), alle 52 Jahre; ebenso die dort genannten Abstände für Christi Himmelfahrt, Pfingsten und Fronleichnam. Auch die Osterrechnung im Browser wird gegen diese Tabelle geprüft.</li>
+<li><strong>Österreich 2026 bis 2028</strong> Tag für Tag gegen die 13 Feiertage des § 7 Abs. 2 Arbeitsruhegesetz.</li>
+<li><strong>Bayern und Berlin 2027 und 2028</strong> Tag für Tag gegen Art. 1 des Bayerischen Feiertagsgesetzes und die Feiertagsliste der Berliner Senatsverwaltung für Inneres.</li>
+<li><strong>Die übrigen 14 deutschen Länder</strong> sind in dieser Testreihe nur mit der Zahl ihrer Feiertage 2027 festgehalten. Ihre Landesgesetze haben wir am 18. November 2026 nicht erneut abgerufen; ein Tag-für-Tag-Abgleich steht für sie noch aus.</li>
+<li><strong>Fristenrechner:</strong> jede Rechenregel, alle Beispiele der Seite und jeder Starttag des Jahres 2027 für jede Vorschrift – das Ergebnis darf nie auf einen Tag fallen, der nach der gewählten Vorschrift verschiebt.</li>
+</ul>
 
 <h2>Stand und Grenzen</h2>
-<p>Letzte inhaltliche Prüfung: 3. November 2026. Nicht enthalten sind Regelungen aus Kollektiv- und Tarifverträgen (etwa zum 24. und 31. Dezember), betriebliche Schließtage und Feiertage einzelner Gemeinden. Alle Angaben erfolgen ohne Gewähr und ersetzen keine Rechtsberatung. Einen Fehler gefunden? Schreib an <a href="mailto:office@adstern.com">office@adstern.com</a> – wir prüfen jeden Hinweis.</p>
+<p>Letzte inhaltliche Prüfung: 18. November 2026. Nicht enthalten sind Regelungen aus Kollektiv- und Tarifverträgen (etwa zum 24. und 31. Dezember), betriebliche Schließtage und Feiertage einzelner Gemeinden. Alle Angaben erfolgen ohne Gewähr und ersetzen keine Rechtsberatung. Einen Fehler gefunden? Schreib an <a href="mailto:office@adstern.com">office@adstern.com</a> – wir prüfen jeden Hinweis.</p>
 </div>
   </article>
   <aside class="side">
-    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Fenstertage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/kalender-2027-zum-ausdrucken.html">Kalender 2027 zum Ausdrucken</a></li></ul></div>
+    <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Fenstertage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/fristenrechner.html">Fristenrechner</a></li><li><a href="/kalender-2027-zum-ausdrucken.html">Kalender 2027 zum Ausdrucken</a></li></ul></div>
 <div class="ad ad--half" data-ad="half" aria-hidden="true"></div><div class="ad ad--sky" data-ad="sky" aria-hidden="true"></div>  </aside>
 </div>
 <div class="wrap"><div class="ad ad--superbanner" data-ad="superbanner" aria-hidden="true"></div><div class="ad ad--mbanner" data-ad="mbanner" aria-hidden="true"></div></div></main>
