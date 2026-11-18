@@ -17,6 +17,7 @@ function feiertage(land, region) {
   for (const y of JAHRE) for (const [d, name, kind, note] of DATA.h[`${land}:${region}:${y}`] || []) if (kind === "legal") out[d] = { name, note };
   return out;
 }
+const R_ABGB = REGEL["at-abgb"];
 const rechne = (e) => F.berechne(e, REGEL[e.regel], feiertage(e.land, e.region || ""));
 
 /* Osterfesttabelle der PTB (abgerufen 18.11.2026), wörtlich. */
@@ -78,9 +79,14 @@ test("Alle Beispiele der Seite ergeben das dort genannte Ende", () => {
 test("Welche Tage verschieben, hängt von der Vorschrift ab", () => {
   const basis = { land: "at", region: "wien", n: 1, einheit: "tage", modus: "ereignis" };
   const ende = (regel, start, extra = {}) => rechne({ ...basis, ...extra, regel, start }).ende;
-  // Karfreitag 26.3.2027: nur Verfahrensvorschriften verschieben (bis Di 30.3., weil Ostermontag Feiertag ist)
-  for (const id of ["at-avg", "at-bao", "at-zpo", "at-stpo"]) assert.equal(ende(id, "2027-03-25"), "2027-03-30", id);
-  assert.equal(ende("at-abgb", "2027-03-25"), "2027-03-26");
+  // Karfreitag 26.3.2027 verschiebt in jeder österreichischen Vorschrift (bis Di 30.3., weil Ostermontag Feiertag ist):
+  // Verfahrensgesetze nennen ihn, im Zivilrecht hat ihn Österreich nach Art. 11 Fristenübereinkommen notifiziert.
+  for (const id of ["at-abgb", "at-avg", "at-bao", "at-zpo", "at-stpo"]) assert.equal(ende(id, "2027-03-25"), "2027-03-30", id);
+  assert.equal(rechne({ land: "at", region: "wien", regel: "at-abgb", start: "2027-02-26", n: 4, einheit: "wochen", modus: "ereignis" }).ende, "2027-03-30", "Kontrollfall");
+  assert.deepEqual(rechne({ land: "at", region: "wien", regel: "at-abgb", start: "2027-02-26", n: 4, einheit: "wochen" }).schritte.map(s => s.grund),
+    ["Karfreitag", "Samstag", "Sonntag", "gesetzlicher Feiertag (Ostermontag)"]);
+  assert.deepEqual(CFG.regeln.filter(r => r.land === "at").map(r => r.kf), [true, true, true, true, true]);
+  assert.ok(R_ABGB.quellen.some(q => /\/P0\/NOR40232557$/.test(q[1])), "Notifikation nach Art. 11 ist verlinkt");
   // 24.12.2026 (Donnerstag): nur AVG und BAO; danach Christtag (Fr), Stefanitag (Sa), Sonntag → Montag 28.12.
   for (const id of ["at-avg", "at-bao"]) assert.equal(ende(id, "2026-12-23"), "2026-12-28", id);
   for (const id of ["at-abgb", "at-zpo", "at-stpo"]) assert.equal(ende(id, "2026-12-23"), "2026-12-24", id);
@@ -102,7 +108,12 @@ test("Tagesbeginn nur, wo die Vorschrift ihn kennt", () => {
   const e = { land: "at", region: "", regel: "at-avg", start: "2027-03-01", n: 1, einheit: "monate", modus: "tagesbeginn" };
   assert.equal(rechne(e).modus, "ereignis");
   assert.equal(rechne(e).roh, "2027-04-01");
-  assert.equal(rechne({ ...e, land: "de", regel: "de-bgb" }).modus, "tagesbeginn");
+  // alle deutschen Vorschriften, die auf §§ 187 ff. BGB verweisen
+  for (const id of ["de-bgb", "de-zpo", "de-vwvfg"]) {
+    assert.equal(rechne({ ...e, land: "de", regel: id }).modus, "tagesbeginn", id);
+    assert.equal(rechne({ ...e, land: "de", regel: id }).roh, "2027-03-31", id);
+  }
+  assert.equal(rechne({ ...e, land: "de", regel: "de-stpo" }).modus, "ereignis");
 });
 
 test("Das Ende ist nie ein Tag, der laut Vorschrift verschiebt – alle Starttage 2027, alle Vorschriften", () => {
@@ -138,15 +149,26 @@ test("Unsinnseingaben liefern eine Meldung, keinen Absturz", () => {
   assert.match(rechne({ ...ok, n: 999, einheit: "jahre" }).fehler, /Feiertagsdaten/);
 });
 
-test("Hinweise: Karfreitag im Vertragsrecht, Gemeindefeiertage, fehlender Monatstag", () => {
+test("Hinweise: Gemeindefeiertage, fehlender Monatstag, zwei mögliche Enden", () => {
   const h = (e) => { const r = rechne(e), ft = feiertage(e.land, e.region || ""); return F.hinweise(r, REGEL[e.regel], e, ft, F.regionaleTage(e.land, e.region, JAHRE)).join(" | "); };
-  assert.match(h(CFG.beispiele[1]), /Karfreitag/);
-  assert.doesNotMatch(h(CFG.beispiele[0]), /Karfreitag/);
+  assert.equal(h(CFG.beispiele[0]), ""); assert.equal(h(CFG.beispiele[1]), "");
+  assert.match(h(CFG.beispiele[CFG.beispiele.length - 1]), /24\. Dezember ist kein gesetzlicher Feiertag/);
   assert.match(h(CFG.beispiele[2]), /Monatsletzten/);
   // Mariä Himmelfahrt 2028 (Dienstag) in Bayern: verschiebt, mit Hinweis auf die Gemeinden
   const by = { land: "de", region: "bayern", regel: "de-bgb", start: "2028-08-01", n: 2, einheit: "wochen", modus: "ereignis" };
   assert.equal(rechne(by).ende, "2028-08-16");
+  assert.equal(rechne(by).alternativ, "2028-08-15", "wo der Tag kein Feiertag ist, endet die Frist am 15. August");
   assert.match(h(by), /überwiegend katholischer Bevölkerung/);
+  assert.match(h(by), /Dienstag, 15\. August 2028 der letzte Tag/);
+  // 15.8.2026 ist ein Samstag: Es verschiebt der Samstag, nicht der Feiertag → keine Gemeinde-Notiz, kein zweites Ende
+  const sa = { ...by, start: "2026-08-01" }, rs = rechne(sa);
+  assert.equal(rs.ende, "2026-08-17"); assert.equal(rs.alternativ, "");
+  assert.deepEqual(rs.schritte.map(s => [s.grund, s.note]), [["Samstag", ""], ["Sonntag", ""]]);
+  assert.doesNotMatch(h(sa), /katholisch/);
+  // 15.8.2027 ist ein Sonntag: ebenso
+  assert.equal(rechne({ ...by, start: "2027-08-01" }).alternativ, ""); assert.doesNotMatch(h({ ...by, start: "2027-08-01" }), /katholisch/);
+  // Beispiele ohne bedingten Feiertag haben kein zweites Ende
+  for (const b of CFG.beispiele) assert.equal(rechne(b).alternativ, "", b.titel);
   // Fronleichnam 2027 in Sachsen: kein landesweiter Feiertag → kein Verschieben, aber Hinweis
   const sn = { land: "de", region: "sachsen", regel: "de-zpo", start: "2027-05-13", n: 2, einheit: "wochen", modus: "ereignis" };
   assert.equal(rechne(sn).ende, "2027-05-27");
@@ -154,6 +176,11 @@ test("Hinweise: Karfreitag im Vertragsrecht, Gemeindefeiertage, fehlender Monats
   assert.match(h({ ...sn, region: "" }), /bundesweiten Feiertagen/);
   // Augsburg: Fristende Freitag, 8.8.2030
   assert.match(h({ land: "de", region: "bayern", regel: "de-bgb", start: "2030-08-01", n: 1, einheit: "wochen", modus: "ereignis" }), /Augsburg/);
+});
+
+test("Monatsnamen: Jänner in Österreich, Januar bei deutscher Auswahl", () => {
+  F.sprache("de"); assert.equal(F.lang("2027-01-31"), "Sonntag, 31. Januar 2027");
+  F.sprache("at"); assert.equal(F.lang("2027-01-31"), "Sonntag, 31. Jänner 2027");
 });
 
 test("Die Vorschriften-Tabelle ist in sich stimmig", () => {
@@ -167,6 +194,6 @@ test("Die Vorschriften-Tabelle ist in sich stimmig", () => {
     if (r.land === "de") { assert.equal(r.kf, false); assert.equal(r.d24, false); }   // Karfreitag ist dort ohnehin Feiertag
   }
   assert.deepEqual(CFG.regeln.filter(r => r.d24).map(r => r.id).sort(), ["at-avg", "at-bao"]);
-  assert.deepEqual(CFG.regeln.filter(r => r.tagesbeginn).map(r => r.id), ["de-bgb"]);
+  assert.deepEqual(CFG.regeln.filter(r => r.tagesbeginn).map(r => r.id).sort(), ["de-bgb", "de-vwvfg", "de-zpo"]);
   assert.match(CFG.abruf, /^\d{4}-\d{2}-\d{2}$/);
 });

@@ -233,6 +233,92 @@ for (const breite of [390, 1366]) {
     assert.deepEqual([...probleme, ...s2.probleme], []);
     await s2.page.close();
   });
+
+  await fall(`${breite} px Fristenrechner: Hinweis keine Rechtsberatung, Link mit leerer Region, Tagesbeginn, zwei mögliche Enden`, async () => {
+    // Kontrollfall der Prüfung: Vertrag, Wien, 4 Wochen ab 26.2.2027 → 30.3.2027 (Karfreitag nach Art. 11 notifiziert)
+    const { page, probleme } = await seite(ctx, "/fristenrechner.html?land=at&region=wien&regel=at-abgb&start=2027-02-26&n=4&einheit=wochen");
+    await page.waitForSelector("[data-fr-aus] .fr-streifen");
+    assert.match(await ergebnis(page), /Dienstag, 30\. März 2027/);
+    assert.match(await page.locator(".fr-schritte").innerText(), /26\. März ist Karfreitag/);
+    assert.match(await page.locator(".fr-beratung").innerText(), /Rechenhilfe, keine Rechtsberatung – Fristbeginn und anwendbare Vorschrift selbst prüfen/);
+    assert.equal(await page.locator('.fr-beratung a[href="#grenzen"]').count(), 1);
+    assert.equal(await page.locator("h2#grenzen").count(), 1);
+    // gemerktes Bundesland darf einen Link ohne Region nicht verändern
+    await page.evaluate(() => localStorage.setItem("kk24-region", "de:bayern"));
+    await page.goto(BASE + "/fristenrechner.html?land=de&regel=de-zpo&start=2027-05-13&n=2&einheit=wochen");
+    await page.waitForSelector("[data-fr-aus] .fr-streifen");
+    assert.equal(await page.locator("[name=region]").inputValue(), "");
+    assert.match(await ergebnis(page), /Donnerstag, 27\. Mai 2027/);
+    await page.click("[data-fr=link]");
+    await page.waitForFunction(() => /Link kopiert/.test(document.querySelector("[data-fr-meldung]").textContent));
+    assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\?land=de&region=&regel=de-zpo&start=2027-05-13/);
+    // ohne Werte im Link gilt das gemerkte Bundesland
+    await page.goto(BASE + "/fristenrechner.html");
+    await page.waitForSelector("[data-fr-aus] .fr-streifen");
+    assert.equal(await page.locator("[name=region]").inputValue(), "bayern");
+    // Monatsname bei deutscher Auswahl
+    await page.fill("[name=start]", "2027-01-04"); await page.fill("[name=n]", "1"); await page.selectOption("[name=einheit]", "wochen");
+    assert.match(await ergebnis(page), /Montag, 11\. Januar 2027/);
+    assert.doesNotMatch(await page.locator("[data-fr-aus]").innerText(), /Jänner/);
+    // Tagesbeginn: bei § 222 ZPO und § 31 VwVfG zulässig, bei der StPO sichtbar zurückgesetzt
+    await page.selectOption("[name=regel]", "de-bgb"); await page.selectOption("[name=modus]", "tagesbeginn");
+    await page.fill("[name=start]", "2027-03-01"); await page.selectOption("[name=einheit]", "monate");
+    assert.match(await ergebnis(page), /Mittwoch, 31\. März 2027/);
+    for (const id of ["de-zpo", "de-vwvfg"]) {
+      await page.selectOption("[name=regel]", id);
+      assert.equal(await page.locator("[name=modus]").inputValue(), "tagesbeginn", id);
+      assert.match(await ergebnis(page), /Mittwoch, 31\. März 2027/, id);
+    }
+    await page.selectOption("[name=regel]", "de-stpo");
+    assert.equal(await page.locator("[name=modus]").inputValue(), "ereignis");
+    assert.match(await page.locator(".fr-hinweise").innerText(), /„Der erste Tag zählt mit“ gibt es nur/);
+    assert.match(await ergebnis(page), /Donnerstag, 1\. April 2027/);
+    await page.selectOption("[name=regel]", "de-bgb");
+    assert.equal(await page.locator(".fr-hinweise").count(), 0, "Meldung verschwindet, sobald die Vorschrift den Modus kennt");
+    // Mariä Himmelfahrt 2028 (Dienstag) in Bayern: beide Enden gleichrangig, Kalenderdatei auf das frühere
+    await page.selectOption("[name=modus]", "ereignis"); await page.fill("[name=start]", "2028-08-01"); await page.fill("[name=n]", "2"); await page.selectOption("[name=einheit]", "wochen");
+    const kopf = await ergebnis(page);
+    assert.match(kopf, /Dienstag, 15\. August 2028/); assert.match(kopf, /wo Mariä Himmelfahrt gesetzlicher Feiertag ist:\s*Mittwoch, 16\. August 2028/);
+    assert.equal(await page.locator(".fr-tag.ziel").count(), 2);
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("[data-fr=ics]")]);
+    assert.equal(dl.suggestedFilename(), "fristende-2028-08-15.ics");
+    const ics = fs.readFileSync(await dl.path(), "utf8");
+    assert.match(ics, /DTSTART;VALUE=DATE:20280815/); assert.match(ics, /16\. August 2028/); assert.match(ics, /Rechenhilfe\\, keine Rechtsberatung/);
+    assert.doesNotMatch(ics.replace(/\\[\\;,n]/g, ""), /DESCRIPTION:[^\r]*[;,\\]/, "Komma, Strichpunkt und Backslash sind maskiert");
+    await page.click("[data-fr=text]");
+    await page.waitForFunction(() => /Text kopiert/.test(document.querySelector("[data-fr-meldung]").textContent));
+    assert.match(await page.evaluate(() => navigator.clipboard.readText()), /^Fristende: Dienstag, 15\. August 2028 \(Ablauf des Tages\) – wo Mariä Himmelfahrt Feiertag ist: Mittwoch, 16\. August 2028/);
+    // 15.8.2026 ist ein Samstag: ein Ende, kein Gemeinde-Hinweis
+    await page.fill("[name=start]", "2026-08-01");
+    assert.match(await ergebnis(page), /Montag, 17\. August 2026/);
+    assert.equal(await page.locator(".fr-tag.ziel").count(), 1);
+    assert.doesNotMatch(await page.locator("[data-fr-aus]").innerText(), /katholisch/);
+    await page.evaluate(() => localStorage.removeItem("kk24-region"));
+    assert.deepEqual(probleme, []);
+    await page.close();
+  });
+
+  await fall(`${breite} px Arbeitstage-Rechner und Urlaubsplaner: Link ohne Region übernimmt kein gemerktes Bundesland`, async () => {
+    const { page, probleme } = await seite(ctx, "/arbeitstage-rechner.html");
+    await page.waitForSelector("[data-workdays-out] table");
+    await page.evaluate(() => localStorage.setItem("kk24-region", "de:bayern"));
+    await page.goto(BASE + "/arbeitstage-rechner.html?land=de&von=2027-05-01&bis=2027-06-30");
+    await page.waitForSelector("[data-workdays-out] table");
+    assert.equal(await page.locator("select[data-region]").first().inputValue(), "");
+    assert.match(await page.locator("[data-workdays-out] .plan-sum").innerText(), /^41 Arbeitstage/);   // bundesweit: ohne Fronleichnam
+    await page.click("[data-share=link]");
+    await page.waitForFunction(() => /Link kopiert/.test(document.querySelector("[data-share-msg]").textContent));
+    assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\?land=de&region=&von=2027-05-01&bis=2027-06-30$/);
+    await page.goto(BASE + "/arbeitstage-rechner.html");
+    await page.waitForSelector("[data-workdays-out] table");
+    assert.equal(await page.locator("select[data-region]").first().inputValue(), "bayern", "ohne Werte im Link gilt das gemerkte Bundesland");
+    await page.goto(BASE + "/urlaubsplaner.html?land=de&jahr=2027&tage=5");
+    await page.waitForSelector("[data-plan-list] li");
+    assert.equal(await page.locator("select[data-region]").first().inputValue(), "");
+    await page.evaluate(() => localStorage.removeItem("kk24-region"));
+    assert.deepEqual(probleme, []);
+    await page.close();
+  });
   await ctx.close();
 }
 

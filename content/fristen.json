@@ -1,66 +1,339 @@
 {
-  "abruf": "2026-11-18",
-  "regeln": [
-    {"id": "at-abgb", "land": "at", "kurz": "Vertrag und Zivilrecht", "name": "§§ 902, 903 ABGB und Art. 5 Europäisches Fristenübereinkommen",
-     "gilt": "Fristen aus Vertrag oder Gesetz im Zivilrecht, soweit nichts anderes vereinbart oder bestimmt ist",
-     "sa": true, "so": true, "ft": true, "kf": false, "d24": false, "tagesbeginn": false,
-     "hinweis": "§ 903 ABGB nennt nur den Sonntag und den anerkannten Feiertag. Den Samstag ergänzt Art. 5 des Europäischen Übereinkommens über die Berechnung von Fristen (BGBl. Nr. 254/1983). Beides gilt nur, wenn eine Erklärung abzugeben, eine Leistung zu bewirken oder sonst eine Handlung vor Fristablauf vorzunehmen ist, und § 903 nur vorbehaltlich einer anderen Vereinbarung.",
-     "quellen": [["§ 902 ABGB", "https://www.ris.bka.gv.at/eli/jgs/1811/946/P902/NOR12018626"], ["§ 903 ABGB", "https://www.ris.bka.gv.at/eli/jgs/1811/946/P903/NOR12018627"], ["Art. 5 Fristenübereinkommen", "https://www.ris.bka.gv.at/eli/bgbl/1983/254/A5/NOR12010626"]]},
-    {"id": "at-avg", "land": "at", "kurz": "Verwaltungsverfahren", "name": "§§ 32, 33 AVG",
-     "gilt": "Fristen im Verfahren vor Verwaltungsbehörden, etwa für eine Beschwerde gegen einen Bescheid",
-     "sa": true, "so": true, "ft": true, "kf": true, "d24": true, "tagesbeginn": false,
-     "hinweis": "Die Tage des Postlaufs werden in die Frist nicht eingerechnet (§ 33 Abs. 3 AVG): Es genügt, das Schriftstück am letzten Tag einem Zustelldienst zu übergeben.",
-     "quellen": [["§ 32 AVG", "https://www.ris.bka.gv.at/eli/bgbl/1991/51/P32/NOR12063019"], ["§ 33 AVG", "https://ris.bka.gv.at/eli/bgbl/1991/51/P33/NOR40254631"]]},
-    {"id": "at-bao", "land": "at", "kurz": "Abgabenverfahren (Finanzamt)", "name": "§ 108 BAO",
-     "gilt": "Fristen im Abgabenverfahren, etwa für eine Beschwerde gegen einen Steuerbescheid",
-     "sa": true, "so": true, "ft": true, "kf": true, "d24": true, "tagesbeginn": false,
-     "hinweis": "Die Tage des Postenlaufes werden in die Frist nicht eingerechnet (§ 108 Abs. 4 BAO).",
-     "quellen": [["§ 108 BAO", "https://www.ris.bka.gv.at/eli/bgbl/1961/194/P108/NOR12043881"]]},
-    {"id": "at-zpo", "land": "at", "kurz": "Zivilprozess", "name": "§§ 125, 126 ZPO",
-     "gilt": "Gesetzliche und richterliche Fristen im Zivilprozess",
-     "sa": true, "so": true, "ft": true, "kf": true, "d24": false, "tagesbeginn": false,
-     "hinweis": "Der 24. Dezember ist in § 126 ZPO nicht genannt.",
-     "quellen": [["§ 125 ZPO", "https://www.ris.bka.gv.at/eli/rgbl/1895/113/P125/NOR12020258"], ["§ 126 ZPO", "https://www.ris.bka.gv.at/eli/rgbl/1895/113/P126/NOR40138482"]]},
-    {"id": "at-stpo", "land": "at", "kurz": "Strafverfahren", "name": "§ 84 StPO",
-     "gilt": "Fristen der Strafprozeßordnung, soweit im Einzelnen nichts anderes bestimmt ist",
-     "sa": true, "so": true, "ft": true, "kf": true, "d24": false, "tagesbeginn": false,
-     "hinweis": "§ 84 StPO regelt nur, dass der Tag des Fristbeginns nicht zählt und wann sich das Ende verschiebt; wie Wochen- und Monatsfristen enden, sagt er nicht. Der Rechner zählt sie wie in § 902 Abs. 2 ABGB. Tage des Postlaufs werden nicht eingerechnet, Fristen können nicht verlängert werden.",
-     "quellen": [["§ 84 StPO", "https://www.ris.bka.gv.at/eli/bgbl/1975/631/P84/NOR40124598"]]},
-    {"id": "de-bgb", "land": "de", "kurz": "Vertrag und Zivilrecht", "name": "§§ 187, 188, 193 BGB",
-     "gilt": "Fristen in Gesetzen, gerichtlichen Verfügungen und Rechtsgeschäften, soweit nichts anderes bestimmt ist (§ 186 BGB)",
-     "sa": true, "so": true, "ft": true, "kf": false, "d24": false, "tagesbeginn": true,
-     "hinweis": "§ 193 BGB verschiebt das Ende nur, wenn innerhalb der Frist eine Willenserklärung abzugeben oder eine Leistung zu bewirken ist. Maßgeblich sind die Feiertage am Erklärungs- oder Leistungsort.",
-     "quellen": [["§ 187 BGB", "https://www.gesetze-im-internet.de/bgb/__187.html"], ["§ 188 BGB", "https://www.gesetze-im-internet.de/bgb/__188.html"], ["§ 193 BGB", "https://www.gesetze-im-internet.de/bgb/__193.html"]]},
-    {"id": "de-vwvfg", "land": "de", "kurz": "Behörden, Finanzamt, Sozialverwaltung", "name": "§ 31 VwVfG, § 108 AO, § 26 SGB X",
-     "gilt": "Fristen im Verwaltungsverfahren des Bundes, im Steuerverfahren und im Sozialverwaltungsverfahren; alle drei verweisen auf §§ 187 bis 193 BGB",
-     "sa": true, "so": true, "ft": true, "kf": false, "d24": false, "tagesbeginn": false,
-     "hinweis": "Eine von der Behörde gesetzte Frist beginnt mit dem Tag nach der Bekanntgabe. Das Ende verschiebt sich nicht, wenn die Behörde unter Hinweis auf die Vorschrift einen bestimmten Tag als Fristende mitgeteilt hat (§ 31 Abs. 3 Satz 2 VwVfG, § 26 Abs. 3 Satz 2 SGB X). Für Verfahren vor Landesbehörden gelten die Verwaltungsverfahrensgesetze der Länder.",
-     "quellen": [["§ 31 VwVfG", "https://www.gesetze-im-internet.de/vwvfg/__31.html"], ["§ 108 AO", "https://www.gesetze-im-internet.de/ao_1977/__108.html"], ["§ 26 SGB X", "https://www.gesetze-im-internet.de/sgb_10/__26.html"]]},
-    {"id": "de-zpo", "land": "de", "kurz": "Zivil-, Verwaltungs- und Familiengericht", "name": "§ 222 ZPO (auch über § 57 VwGO und § 16 FamFG)",
-     "gilt": "Fristen im Zivilprozess; die Verwaltungsgerichtsordnung und das FamFG verweisen auf § 222 ZPO",
-     "sa": true, "so": true, "ft": true, "kf": false, "d24": false, "tagesbeginn": false,
-     "hinweis": "Für die Berechnung verweist § 222 Abs. 1 ZPO auf das BGB. Das Ende verschiebt sich bei jeder Frist, nicht nur bei Erklärungen und Leistungen.",
-     "quellen": [["§ 222 ZPO", "https://www.gesetze-im-internet.de/zpo/__222.html"], ["§ 57 VwGO", "https://www.gesetze-im-internet.de/vwgo/__57.html"], ["§ 16 FamFG", "https://www.gesetze-im-internet.de/famfg/__16.html"]]},
-    {"id": "de-stpo", "land": "de", "kurz": "Strafverfahren", "name": "§§ 42, 43 StPO",
-     "gilt": "Tages-, Wochen- und Monatsfristen im Strafverfahren",
-     "sa": true, "so": true, "ft": true, "kf": false, "d24": false, "tagesbeginn": false,
-     "hinweis": "§ 43 StPO nennt Wochen- und Monatsfristen; Jahresfristen rechnet der Rechner als zwölf Monate.",
-     "quellen": [["§ 42 StPO", "https://www.gesetze-im-internet.de/stpo/__42.html"], ["§ 43 StPO", "https://www.gesetze-im-internet.de/stpo/__43.html"]]}
-  ],
-  "beispiele": [
-    {"titel": "Bescheid vor Ostern (Wien)", "land": "at", "region": "wien", "regel": "at-avg", "start": "2027-02-26", "n": 4, "einheit": "wochen", "modus": "ereignis", "roh": "2027-03-26", "ende": "2027-03-30",
-     "text": "Ein Bescheid wird am Freitag, 26. Februar 2027, zugestellt, die Frist beträgt vier Wochen. Rechnerisch endet sie am Karfreitag, 26. März. Im Verwaltungsverfahren verschiebt der Karfreitag das Ende; es folgen Samstag, Sonntag und der Ostermontag. Letzter Tag ist Dienstag, 30. März 2027."},
-    {"titel": "Dieselbe Frist im Vertrag (Wien)", "land": "at", "region": "wien", "regel": "at-abgb", "start": "2027-02-26", "n": 4, "einheit": "wochen", "modus": "ereignis", "roh": "2027-03-26", "ende": "2027-03-26",
-     "text": "Dieselben vier Wochen aus einem Vertrag: § 903 ABGB und Art. 5 des Fristenübereinkommens nennen den Karfreitag nicht. Der Rechner lässt das Ende deshalb am Freitag, 26. März 2027, stehen und weist darauf hin."},
-    {"titel": "Monatsfrist über den Februar (Bayern)", "land": "de", "region": "bayern", "regel": "de-bgb", "start": "2027-01-31", "n": 1, "einheit": "monate", "modus": "ereignis", "roh": "2027-02-28", "ende": "2027-03-01",
-     "text": "Die Frist beginnt mit einem Ereignis am Sonntag, 31. Januar 2027, und beträgt einen Monat. Einen 31. Februar gibt es nicht, die Frist endet am Monatsletzten (§ 188 Abs. 3 BGB) – das ist Sonntag, 28. Februar. Nach § 193 BGB tritt der nächste Werktag an seine Stelle: Montag, 1. März 2027."},
-    {"titel": "Fronleichnam: München und Hamburg", "land": "de", "region": "bayern", "regel": "de-zpo", "start": "2027-05-13", "n": 2, "einheit": "wochen", "modus": "ereignis", "roh": "2027-05-27", "ende": "2027-05-28",
-     "text": "Zustellung am Donnerstag, 13. Mai 2027, Frist zwei Wochen. Rechnerisch endet sie am Donnerstag, 27. Mai – Fronleichnam. In Bayern ist das ein gesetzlicher Feiertag, die Frist endet am Freitag, 28. Mai. In Hamburg bleibt es beim 27. Mai."},
-    {"titel": "Derselbe Fall in Hamburg", "land": "de", "region": "hamburg", "regel": "de-zpo", "start": "2027-05-13", "n": 2, "einheit": "wochen", "modus": "ereignis", "roh": "2027-05-27", "ende": "2027-05-27",
-     "text": "Fronleichnam ist in Hamburg kein gesetzlicher Feiertag; der 27. Mai 2027 ist ein gewöhnlicher Donnerstag und letzter Tag der Frist."},
-    {"titel": "Finanzamt vor Weihnachten (Österreich)", "land": "at", "region": "", "regel": "at-bao", "start": "2027-11-24", "n": 1, "einheit": "monate", "modus": "ereignis", "roh": "2027-12-24", "ende": "2027-12-27",
-     "text": "Zustellung eines Abgabenbescheids am Mittwoch, 24. November 2027, Frist ein Monat. Rechnerisch endet sie am Freitag, 24. Dezember. § 108 Abs. 3 BAO nennt den 24. Dezember ausdrücklich; Christtag und Stefanitag fallen 2027 auf Samstag und Sonntag. Letzter Tag ist Montag, 27. Dezember 2027."},
-    {"titel": "Frist ab Tagesbeginn (Berlin)", "land": "de", "region": "berlin", "regel": "de-bgb", "start": "2027-03-01", "n": 1, "einheit": "monate", "modus": "tagesbeginn", "roh": "2027-03-31", "ende": "2027-03-31",
-     "text": "Beginnt eine Monatsfrist mit dem Anfang eines Tages – hier Montag, 1. März 2027, 0 Uhr –, zählt dieser Tag mit (§ 187 Abs. 2 BGB). Die Frist endet dann am Tag vor dem entsprechenden Tag des Folgemonats: Mittwoch, 31. März 2027, nicht am 1. April."}
-  ]
+ "abruf": "2026-11-18",
+ "regeln": [
+  {
+   "id": "at-abgb",
+   "land": "at",
+   "kurz": "Vertrag und Zivilrecht",
+   "name": "§§ 902, 903 ABGB und Art. 5, 11 Europäisches Fristenübereinkommen",
+   "gilt": "Fristen aus Vertrag oder Gesetz im Zivilrecht, soweit nichts anderes vereinbart oder bestimmt ist",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": true,
+   "d24": false,
+   "tagesbeginn": false,
+   "hinweis": "§ 903 ABGB nennt nur den Sonntag und den anerkannten Feiertag. Den Samstag ergänzt Art. 5 des Europäischen Übereinkommens über die Berechnung von Fristen (BGBl. Nr. 254/1983), den Karfreitag die Notifikation Österreichs nach Art. 11: Er steht dort in der Liste der Tage, die wie gesetzliche Feiertage behandelt werden. Das gilt, wenn vor Fristablauf eine Handlung vorzunehmen ist – eine Erklärung, eine Leistung –, und § 903 nur vorbehaltlich einer anderen Vereinbarung. Der 24. Dezember ist nirgends genannt.",
+   "quellen": [
+    [
+     "§ 902 ABGB",
+     "https://www.ris.bka.gv.at/eli/jgs/1811/946/P902/NOR12018626"
+    ],
+    [
+     "§ 903 ABGB",
+     "https://www.ris.bka.gv.at/eli/jgs/1811/946/P903/NOR12018627"
+    ],
+    [
+     "Art. 5 Fristenübereinkommen",
+     "https://www.ris.bka.gv.at/eli/bgbl/1983/254/A5/NOR12010626"
+    ],
+    [
+     "Notifikation nach Art. 11 (Ratifikationstext)",
+     "https://www.ris.bka.gv.at/eli/bgbl/1983/254/P0/NOR40232557"
+    ]
+   ]
+  },
+  {
+   "id": "at-avg",
+   "land": "at",
+   "kurz": "Verwaltungsverfahren",
+   "name": "§§ 32, 33 AVG",
+   "gilt": "Fristen im Verfahren vor Verwaltungsbehörden, etwa für eine Beschwerde gegen einen Bescheid",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": true,
+   "d24": true,
+   "tagesbeginn": false,
+   "hinweis": "Die Tage des Postlaufs werden in die Frist nicht eingerechnet (§ 33 Abs. 3 AVG): Es genügt, das Schriftstück am letzten Tag einem Zustelldienst zu übergeben.",
+   "quellen": [
+    [
+     "§ 32 AVG",
+     "https://www.ris.bka.gv.at/eli/bgbl/1991/51/P32/NOR12063019"
+    ],
+    [
+     "§ 33 AVG",
+     "https://ris.bka.gv.at/eli/bgbl/1991/51/P33/NOR40254631"
+    ]
+   ]
+  },
+  {
+   "id": "at-bao",
+   "land": "at",
+   "kurz": "Abgabenverfahren (Finanzamt)",
+   "name": "§ 108 BAO",
+   "gilt": "Fristen im Abgabenverfahren, etwa für eine Beschwerde gegen einen Steuerbescheid",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": true,
+   "d24": true,
+   "tagesbeginn": false,
+   "hinweis": "Die Tage des Postenlaufes werden in die Frist nicht eingerechnet (§ 108 Abs. 4 BAO).",
+   "quellen": [
+    [
+     "§ 108 BAO",
+     "https://www.ris.bka.gv.at/eli/bgbl/1961/194/P108/NOR12043881"
+    ]
+   ]
+  },
+  {
+   "id": "at-zpo",
+   "land": "at",
+   "kurz": "Zivilprozess",
+   "name": "§§ 125, 126 ZPO",
+   "gilt": "Gesetzliche und richterliche Fristen im Zivilprozess",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": true,
+   "d24": false,
+   "tagesbeginn": false,
+   "hinweis": "Der 24. Dezember ist in § 126 ZPO nicht genannt.",
+   "quellen": [
+    [
+     "§ 125 ZPO",
+     "https://www.ris.bka.gv.at/eli/rgbl/1895/113/P125/NOR12020258"
+    ],
+    [
+     "§ 126 ZPO",
+     "https://www.ris.bka.gv.at/eli/rgbl/1895/113/P126/NOR40138482"
+    ]
+   ]
+  },
+  {
+   "id": "at-stpo",
+   "land": "at",
+   "kurz": "Strafverfahren",
+   "name": "§ 84 StPO",
+   "gilt": "Fristen der Strafprozeßordnung, soweit im Einzelnen nichts anderes bestimmt ist",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": true,
+   "d24": false,
+   "tagesbeginn": false,
+   "hinweis": "§ 84 StPO regelt nur, dass der Tag des Fristbeginns nicht zählt und wann sich das Ende verschiebt; wie Wochen- und Monatsfristen enden, sagt er nicht. Der Rechner zählt sie wie in § 902 Abs. 2 ABGB. Tage des Postlaufs werden nicht eingerechnet, Fristen können nicht verlängert werden.",
+   "quellen": [
+    [
+     "§ 84 StPO",
+     "https://www.ris.bka.gv.at/eli/bgbl/1975/631/P84/NOR40124598"
+    ]
+   ]
+  },
+  {
+   "id": "de-bgb",
+   "land": "de",
+   "kurz": "Vertrag und Zivilrecht",
+   "name": "§§ 187, 188, 193 BGB",
+   "gilt": "Fristen in Gesetzen, gerichtlichen Verfügungen und Rechtsgeschäften, soweit nichts anderes bestimmt ist (§ 186 BGB)",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": false,
+   "d24": false,
+   "tagesbeginn": true,
+   "hinweis": "§ 193 BGB verschiebt das Ende nur, wenn innerhalb der Frist eine Willenserklärung abzugeben oder eine Leistung zu bewirken ist. Maßgeblich sind die Feiertage am Erklärungs- oder Leistungsort.",
+   "quellen": [
+    [
+     "§ 187 BGB",
+     "https://www.gesetze-im-internet.de/bgb/__187.html"
+    ],
+    [
+     "§ 188 BGB",
+     "https://www.gesetze-im-internet.de/bgb/__188.html"
+    ],
+    [
+     "§ 193 BGB",
+     "https://www.gesetze-im-internet.de/bgb/__193.html"
+    ]
+   ]
+  },
+  {
+   "id": "de-vwvfg",
+   "land": "de",
+   "kurz": "Behörden, Finanzamt, Sozialverwaltung",
+   "name": "§ 31 VwVfG, § 108 AO, § 26 SGB X",
+   "gilt": "Fristen im Verwaltungsverfahren des Bundes, im Steuerverfahren und im Sozialverwaltungsverfahren; alle drei verweisen auf §§ 187 bis 193 BGB",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": false,
+   "d24": false,
+   "tagesbeginn": true,
+   "hinweis": "Eine von der Behörde gesetzte Frist beginnt mit dem Tag nach der Bekanntgabe. Das Ende verschiebt sich nicht, wenn die Behörde unter Hinweis auf die Vorschrift einen bestimmten Tag als Fristende mitgeteilt hat (§ 31 Abs. 3 Satz 2 VwVfG, § 26 Abs. 3 Satz 2 SGB X). Für Verfahren vor Landesbehörden gelten die Verwaltungsverfahrensgesetze der Länder.",
+   "quellen": [
+    [
+     "§ 31 VwVfG",
+     "https://www.gesetze-im-internet.de/vwvfg/__31.html"
+    ],
+    [
+     "§ 108 AO",
+     "https://www.gesetze-im-internet.de/ao_1977/__108.html"
+    ],
+    [
+     "§ 26 SGB X",
+     "https://www.gesetze-im-internet.de/sgb_10/__26.html"
+    ]
+   ]
+  },
+  {
+   "id": "de-zpo",
+   "land": "de",
+   "kurz": "Zivil-, Verwaltungs- und Familiengericht",
+   "name": "§ 222 ZPO (auch über § 57 VwGO und § 16 FamFG)",
+   "gilt": "Fristen im Zivilprozess; die Verwaltungsgerichtsordnung und das FamFG verweisen auf § 222 ZPO",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": false,
+   "d24": false,
+   "tagesbeginn": true,
+   "hinweis": "Für die Berechnung verweist § 222 Abs. 1 ZPO auf das BGB. Das Ende verschiebt sich bei jeder Frist, nicht nur bei Erklärungen und Leistungen.",
+   "quellen": [
+    [
+     "§ 222 ZPO",
+     "https://www.gesetze-im-internet.de/zpo/__222.html"
+    ],
+    [
+     "§ 57 VwGO",
+     "https://www.gesetze-im-internet.de/vwgo/__57.html"
+    ],
+    [
+     "§ 16 FamFG",
+     "https://www.gesetze-im-internet.de/famfg/__16.html"
+    ]
+   ]
+  },
+  {
+   "id": "de-stpo",
+   "land": "de",
+   "kurz": "Strafverfahren",
+   "name": "§§ 42, 43 StPO",
+   "gilt": "Tages-, Wochen- und Monatsfristen im Strafverfahren",
+   "sa": true,
+   "so": true,
+   "ft": true,
+   "kf": false,
+   "d24": false,
+   "tagesbeginn": false,
+   "hinweis": "§ 43 StPO nennt Wochen- und Monatsfristen; Jahresfristen rechnet der Rechner als zwölf Monate. Die §§ 42, 43 StPO verweisen nicht auf das BGB; eine Frist, deren erster Tag mitzählt, kennt der Rechner hier nicht.",
+   "quellen": [
+    [
+     "§ 42 StPO",
+     "https://www.gesetze-im-internet.de/stpo/__42.html"
+    ],
+    [
+     "§ 43 StPO",
+     "https://www.gesetze-im-internet.de/stpo/__43.html"
+    ]
+   ]
+  }
+ ],
+ "beispiele": [
+  {
+   "titel": "Bescheid vor Ostern (Wien)",
+   "land": "at",
+   "region": "wien",
+   "regel": "at-avg",
+   "start": "2027-02-26",
+   "n": 4,
+   "einheit": "wochen",
+   "modus": "ereignis",
+   "roh": "2027-03-26",
+   "ende": "2027-03-30",
+   "text": "Ein Bescheid wird am Freitag, 26. Februar 2027, zugestellt, die Frist beträgt vier Wochen. Rechnerisch endet sie am Karfreitag, 26. März. Im Verwaltungsverfahren verschiebt der Karfreitag das Ende; es folgen Samstag, Sonntag und der Ostermontag. Letzter Tag ist Dienstag, 30. März 2027."
+  },
+  {
+   "titel": "Dieselbe Frist aus einem Vertrag (Wien)",
+   "land": "at",
+   "region": "wien",
+   "regel": "at-abgb",
+   "start": "2027-02-26",
+   "n": 4,
+   "einheit": "wochen",
+   "modus": "ereignis",
+   "roh": "2027-03-26",
+   "ende": "2027-03-30",
+   "text": "Dieselben vier Wochen aus einem Vertrag enden rechnerisch ebenfalls am Karfreitag, 26. März. § 903 ABGB nennt den Karfreitag nicht, wohl aber die Liste, die Österreich nach Art. 11 des Fristenübereinkommens notifiziert hat. Auch hier ist Dienstag, 30. März 2027, der letzte Tag."
+  },
+  {
+   "titel": "Monatsfrist über den Februar (Bayern)",
+   "land": "de",
+   "region": "bayern",
+   "regel": "de-bgb",
+   "start": "2027-01-31",
+   "n": 1,
+   "einheit": "monate",
+   "modus": "ereignis",
+   "roh": "2027-02-28",
+   "ende": "2027-03-01",
+   "text": "Die Frist beginnt mit einem Ereignis am Sonntag, 31. Januar 2027, und beträgt einen Monat. Einen 31. Februar gibt es nicht, die Frist endet am Monatsletzten (§ 188 Abs. 3 BGB) – das ist Sonntag, 28. Februar. Nach § 193 BGB tritt der nächste Werktag an seine Stelle: Montag, 1. März 2027."
+  },
+  {
+   "titel": "Fronleichnam: München und Hamburg",
+   "land": "de",
+   "region": "bayern",
+   "regel": "de-zpo",
+   "start": "2027-05-13",
+   "n": 2,
+   "einheit": "wochen",
+   "modus": "ereignis",
+   "roh": "2027-05-27",
+   "ende": "2027-05-28",
+   "text": "Zustellung am Donnerstag, 13. Mai 2027, Frist zwei Wochen. Rechnerisch endet sie am Donnerstag, 27. Mai – Fronleichnam. In Bayern ist das ein gesetzlicher Feiertag, die Frist endet am Freitag, 28. Mai. In Hamburg bleibt es beim 27. Mai."
+  },
+  {
+   "titel": "Derselbe Fall in Hamburg",
+   "land": "de",
+   "region": "hamburg",
+   "regel": "de-zpo",
+   "start": "2027-05-13",
+   "n": 2,
+   "einheit": "wochen",
+   "modus": "ereignis",
+   "roh": "2027-05-27",
+   "ende": "2027-05-27",
+   "text": "Fronleichnam ist in Hamburg kein gesetzlicher Feiertag; der 27. Mai 2027 ist ein gewöhnlicher Donnerstag und letzter Tag der Frist."
+  },
+  {
+   "titel": "Finanzamt vor Weihnachten (Österreich)",
+   "land": "at",
+   "region": "",
+   "regel": "at-bao",
+   "start": "2027-11-24",
+   "n": 1,
+   "einheit": "monate",
+   "modus": "ereignis",
+   "roh": "2027-12-24",
+   "ende": "2027-12-27",
+   "text": "Zustellung eines Abgabenbescheids am Mittwoch, 24. November 2027, Frist ein Monat. Rechnerisch endet sie am Freitag, 24. Dezember. § 108 Abs. 3 BAO nennt den 24. Dezember ausdrücklich; Christtag und Stefanitag fallen 2027 auf Samstag und Sonntag. Letzter Tag ist Montag, 27. Dezember 2027."
+  },
+  {
+   "titel": "Frist ab Tagesbeginn (Berlin)",
+   "land": "de",
+   "region": "berlin",
+   "regel": "de-bgb",
+   "start": "2027-03-01",
+   "n": 1,
+   "einheit": "monate",
+   "modus": "tagesbeginn",
+   "roh": "2027-03-31",
+   "ende": "2027-03-31",
+   "text": "Beginnt eine Monatsfrist mit dem Anfang eines Tages – hier Montag, 1. März 2027, 0 Uhr –, zählt dieser Tag mit (§ 187 Abs. 2 BGB). Die Frist endet dann am Tag vor dem entsprechenden Tag des Folgemonats: Mittwoch, 31. März 2027, nicht am 1. April."
+  },
+  {
+   "titel": "Vertragsfrist vor Weihnachten (Österreich)",
+   "land": "at",
+   "region": "",
+   "regel": "at-abgb",
+   "start": "2027-11-24",
+   "n": 1,
+   "einheit": "monate",
+   "modus": "ereignis",
+   "roh": "2027-12-24",
+   "ende": "2027-12-24",
+   "text": "Derselbe Monat ab Mittwoch, 24. November 2027, aus einem Vertrag: Der 24. Dezember steht weder in § 903 ABGB noch in der Liste, die Österreich zum Fristenübereinkommen notifiziert hat. Die Frist endet am Freitag, 24. Dezember 2027 – drei Tage früher als beim Finanzamt."
+  }
+ ]
 }

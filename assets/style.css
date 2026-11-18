@@ -136,6 +136,8 @@ input[type=range]{width:100%;accent-color:var(--sea);min-height:32px}
 .planner .row + .row{margin-top:12px}
 .fr-knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
 .fr-fehler{color:var(--red)}
+.fr-oder{font-size:.95rem;color:var(--muted)}
+.fr-beratung{margin:0 0 6px;color:var(--muted)}
 .fr-streifen{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:12px 0}
 .fr-tag{flex:1 1 74px;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:center}
 .fr-tag b{font-size:.8rem;color:var(--muted)}.fr-tag span{font:600 1.05rem var(--display)}.fr-tag em{font-style:normal;font-size:.72rem;color:var(--muted);min-height:1em;overflow-wrap:anywhere}

@@ -290,7 +290,9 @@
   // Werte aus der Adresse übernehmen – nur geprüfte Werte, nichts davon wird als HTML eingesetzt
   function applyShareParams(){
     const q = new URLSearchParams(location.search);
-    const c = q.get("land"); if (c === "at" || c === "de"){ state.country = c; state.region = ""; }
+    if (!["land","region","jahr","tage","von","bis"].some(k => q.has(k))) return;
+    state.region = "";   // Link ohne Region = ohne Bundesland, nicht das hier gemerkte
+    const c = q.get("land"); if (c === "at" || c === "de") state.country = c;
     const r = q.get("region"); if (r && Object.prototype.hasOwnProperty.call(DATA.countries[state.country].regions, r)) state.region = r;
     const y = Number(q.get("jahr")); if (q.has("jahr") && $$("select[data-year] option").some(o => +o.value === y)) state.year = y;
     const w = $("[data-workdays]");
@@ -299,8 +301,7 @@
     if (b && q.has("tage") && Number.isInteger(t) && t >= +b.min && t <= +b.max) b.value = t;
   }
   function shareLink(){
-    const p = new URLSearchParams({ land: state.country });
-    if (state.region) p.set("region", state.region);
+    const p = new URLSearchParams({ land: state.country, region: state.region || "" });   // region immer, auch leer
     const w = $("[data-workdays]"), b = $("[data-planner] [data-budget]");
     if (w){ p.set("von", $("[name=from]", w).value); p.set("bis", $("[name=to]", w).value); }
     if (b){ p.set("jahr", state.year); p.set("tage", b.value); }

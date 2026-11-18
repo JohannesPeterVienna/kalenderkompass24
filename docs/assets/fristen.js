@@ -6,6 +6,7 @@
   var EINHEITEN = { tage: ["Tag", "Tage"], wochen: ["Woche", "Wochen"], monate: ["Monat", "Monate"], jahre: ["Jahr", "Jahre"] };
   var WT = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
   var MON = ["Jänner", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  var SPRACHE = "at";   // "de": Januar statt Jänner
   var MIN_JAHR = 2026, MAX_JAHR = 2030;   // Feiertagsdaten liegen für diese Jahre vor
 
   /* Datum als UTC-Mitternacht: keine Sommerzeit-Sprünge beim Tagezählen. */
@@ -70,27 +71,42 @@
     var roh = rohEnde(start, n, e.einheit, modus);
     // bis 20. Dezember des letzten Jahres: so bleibt jede Verschiebung innerhalb der vorhandenen Feiertagsdaten
     if (start.getUTCFullYear() < MIN_JAHR || iso(roh.datum) > MAX_JAHR + "-12-20")
-      return { fehler: "Der Rechner hat Feiertagsdaten für Fristen, die frühestens am 1. Jänner " + MIN_JAHR + " beginnen und spätestens am 20. Dezember " + MAX_JAHR + " enden." };
-    var ende = roh.datum, schritte = [], g;
+      return { fehler: "Der Rechner hat Feiertagsdaten für Fristen, die frühestens am 1.1." + MIN_JAHR + " beginnen und spätestens am 20.12." + MAX_JAHR + " enden." };
+    var ende = roh.datum, schritte = [], g, bedingt = false;
     while ((g = grund(ende, regel, feiertage))) {
-      schritte.push({ datum: iso(ende), grund: g, note: (feiertage[iso(ende)] || {}).note || "" });
+      // Notiz nur, wenn wirklich der Feiertag verschiebt (nicht, wenn der Tag ohnehin Samstag oder Sonntag ist)
+      var note = g.indexOf("gesetzlicher Feiertag") === 0 ? (feiertage[iso(ende)] || {}).note || "" : "";
+      if (note) bedingt = true;
+      schritte.push({ datum: iso(ende), grund: g, note: note });
       ende = plus(ende, 1);
     }
-    return { start: iso(start), roh: iso(roh.datum), fehlt: roh.fehlt, ende: iso(ende), schritte: schritte, modus: modus,
+    // Feiertag, der nur in einem Teil des Landes gilt: zweites Ergebnis für Orte, an denen er kein Feiertag ist
+    var alternativ = "";
+    if (bedingt) {
+      var ohne = {}, x = roh.datum;
+      Object.keys(feiertage).forEach(function (k) { if (!feiertage[k].note) ohne[k] = feiertage[k]; });
+      while (grund(x, regel, ohne)) x = plus(x, 1);
+      if (iso(x) !== iso(ende)) alternativ = iso(x);
+    }
+    return { start: iso(start), roh: iso(roh.datum), fehlt: roh.fehlt, ende: iso(ende), alternativ: alternativ, schritte: schritte, modus: modus,
       n: n, einheit: e.einheit, kalendertage: Math.round((ende - start) / 864e5) };
   }
 
-  function lang(s, mitWt) { var d = parse(s); return (mitWt === false ? "" : WT[d.getUTCDay()] + ", ") + d.getUTCDate() + ". " + MON[d.getUTCMonth()] + " " + d.getUTCFullYear(); }
+  function lang(s, mitWt) {
+    var d = parse(s), m = SPRACHE === "de" && d.getUTCMonth() === 0 ? "Januar" : MON[d.getUTCMonth()];
+    return (mitWt === false ? "" : WT[d.getUTCDay()] + ", ") + d.getUTCDate() + ". " + m + " " + d.getUTCFullYear();
+  }
+  function sprache(land) { SPRACHE = land === "de" ? "de" : "at"; }
   function dauer(n, einheit) { return n + " " + EINHEITEN[einheit][n === 1 ? 0 : 1]; }
 
   /* Hinweise, die über die reine Rechnung hinausgehen. regionaleTage: { iso: Text } für Feiertage, die nur in Teilen des Landes gelten. */
   function hinweise(r, regel, e, feiertage, regionaleTage) {
-    var out = [], y = Number(r.roh.slice(0, 4));
+    var out = [];
     if (r.fehlt) out.push("Der entsprechende Tag fehlt im letzten Monat; die Frist endet deshalb am Monatsletzten.");
-    if (regel.land === "at" && !regel.kf && r.ende === iso(karfreitag(y)))
-      out.push("Das Ende fällt auf den Karfreitag. § 903 ABGB und Art. 5 des Fristenübereinkommens nennen ihn nicht; ob er wie ein Feiertag behandelt wird, konnten wir aus den gelesenen Vorschriften nicht belegen. Der Rechner verschiebt deshalb nicht – wer sicher gehen will, handelt bis Gründonnerstag.");
     if (!regel.d24 && r.ende.slice(5) === "12-24") out.push("Der 24. Dezember ist kein gesetzlicher Feiertag und in dieser Vorschrift nicht genannt; die Frist endet an diesem Tag.");
-    r.schritte.forEach(function (s) { if (s.note) out.push(lang(s.datum, false) + ": " + s.note + ". Wo der Tag kein Feiertag ist, endet die Frist schon an diesem Tag."); });
+    r.schritte.forEach(function (s) {
+      if (s.note) out.push(lang(s.datum, false) + ": " + s.note + "." + (r.alternativ ? " Wo der Tag kein Feiertag ist, ist " + lang(r.alternativ) + " der letzte Tag der Frist." : ""));
+    });
     [r.roh, r.ende].forEach(function (s, i) {
       if (regionaleTage && regionaleTage[s] && !feiertage[s] && (i === 0 || s !== r.roh)) out.push(lang(s, false) + ": " + regionaleTage[s]);
     });
@@ -111,7 +127,7 @@
   }
 
   var API = { parse: parse, iso: iso, plus: plus, ostern: ostern, karfreitag: karfreitag, monateWeiter: monateWeiter, rohEnde: rohEnde,
-    grund: grund, berechne: berechne, hinweise: hinweise, regionaleTage: regionaleTage, lang: lang, dauer: dauer, MIN_JAHR: MIN_JAHR, MAX_JAHR: MAX_JAHR };
+    grund: grund, berechne: berechne, hinweise: hinweise, regionaleTage: regionaleTage, lang: lang, sprache: sprache, dauer: dauer, MIN_JAHR: MIN_JAHR, MAX_JAHR: MAX_JAHR };
   if (typeof module !== "undefined" && module.exports) { module.exports = API; return; }
   root.KKFristen = API;
 
@@ -137,7 +153,8 @@
   var $ = function (s) { return box.querySelector(s); };
   var F = { land: $("[name=land]"), region: $("[name=region]"), regel: $("[name=regel]"), start: $("[name=start]"), n: $("[name=n]"), einheit: $("[name=einheit]"), modus: $("[name=modus]") };
   var JAHRE = [2026, 2027, 2028, 2029, 2030];
-  var aus = $("[data-fr-aus]"), meld = $("[data-fr-meldung]"), REGELN = [], BEISPIELE = [], DATA = null, letzte = null;
+  var aus = $("[data-fr-aus]"), meld = $("[data-fr-meldung]"), REGELN = [], BEISPIELE = [], DATA = null, letzte = null, zurueckgesetzt = false;
+  var KEINE_BERATUNG = "Rechenhilfe, keine Rechtsberatung – Fristbeginn und anwendbare Vorschrift selbst prüfen";
 
   function regel() { return REGELN.filter(function (r) { return r.id === F.regel.value; })[0]; }
   function feiertage(land, region, jahre) {
@@ -162,41 +179,49 @@
   function modusAnpassen() {
     var r = regel(), ok = !!(r && r.tagesbeginn);
     F.modus.querySelector("[value=tagesbeginn]").disabled = !ok;
-    if (!ok) F.modus.value = "ereignis";
+    if (!ok && F.modus.value === "tagesbeginn") { F.modus.value = "ereignis"; zurueckgesetzt = true; }   // sichtbar melden, nicht stillschweigend
+    else if (ok) zurueckgesetzt = false;
   }
   function eingabe() { return { land: F.land.value, region: F.region.value, regel: F.regel.value, start: F.start.value, n: F.n.value.trim(), einheit: F.einheit.value, modus: F.modus.value }; }
   function linkFuer(e) {
     var p = new URLSearchParams();
-    ["land", "region", "regel", "start", "n", "einheit", "modus"].forEach(function (k) { if (e[k] !== "" && e[k] != null) p.set(k, e[k]); });
+    // region immer mitschreiben, auch leer: der Link soll beim Empfänger dasselbe Ergebnis zeigen
+    ["land", "region", "regel", "start", "n", "einheit", "modus"].forEach(function (k) { if (k === "region" || (e[k] !== "" && e[k] != null)) p.set(k, e[k] || ""); });
     return root.location.origin + root.location.pathname + "?" + p.toString();
   }
   function textFuer(e, r, rg, hin) {
-    var z = ["Fristende: " + lang(r.ende) + " (Ablauf des Tages)",
+    var z = [(r.alternativ ? "Fristende: " + lang(r.alternativ) + " (Ablauf des Tages) – wo " + bedingterName(r) + " Feiertag ist: " + lang(r.ende) : "Fristende: " + lang(r.ende) + " (Ablauf des Tages)"),
       "Frist: " + dauer(r.n, r.einheit) + " ab " + lang(r.start) + (r.modus === "tagesbeginn" ? " (Tag zählt mit)" : " (Tag zählt nicht mit)"),
       "Vorschrift: " + rg.name + " · " + (DATA.countries[e.land].regions[e.region] || (e.land === "de" ? "Deutschland bundesweit" : "Österreich")),
       "Rechnerisches Ende: " + lang(r.roh)];
     r.schritte.forEach(function (s) { z.push("– " + lang(s.datum) + ": " + s.grund + ", verschiebt"); });
     hin.forEach(function (h) { z.push("Hinweis: " + h); });
-    z.push("Ohne Gewähr, keine Rechtsberatung. " + linkFuer(e));
+    z.push(KEINE_BERATUNG + ". " + linkFuer(e));
     return z.join("\n");
   }
+  function bedingterName(r) {
+    var s = r.schritte.filter(function (x) { return x.note; })[0];
+    return s ? s.grund.replace(/^gesetzlicher Feiertag \(|\)$/g, "") : "der Tag";
+  }
   function streifen(r, ft, rg) {
-    var a = plus(parse(r.roh), -2), b = plus(parse(r.ende), 1), z = "";
+    var a = plus(parse(r.roh), -2), b = plus(parse(r.ende), 1), z = "";   // r.alternativ liegt immer zwischen r.roh und r.ende
     for (var d = a; d <= b; d = plus(d, 1)) {
-      var s = iso(d), g = grund(d, rg, ft), k = s === r.ende ? "ziel" : g ? "frei" : "";
+      var s = iso(d), g = grund(d, rg, ft), k = (s === r.ende || s === r.alternativ) ? "ziel" : g ? "frei" : "";
       z += '<li class="fr-tag ' + k + '"' + (s === r.ende ? ' aria-current="date"' : "") + "><b>" + WT[d.getUTCDay()].slice(0, 2) + "</b><span>" + d.getUTCDate() + "." + (d.getUTCMonth() + 1) + ".</span><em>" +
-        esc(s === r.ende ? "Fristende" : s === r.roh ? "rechnerisch" : g ? g.split(" (")[0] : "") + "</em></li>";
+        esc((s === r.ende || s === r.alternativ) ? "Fristende" : s === r.roh ? "rechnerisch" : g ? g.split(" (")[0] : "") + "</em></li>";
     }
     return '<ol class="fr-streifen" aria-label="Tage rund um das Fristende">' + z + "</ol>";
   }
   function rechne() {
     if (!DATA) return;
     var e = eingabe(), rg = regel();
+    sprache(e.land);
     meld.textContent = "";
     var ft = feiertage(e.land, e.region, JAHRE);
     var r = berechne(e, rg, ft);
     if (r.fehler) { letzte = null; aus.innerHTML = '<p class="plan-sum fr-fehler">' + esc(r.fehler) + "</p>"; return; }
     var hin = hinweise(r, rg, e, ft, regionaleTage(e.land, e.region, JAHRE));
+    if (zurueckgesetzt) hin.unshift("„Der erste Tag zählt mit“ gibt es nur bei Vorschriften, die auf § 187 Abs. 2 BGB verweisen. Für die gewählte Vorschrift rechnet der Rechner deshalb mit „zählt nicht mit“.");
     letzte = { e: e, r: r, rg: rg, hin: hin };
     var ort = DATA.countries[e.land].regions[e.region] || (e.land === "de" ? "Deutschland (bundesweit)" : "Österreich");
     var p1 = r.modus === "tagesbeginn"
@@ -208,7 +233,10 @@
     var p3 = r.schritte.length
       ? "Dieser Tag verschiebt das Ende: " + r.schritte.map(function (x) { return esc(lang(x.datum, false).replace(/ \d{4}$/, "")) + " ist " + esc(x.grund); }).join("; ") + ". Der nächste Tag, der nicht dazugehört, ist " + esc(lang(r.ende)) + "."
       : "Dieser Tag ist nach der gewählten Vorschrift weder Samstag, Sonntag noch ein anderer Tag, der das Ende verschiebt. Es bleibt dabei.";
-    aus.innerHTML = '<p class="plan-sum">Letzter Tag der Frist: <b>' + esc(lang(r.ende)) + "</b></p>" +
+    var kopf = r.alternativ
+      ? '<p class="plan-sum">Letzter Tag der Frist: <b>' + esc(lang(r.alternativ)) + '</b><br><span class="fr-oder">wo ' + esc(bedingterName(r)) + ' gesetzlicher Feiertag ist: </span><b>' + esc(lang(r.ende)) + "</b></p>"
+      : '<p class="plan-sum">Letzter Tag der Frist: <b>' + esc(lang(r.ende)) + "</b></p>";
+    aus.innerHTML = kopf + '<p class="small fr-beratung">' + esc(KEINE_BERATUNG) + ' (<a href="#grenzen">Grenzen des Rechners</a>).</p>' +
       '<p class="small muted">' + esc(rg.name) + " · " + esc(ort) + " · " + r.kalendertage + " Kalendertage nach dem Fristbeginn · die Frist läuft bis zum Ablauf dieses Tages</p>" +
       streifen(r, ft, rg) + '<ol class="fr-schritte"><li>' + esc(p1) + "</li><li>" + p2 + "</li><li>" + p3 + "</li></ol>" +
       (hin.length ? '<ul class="fr-hinweise">' + hin.map(function (h) { return "<li>" + esc(h) + "</li>"; }).join("") + "</ul>" : "") +
@@ -223,6 +251,7 @@
     if (/^\d{1,3}$/.test(String(v.n || "")) && +v.n >= 1) F.n.value = String(+v.n);
     if (EINHEITEN[v.einheit]) F.einheit.value = v.einheit;
     if (v.modus === "tagesbeginn" && regel() && regel().tagesbeginn) F.modus.value = "tagesbeginn"; else if (v.modus) F.modus.value = "ereignis";
+    zurueckgesetzt = false;
   }
   function kopiere(text, ok) {
     var fertig = function () { meld.textContent = ok; };
@@ -230,19 +259,21 @@
     else meld.textContent = "Kopieren nicht möglich – bitte den Text markieren: " + text;
   }
   function ics() {
-    var r = letzte.r, d = r.ende.replace(/-/g, ""), nd = iso(plus(parse(r.ende), 1)).replace(/-/g, "");
+    var r = letzte.r, tag = r.alternativ || r.ende;   // bei zwei möglichen Enden das frühere
+    var d = tag.replace(/-/g, ""), nd = iso(plus(parse(tag), 1)).replace(/-/g, "");
     var t = function (s) { return String(s).replace(/[\;,]/g, "\\$&").replace(/\r?\n/g, "\\n"); };
     var z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Kalenderkompass 24//Fristenrechner//DE", "BEGIN:VEVENT", "UID:frist-" + d + "-" + r.start + "-" + r.n + r.einheit + "@kalenderkompass24.de",
       "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z", "DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + nd,
       "SUMMARY:" + t("Fristende (" + dauer(r.n, r.einheit) + " ab " + lang(r.start, false) + ")"),
-      "DESCRIPTION:" + t(letzte.rg.name + ". Berechnet mit dem Fristenrechner von Kalenderkompass 24, ohne Gewähr."), "END:VEVENT", "END:VCALENDAR"];
+      "DESCRIPTION:" + t(letzte.rg.name + ". " + (r.alternativ ? "Wo " + bedingterName(r) + " gesetzlicher Feiertag ist, endet die Frist erst am " + lang(r.ende) + ". " : "") + KEINE_BERATUNG + ". Berechnet mit dem Fristenrechner von Kalenderkompass 24."), "END:VEVENT", "END:VCALENDAR"];
     var a = doc.createElement("a"); a.href = URL.createObjectURL(new Blob([z.join("\r\n") + "\r\n"], { type: "text/calendar" }));
-    a.download = "fristende-" + r.ende + ".ics"; doc.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    a.download = "fristende-" + tag + ".ics"; doc.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
 
   box.addEventListener("change", function (ev) {
     if (ev.target === F.land) { fuelleRegionen(); fuelleRegeln(); }
     if (ev.target === F.regel) modusAnpassen();
+    if (ev.target === F.modus) zurueckgesetzt = false;
     rechne();
   });
   box.addEventListener("input", function (ev) { if (ev.target === F.n || ev.target === F.start) rechne(); });
@@ -270,7 +301,10 @@
     if (g[1] && DATA.countries[F.land.value].regions[g[1]]) F.region.value = g[1];
     var q = new URLSearchParams(root.location.search), v = {};
     ["land", "region", "regel", "start", "n", "einheit", "modus"].forEach(function (k) { if (q.has(k)) v[k] = q.get(k); });
-    if (Object.keys(v).length) setze(v);
+    if (Object.keys(v).length) {
+      if (!("region" in v)) v.region = "";   // Link ohne Region = ohne Bundesland, nicht das hier gemerkte
+      setze(v);
+    }
     rechne();
   }).catch(function () { aus.innerHTML = '<p class="plan-sum fr-fehler">Die Feiertagsdaten konnten nicht geladen werden. Bitte die Seite neu laden.</p>'; });
 })(typeof window !== "undefined" ? window : globalThis);
