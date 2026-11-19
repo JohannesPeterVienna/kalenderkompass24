@@ -128,6 +128,26 @@ await fall("ohne :has() (Rückfall-Klassen): leer ohne Beiwerk, ins sichtbar; fi
   await ctx.close();
 });
 
+await fall("Platz im ersten Bildschirm: <ins> steht im HTML mit fester Größe; mit Global Privacy Control wird er entfernt", async () => {
+  const html = fs.readFileSync(path.join(DOCS, "index.html"), "utf8");
+  assert.match(html, /<div class="ad ad--kopf" data-ad="kopf" aria-hidden="true"><ins class="adsbygoogle kk_kopf" style="display:block" data-ad-client="ca-pub-7811071715414905" data-ad-slot="\d{10}"><\/ins><\/div>/);
+  for (const [breite, soll] of [[1366, "728×90"], [800, "728×90"], [390, "320×100"], [340, "weg"]]) {
+    const { ctx, page } = await seite(breite, "/");
+    const ist = await page.$eval(".ad--kopf", b => { const i = b.querySelector("ins"); if (!i) return "weg"; const r = i.getBoundingClientRect(); return r.width + "×" + r.height; });
+    assert.equal(ist, soll, `${breite} px`);
+    await ctx.close();
+  }
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+  await ctx.addInitScript(() => Object.defineProperty(Navigator.prototype, "globalPrivacyControl", { get: () => true }));
+  await ctx.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.fulfill({ status: 200, contentType: "text/javascript", body: "/* Stub */" }));
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/", { waitUntil: "load" });
+  await page.waitForTimeout(200);
+  assert.equal(await page.$$eval("ins.adsbygoogle", l => l.length), 0, "GPC: kein <ins>");
+  assert.equal(await page.$eval(".ad--kopf", b => b.getBoundingClientRect().height), 0, "GPC: Platz ohne Höhe");
+  await ctx.close();
+});
+
 await browser.close();
 server.close();
 console.log(fehler ? `${fehler} Fall/Fälle fehlgeschlagen` : "Werbeflächen: alle Fälle bestanden");

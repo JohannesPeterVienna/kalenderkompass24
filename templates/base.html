@@ -11,6 +11,10 @@ gtag("consent","default",{ad_storage:"denied",ad_user_data:"denied",ad_personali
 window.kkConsentDefault=true;
 if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;}</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7811071715414905" crossorigin="anonymous"></script>
+<style>/* Größe der beiden Plätze im ersten Bildschirm je Bildschirmbreite – im Dokument, nicht im externen Stylesheet (AdSense-Hilfe 9183363) */
+.kk_kopf,.kk_auftakt{width:320px;height:100px;margin:0 auto}
+@media(min-width:768px){.kk_kopf,.kk_auftakt{width:728px;height:90px}}
+@media(min-width:1024px){.kk_auftakt{width:100%;max-width:970px;height:250px}}</style>
 {% endif %}<title>{{ title }}</title>
 <meta name="description" content="{{ description }}">
 <link rel="canonical" href="{{ site }}{{ path }}">
@@ -43,6 +47,8 @@ if(navigator.globalPrivacyControl===true){(window.adsbygoogle=window.adsbygoogle
   </nav>
 </div></header>
 <main id="inhalt">
+{% if slots and kopf_art and kopf_art not in skip_ads %}<div class="wrap"><div class="ad ad--{{ kopf_art }}" data-ad="{{ kopf_art }}" aria-hidden="true"><ins class="adsbygoogle kk_{{ kopf_art }}" style="display:block" data-ad-client="ca-pub-7811071715414905" data-ad-slot="{{ ad_oben_slot }}"></ins></div></div>
+{% endif %}
 {% block main %}{% endblock %}
 {% if slots %}<div class="wrap"><div class="ad ad--superbanner" data-ad="superbanner" aria-hidden="true"></div><div class="ad ad--mbanner" data-ad="mbanner" aria-hidden="true"></div></div>{% endif %}
 </main>

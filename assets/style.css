@@ -277,6 +277,28 @@ main{overflow-wrap:break-word}main a{overflow-wrap:anywhere}
 .ad--billboard{margin-bottom:64px}
 .side .ad--half{margin-top:128px}
 
+/* Plätze im ersten Bildschirm (19.11.2026). Größe: Klassen kk_kopf / kk_auftakt im <head> (base.html).
+   kopf: flach unter der Kopfzeile, wo die Seite mit einem Werkzeug beginnt – Abstand zum Menü darüber, das Werkzeug
+   bleibt mehr als 150 px entfernt. auftakt: nach Überschrift und Einleitung (Ferienübersicht: unter der Kopfzeile). */
+.ad--kopf,.ad--auftakt{display:block;max-width:970px}
+.ad--kopf{margin:20px auto 4px}
+.ad--auftakt{margin:4px auto 20px}
+main>.wrap:first-child>.ad--auftakt{margin:20px auto 4px}
+/* bis consent.js den Platz anmeldet (.on), gilt dasselbe wie ohne Antwort von Google: nur das <ins>, kein Beiwerk */
+.ad--kopf:not(.on),.ad--auftakt:not(.on){margin:0 auto}
+.ad--kopf:not(.on)::before,.ad--auftakt:not(.on)::before{display:none}
+@media (max-width:359px){.ad--kopf,.ad--auftakt{display:none!important}}
+/* Mobile Banner am Seitenende: 150 px Abstand zu Knöpfen der Seitenleisten-Kästen, die am Handy darüber liegen */
+.ad--mbanner{margin-top:150px}
+/* Half Page Ad haftet am Desktop beim Scrollen (AdSense-Hilfe 10734935, „Sticky ads“: höchstens 300 px breit, nur
+   Desktop, nie über oder unter Inhalt, nur ein haftender Platz, scrollt mit der Spalte hinein und hinaus). Nur auf
+   Seiten ohne Bedienelemente in der Inhaltsspalte (.side--haftend), der Platz ist der letzte der Spalte, und nur,
+   wenn Beschriftung und 600 px Höhe ganz ins Fenster passen. */
+@media (min-width:1024px) and (min-height:700px){
+  .side--haftend{align-self:stretch}
+  .side--haftend .ad--half{position:sticky;top:24px}
+}
+
 /* Werbeflächen ohne Antwort von Google: Das <ins class="adsbygoogle"> bleibt immer sichtbar und ungeschnitten
    (AdSense-Hilfe 10762946: Anzeigenblöcke nicht anfangs versteckt laden). Nur das Beiwerk – „Werbung“, Mindesthöhe,
    Polster und Abstände – erscheint erst bei data-ad-status="filled" oder "unfill-optimized". Responsive Blöcke

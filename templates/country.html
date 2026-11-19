@@ -6,8 +6,8 @@
   <p class="lead">{{ lead }}</p>
   {{ m.checked_line() }}
 </div></section>
+<div class="wrap">{{ m.ad("auftakt") }}</div>
 <div class="wrap">{{ m.band(band, band_title, live=False) }}</div>
-<div class="wrap">{{ m.ad("billboard") }}</div>
 <div class="wrap layout">
   <div>
     <h2>{{ table_title }}</h2>
@@ -45,9 +45,9 @@
     <h2>Andere Jahre</h2>
     <ul class="tiles">{% for y in other_years %}<li><a href="/feiertage-{{ y }}-{{ slug }}.html">Feiertage {{ y }} {{ country_name }}</a></li>{% endfor %}</ul>
   </div>
-  <aside class="side">
+  <aside class="side side--haftend">
     <div class="box"><h3>Für dein Bundesland</h3><p class="small">Auf der Startseite wählst du dein Bundesland und siehst Fenster- bzw. Brückentage und den nächsten Feiertag.</p><a class="btn" href="/">Zur Übersicht</a></div>
-    {{ m.ad("half") }}{{ m.ad("sky") }}
+    {{ m.ad("half") }}{# haftender Platz muss der letzte der Spalte sein: kein Skyscraper darunter #}
   </aside>
 </div>
 {% endblock %}

@@ -1,5 +1,6 @@
 {% macro ad(kind) -%}
-{% if slots and kind not in skip_ads %}<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true"></div>{% endif %}
+{# kopf/auftakt (erster Bildschirm): Das <ins> steht schon im HTML, damit der Platz vom ersten Bild an seine Größe hat. #}
+{% if slots and kind not in skip_ads %}<div class="ad ad--{{ kind }}" data-ad="{{ kind }}" aria-hidden="true">{% if kind in ("kopf", "auftakt") %}<ins class="adsbygoogle kk_{{ kind }}" style="display:block" data-ad-client="ca-pub-7811071715414905" data-ad-slot="{{ ad_oben_slot }}"></ins>{% endif %}</div>{% endif %}
 {%- endmacro %}
 
 

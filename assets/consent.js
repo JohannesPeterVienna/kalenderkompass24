@@ -88,8 +88,12 @@
   //   billboard → „Themen-Websites – zwischen Werkzeug und Inhalt – responsiv“
   //   rect, half → „Themen-Websites – nach dem Inhalt – responsiv“ (half als vertikales Format)
   //   superbanner, sky, rect2, mbanner → feste IAB-Größen, Blocknamen „Themen-Websites – …“
+  //   kopf, auftakt → derselbe responsive Block wie billboard, Größe je Bildschirmbreite über die Klassen kk_kopf /
+  //   kk_auftakt im <head> (AdSense-Hilfe 9183363, „Exact ad unit size per screen width“). Für eine getrennte
+  //   Auswertung im AdSense-Konto einen eigenen responsiven Block anlegen und dessen ID hier eintragen.
   const SLOTS = { billboard: "7497607759", rect: "1292301217", rect2: "9522484334", half: "1292301217",
-                  superbanner: "5774811012", sky: "5064364572", mbanner: "5396758258" };
+                  superbanner: "5774811012", sky: "5064364572", mbanner: "5396758258",
+                  kopf: "7497607759", auftakt: "7497607759" };
   // IAB-Standardformate (Werbeformen-Katalog IAB Austria / IAB-Standardgrößen), alle über AdSense-Blöcke:
   //   Desktop:  Billboard 970×250 (responsiv, fällt auf Leaderboard 728×90 zurück), Superbanner 728×90,
   //             Wide Skyscraper 160×600, Half Page Ad 300×600, Medium Rectangle 300×250 (rect, rect2)
@@ -98,11 +102,19 @@
   // Sonderformate wie Wallpaper, Sitebar oder Understitial gibt es in AdSense nicht; sie bräuchten einen
   // Ad-Server (z. B. Google Ad Manager) und Direktbuchungen – dafür ist hier bewusst kein leerer Platz reserviert.
   const FIXED = { superbanner: [728, 90], sky: [160, 600], rect2: [300, 250], mbanner: [320, 100] };
+  // Plätze im ersten Bildschirm: Der Platz hat von Anfang an seine Größe (kein Sprung, wenn Google füllt).
+  //   kopf (unter der Kopfzeile, Seiten mit Werkzeug oben): 320×100 · ab 768 px 728×90
+  //   auftakt (nach Überschrift und Einleitung): 320×100 · ab 768 px 728×90 · ab 1024 px Spaltenbreite bis 970 × 250
+  //   Das <ins> dieser Plätze steht schon im HTML (Klasse kk_kopf / kk_auftakt, Größen im <head>); hier wird es nur angemeldet.
 
   const gpc = navigator.globalPrivacyControl === true;
 
   function loadAds(){
-    if (gpc) { (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1; return; }
+    if (gpc) {
+      (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1;
+      document.querySelectorAll(".ad[data-ad] > ins.adsbygoogle").forEach(i => i.remove());   // keine Anfrage → kein leerer Platz
+      return;
+    }
     // Auf indexierbaren Seiten steht das AdSense-Skript schon statisch im <head> – nicht doppelt laden.
     if (!document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) {
       const s = document.createElement("script");
@@ -114,7 +126,13 @@
       const id = SLOTS[box.dataset.ad];
       if (!id) return;
       box.classList.add("on");
-      if (box.offsetParent === null) { box.classList.remove("on"); return; }   // auf diesem Bildschirm ausgeblendet
+      const fertig = box.querySelector("ins.adsbygoogle");     // kopf, auftakt: <ins> steht im HTML
+      if (box.offsetParent === null) { box.classList.remove("on"); if (fertig) fertig.remove(); return; }   // auf diesem Bildschirm ausgeblendet
+      if (fertig) {
+        zeigeWennGefuellt(box, fertig);
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        return;
+      }
       const ins = document.createElement("ins");
       ins.className = "adsbygoogle"; ins.dataset.adClient = PUB; ins.dataset.adSlot = id;
       const fixed = FIXED[box.dataset.ad];

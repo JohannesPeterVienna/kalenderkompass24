@@ -1,18 +1,18 @@
 {% extends "base.html" %}{% import "macros.html" as m with context %}
 {% block main %}
 {% if crumbs %}{{ m.crumbs(crumbs) }}{% endif %}
-<div class="wrap layout" style="padding-top:28px">
+<div class="wrap layout" style="padding-top:{{ 16 if ads else 28 }}px">
   <article class="prose" style="max-width:none">
     <h1>{{ h1 }}</h1>
     {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
     {{ m.checked_line() }}
-    {% if ads %}{{ m.ad("billboard") }}{% endif %}
+    {% if ads %}{{ m.ad("auftakt") }}{% endif %}
     <div class="prose">{{ body | safe }}</div>
     {% if related %}<h2>Weiterlesen</h2><ul class="cards">{% for a in related %}<li><a href="/{{ a.slug }}.html"><strong>{{ a.title }}</strong><span>{{ a.teaser }}</span></a></li>{% endfor %}</ul>{% endif %}
   </article>
-  <aside class="side">
+  <aside class="side{% if ads %} side--haftend{% endif %}">
     <div class="box"><h3>Werkzeuge</h3><ul><li><a href="/">Feiertage &amp; Fenstertage</a></li><li><a href="/urlaubsplaner.html">Urlaubsplaner</a></li><li><a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a></li><li><a href="/arbeitstage-rechner.html">Arbeitstage-Rechner</a></li><li><a href="/fristenrechner.html">Fristenrechner</a></li><li><a href="/kalender-{{ year }}-zum-ausdrucken.html">Kalender {{ year }} zum Ausdrucken</a></li></ul></div>
-    {% if ads %}{{ m.ad("half") }}{{ m.ad("sky") }}{% endif %}
+    {% if ads %}{{ m.ad("half") }}{% endif %}{# haftender Platz muss der letzte der Spalte sein: kein Skyscraper darunter #}
   </aside>
 </div>
 {% endblock %}

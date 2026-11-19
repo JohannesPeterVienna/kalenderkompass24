@@ -16,7 +16,9 @@ ROOT = Path(__file__).parent
 FRISTEN = json.loads((ROOT / "content" / "fristen.json").read_text(encoding="utf-8"))   # Vorschriften und Beispiele des Fristenrechners
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261118a"
+V = "20261119a"
+# AdSense-Block der Plätze im ersten Bildschirm (kopf, auftakt): steht als <ins> im HTML; gleiche ID wie SLOTS.kopf in assets/consent.js
+AD_OBEN_SLOT = "7497607759"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
@@ -57,7 +59,7 @@ def fmt(d, country, wd=True, year=True):
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
                 lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None,
-                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, fr=False, shop_live=SHOP_LIVE)
+                checked=None, sources=None, skip_ads=(), extra_html=None, kopf_art=None, ad_oben_slot=AD_OBEN_SLOT, mk=False, fr=False, shop_live=SHOP_LIVE)
     m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
     if "year" not in ctx and m and int(m.group(1)) in YEARS:
         base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
@@ -65,6 +67,13 @@ def write(path, template, **ctx):
     base["path"] = "/" if path == "index.html" else "/" + path
     # Anzeigenplätze nur auf indexierbaren Seiten; Einwilligung/Statistik (consent.js) bleibt überall gleich
     base["slots"] = bool(base["ads"]) and "noindex" not in (base["robots"] or "")
+    # Platz direkt unter der Kopfzeile: flach (728×90 / 320×100), wo die Seite mit einem Werkzeug beginnt; groß (bis 970×250)
+    # auf der Ferienübersicht (Sprungknöpfe unter der Überschrift lägen sonst zu nah) und auf den Bundeslandseiten (dort
+    # ist der Kopfbereich mit Kennzahl so hoch, dass ein Platz danach nicht mehr in den ersten Bildschirm passt).
+    # Artikel-, Länder- und Sommerferienseite setzen ihren großen Platz selbst nach Überschrift und Einleitung (Vorlagen).
+    if base["kopf_art"] is None:
+        base["kopf_art"] = {"home.html": "kopf", "tool.html": "kopf", "ferien_overview.html": "auftakt",
+                            "region.html": "auftakt", "ferien_region.html": "auftakt"}.get(template)
     if template == "tool.html":
         # Erste Anzeige erst nach dem ersten Erklärabschnitt unter dem Werkzeug
         body = base.get("body") or ""
@@ -847,7 +856,8 @@ def build_fristen():
           h1="Fristenrechner", lead="Wann läuft eine Frist ab? Der Rechner zählt nach der gewählten Vorschrift, verschiebt das Ende über Wochenende und Feiertage deines Bundeslandes – und sagt, warum.",
           tool=tool, body=body, crumbs=crumbs, show_picker=False, show_year=False, fr=True, checked=CHECKED_1811, lastmod=LASTMOD_1811,
           related=[a for a in ARTICLES if a["slug"] in ("tage-richtig-zaehlen", "schaltjahr-verstehen")],
-          jsonld=[crumbs_ld(crumbs)], active="", priority=0.8)
+          jsonld=[crumbs_ld(crumbs)], active="", priority=0.8,
+          skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen neben „Drucken“ und den Knöpfen des Rechners (unter 150 px)
 
 
 REDIRECTS = {

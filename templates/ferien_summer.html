@@ -2,6 +2,7 @@
 {% block main %}
 {{ m.crumbs(crumbs) }}
 <section class="hero" style="padding-top:20px"><div class="wrap"><h1>{{ h1 }}</h1><p class="lead">{{ lead }}</p>{{ m.checked_line([src_at, src_de]) }}</div></section>
+<div class="wrap">{{ m.ad("auftakt") }}</div>
 <div class="wrap">
   <section class="band">
     <div class="band-head"><h2>Sommerferien 2027 auf einen Blick</h2><span class="small muted">sortiert nach Ferienbeginn</span></div>
@@ -9,7 +10,6 @@
     <div class="legend"><span><i class="f-su"></i>Sommerferien</span><span>AT = Österreich, DE = Deutschland</span></div>
   </section>
 </div>
-<div class="wrap">{{ m.ad("billboard") }}</div>
 <div class="wrap layout">
   <div>
     <h2>Alle Termine</h2>
