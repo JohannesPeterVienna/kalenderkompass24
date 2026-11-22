@@ -516,12 +516,29 @@ def build_bridges(year):
         eff = "<br>".join(f"{b['vacation']} → {b['free']}" for b in bl) or "–"
         parts.append(f"<tr><td><a href='/feiertage-{year}-{slug}.html'>{name}</a></td><td>{days}</td><td>{eff}</td></tr>")
     parts.append("</tbody></table></div>")
-    best = max((b["free"] / b["vacation"], name) for slug, name, bl in de_rows for b in bl) if any(bl for _, _, bl in de_rows) else None
-    body = ("<h2>So liest du die Übersicht</h2><p>Ein Brückentag ist hier jeder Arbeitstag, der allein oder zu zweit zwischen einem Feiertag und dem Wochenende liegt. "
-            "Die erste Zahl sind die nötigen Urlaubstage, die zweite die freien Tage am Stück. Wer dazwischen weitere Tage nimmt, findet im "
-            "<a href='/urlaubsplaner.html'>Urlaubsplaner</a> die effizientesten längeren Blöcke.</p>"
-            "<p>Ein Anspruch auf Freistellung an Brückentagen besteht weder in Österreich noch in Deutschland. Mehr dazu im Beitrag "
-            "<a href='/fenstertag-zwickeltag-brueckentag.html'>Fenstertag, Zwickeltag, Brückentag</a>.</p>")
+    guide = {
+        2027: """<h2>Vier Urlaubstage im Jänner oder drei einzelne lange Wochenenden?</h2>
+<p>In Österreich lassen sich rund um den 6. Jänner zwei Vorschläge aus der Tabelle verbinden.
+Mit Urlaub am 4., 5., 7. und 8. Jänner reicht die freie Zeit bei einer Arbeitswoche von Montag bis Freitag
+vom 1. bis zum 10. Jänner. Das sind zehn zusammenhängende Kalendertage. Beim Addieren der beiden
+Tabellenzeilen würde man den 6. Jänner doppelt zählen.</p>
+<p>Wer lieber einzelne Tage nimmt, kann den 7. Mai, den 28. Mai und den 25. Oktober wählen.
+Jeder dieser Termine ergibt in Österreich vier freie Tage am Stück. Für ein Treffen mit Freunden
+aus mehreren deutschen Bundesländern bietet sich der 7. Mai an: Christi Himmelfahrt am Vortag
+gilt in allen 16 Ländern.</p>""",
+        2028: """<h2>Zwei Möglichkeiten für eine gemeinsame Herbstreise</h2>
+<p>Wer in Deutschland von Montag bis Freitag arbeitet, kann am Montag, dem 2. Oktober,
+einen Urlaubstag einsetzen. Zusammen mit dem Wochenende und dem Tag der Deutschen Einheit
+ergibt das vier freie Tage vom 30. September bis zum 3. Oktober. In Österreich ist der
+3. Oktober ein Arbeitstag. Für denselben Reisezeitraum sind dort zwei Urlaubstage nötig.</p>
+<p>In Österreich lassen sich der Nationalfeiertag am Donnerstag, dem 26. Oktober, und Allerheiligen
+am Mittwoch, dem 1. November, verbinden. Mit Urlaub am 27., 30. und 31. Oktober werden daraus
+sieben freie Tage am Stück. Für gemeinsame Pläne mit einem deutschen Arbeitsort prüfe zusätzlich,
+ob Allerheiligen dort ein gesetzlicher Feiertag ist.</p>""",
+    }
+    body = guide[year] + """<p>Weitere Zeiträume mit deinem Urlaubskontingent berechnet der
+<a href="/urlaubsplaner.html">Urlaubsplaner</a>. Die Zählweise erklärt der
+<a href="/fenstertag-zwickeltag-brueckentag.html">Ratgeber zu Brücken- und Fenstertagen</a>.</p>"""
     crumbs = [("/", "Start"), (f"/brueckentage-{year}.html", f"Fenster- und Brückentage {year}")]
     write(f"brueckentage-{year}.html", "tool.html",
           title=f"Fenster- & Brückentage {year}: Österreich & Deutschland | Kalenderkompass 24",
