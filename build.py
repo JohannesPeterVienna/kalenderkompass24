@@ -1193,7 +1193,7 @@ LEGAL_ADDR = "AdStern – Agentur für digitales Marketing<br>Seilerstätte 8/8,
 
 def build_legal():
     write("imprint.html", "page.html", title="Impressum | Kalenderkompass 24", description="Impressum und Offenlegung von Kalenderkompass 24.",
-          h1="Impressum", body=f"""<h2>Medieninhaber und Herausgeber</h2><p>{LEGAL_ADDR}</p>
+          h1="Impressum", body=f"""<h2>Medieninhaber und Herausgeber</h2><p>{LEGAL_ADDR.replace('Seilerstätte 8/8', 'Seilerstätte 8')}</p>
 <h2>Unternehmensangaben</h2><p>Unternehmensgegenstand: Werbeagentur<br>UID-Nummer: ATU54682507<br>Gewerbebehörde: Magistratisches Bezirksamt für den 1. und 8. Bezirk, Wien<br>Kammerzugehörigkeit: Wirtschaftskammer Wien, Fachgruppe Werbung und Marktkommunikation<br>Berufsbezeichnung: Werbeagentur (Gewerbe, verliehen in Österreich)<br>Anwendbare Rechtsvorschriften: Gewerbeordnung, abrufbar unter <a href="https://www.ris.bka.gv.at" rel="noopener">www.ris.bka.gv.at</a></p>
 <p>Angaben nach § 5 E-Commerce-Gesetz und § 25 Mediengesetz.</p>
 <h2>Grundlegende Richtung</h2><p>Kalenderkompass 24 ist eine unabhängige Informationsseite zu Feiertagen, Brückentagen, Kalenderwochen und Urlaubsplanung in Österreich und Deutschland. Die Seite finanziert sich über Werbung.</p>
