@@ -663,7 +663,10 @@ Samstage und Sonntage sind grau hinterlegt.</p>
 </div>
 <script src="/assets/familie.js?v=""" + V + """" defer></script>"""
     product = next(p for p in PRODUCTS if p["slug"] == "familienplaner-2027")
-    if SHOP_LIVE and product["checkout"] and product["price"]:
+    stripe_offer = env.get_template("shop-family.html").render()
+    if stripe_offer:
+        tool = tool.replace("</section>", stripe_offer + "</section>", 1)
+    elif SHOP_LIVE and product["checkout"] and product["price"]:
         from markupsafe import escape
         buy_link = (f'<p><a class="btn" href="{escape(product["checkout"])}" data-shop-buy="{product["slug"]}">'
                     f'Familienplaner 2027 kaufen · {escape(product["price"])}</a></p>')
