@@ -488,6 +488,10 @@ def de_country_html(year):
 
 """
     if year != 2027:
+        if year == 2026:
+            balance += "<h2>Zwei Samstage im Herbst</h2><p>Der 3. und der 31. Oktober liegen 2026 beide auf einem Samstag. Beim Vergleich zweier Stellen mit einer Montag-bis-Freitag-Woche macht der zusätzliche Reformationstag im betreffenden Bundesland in diesem Jahr daher keinen weiteren freien Werktag aus. In der Spalte mit den Feiertagen wird er dennoch gezählt.</p>"
+        elif year == 2028:
+            balance += "<h2>Eine Urlaubsentscheidung im Oktober</h2><p>Der 3. Oktober fällt auf einen Dienstag. Wer normalerweise Montag bis Freitag arbeitet und Montag, den 2. Oktober, freinimmt, hat vom 30. September bis 3. Oktober vier Tage zusammenhängend frei. Vier Wochen später ergibt sich dieselbe Konstellation am 30. und 31. Oktober ausschließlich dort, wo der Reformationstag arbeitsfrei ist.</p>"
         return balance + '<p><a href="/feiertage-2027-deutschland.html#hintergrund">Herkunft und Rechtsgrundlagen der Feiertage in der Länderübersicht</a></p>'
     return balance + f"""
 <h2 id="hintergrund">Rechtsgrundlage: die Feiertagsgesetze der Länder</h2>
@@ -901,16 +905,26 @@ def build_kw(year):
         rows.append(f"<tr data-kw-row='{year}-{w}'><td class='date'>KW {w}</td><td>{fmt(mon,'at',wd=False)}</td><td>{fmt(sun,'at',wd=False)}</td></tr>")
     tool = (f"<div class='planner'><div class='kw-now' data-kw-now><b>KW</b></div><p class='small muted' style='margin:6px 0 0'>Aktuelle Kalenderwoche nach ISO 8601</p></div>"
             f"<h2>Alle {weeks} Kalenderwochen {year}</h2><div class='scroll'><table class='tbl'><thead><tr><th>Woche</th><th>Montag</th><th>Sonntag</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>")
-    body = f"""<h2>Wie Kalenderwochen gezählt werden</h2>
-<p>In Österreich, Deutschland und der Schweiz gilt die Norm ISO 8601: Eine Woche beginnt am Montag, und die erste Kalenderwoche ist die Woche mit dem ersten Donnerstag des Jahres. Anders gesagt: KW 1 ist die Woche, in der der 4. Jänner liegt.</p>
-<p>{year} beginnt die KW 1 am {fmt(first,'at')}. Das Jahr hat {weeks} Kalenderwochen. Jahre mit 53 Wochen gibt es, wenn das Jahr an einem Donnerstag beginnt oder ein Schaltjahr an einem Mittwoch beginnt – etwa 2026 und 2032.</p>
-<p>In den USA beginnt die Woche dagegen am Sonntag, und die erste Woche ist die mit dem 1. Jänner. Bei internationalen Terminen in Kalenderwochen lohnt es sich deshalb, das Datum dazuzuschreiben.</p>"""
+    if year == 2026:
+        body = """<h2>Den letzten Wochenbericht 2026 richtig beschriften</h2>
+<p>Der Montag nach Weihnachten ist der 28. Dezember. Sein Sonntag liegt bereits am 3. Jänner 2027. Für den gesamten Bericht lautet die Kennung trotzdem 2026-W53. Wer Sonntagszahlen dem Kalenderjahr des Datums zuordnet, würde diese eine Berichtswoche auf zwei Jahre verteilen.</p>
+<p>Für eine fortlaufende Wochenliste folgt auf 2026-W53 unmittelbar 2027-W01. Die Tabelle für den Anschluss steht unter <a href="/kalenderwochen-2027.html#iso">Jahreswechsel 2027 und ISO-Zählweise</a>.</p>"""
+    elif year == 2027:
+        body = """<h2 id="iso">Wann eine neue Berichtswoche beginnt</h2>
+<p>Freitag, der 1. Jänner 2027, gehört noch zu KW 53 des Vorjahres. Montag, der 4. Jänner, eröffnet KW 1. Bei einem Wochendienst von Freitag bis Donnerstag verteilen sich die sieben Tage deshalb auf zwei Wochenblätter: drei Tage auf 2026-W53 und vier auf 2027-W01.</p>
+<p>Eine ISO-Woche beginnt montags. Der erste Donnerstag eines Jahres liegt immer in KW 1. Für den Datenaustausch gehört zur Nummer deshalb auch das ISO-Wochenjahr. Am 1. Jänner können Kalenderjahr und Wochenjahr verschieden sein.</p>"""
+    elif year == 2028:
+        body = """<h2>Den Schalttag im Wochenplan finden</h2>
+<p>Dienstag, der 29. Februar 2028, liegt in KW 9. Auf dasselbe Wochenblatt gehören Montag, der 28. Februar, und Mittwoch, der 1. März. Für eine Übergabe mit Frist bis Freitag dieser Woche lautet das Datum 3. März. Ein zweites Blatt nur wegen des Monatswechsels würde drei Arbeitstage vom Wochenanfang trennen.</p>
+<p>Am Jahresanfang gehören Samstag und Sonntag, der 1. und 2. Jänner, noch zu 2027-W52. Die erste volle Arbeitswoche beginnt am 3. Jänner. <a href="/kalenderwochen-2027.html#iso">So wird das Wochenjahr bestimmt.</a></p>"""
+    else:
+        body = f"<h2>Jahresgrenzen {year}</h2><p>Die erste Kalenderwoche beginnt am {fmt(first, 'at')}. Die letzte der {weeks} Wochen beginnt am {fmt(date.fromisocalendar(year, weeks, 1), 'at')}.</p>"
     crumbs = [("/", "Start"), (f"/kalenderwochen-{year}.html", f"Kalenderwochen {year}")]
     write(f"kalenderwochen-{year}.html", "tool.html", title=f"Kalenderwochen {year}: alle KW mit Datum | Kalenderkompass 24",
           description=f"Alle {weeks} Kalenderwochen {year} mit Start- und Enddatum nach ISO 8601 – und welche KW gerade ist.",
           h1=f"Kalenderwochen {year}", lead=f"Welche Kalenderwoche ist heute? Hier stehen alle {weeks} Wochen {year} mit Datum von Montag bis Sonntag.",
           tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[], jsonld=[crumbs_ld(crumbs)],
-          active=f"/kalenderwochen-{CUR}.html", priority=0.8 if year in (2026, 2027) else 0.5)
+          active=f"/kalenderwochen-{CUR}.html", lastmod="2026-11-22", priority=0.8 if year in (2026, 2027) else 0.5)
 
 
 def build_print(year):
