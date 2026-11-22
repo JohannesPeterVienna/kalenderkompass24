@@ -401,7 +401,7 @@ def build_country(year):
                  "Der Karfreitag ist seit 2019 kein Feiertag mehr. An seine Stelle trat der persönliche Feiertag, den jede und jeder einmal pro Jahr selbst festlegen kann."],
           regions=list(H.AT_REGIONS.items()), region_year=year if year in (2027, 2028) else CUR, country="at",
           other_years=[y for y in YEARS if y != year], slug="oesterreich", country_name="Österreich",
-          extra_html=at_country_html(year),
+          lastmod="2026-11-22", extra_html=at_country_html(year),
           crumbs=crumbs, checked=CHECKED_0411, sources=[("Arbeitsruhegesetz § 7 im RIS", RIS)],
           jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
 
@@ -429,7 +429,7 @@ def build_country(year):
           facts=["Feiertage sind in Deutschland Ländersache. Nur der Tag der Deutschen Einheit ist durch Bundesrecht festgelegt; die übrigen bundesweiten Feiertage stehen in allen Landesgesetzen."],
           regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()], region_year=year if year in (2027, 2028) else CUR, country="de",
           other_years=[y for y in YEARS if y != year], slug="deutschland", country_name="Deutschland",
-          extra_html=de_country_html(year),
+          lastmod="2026-11-22", extra_html=de_country_html(year),
           crumbs=crumbs, checked=CHECKED_0411, jsonld=[crumbs_ld(crumbs), holiday_ld("de", "", year, nat)], lang_at=False, priority=0.9 if year == CUR else 0.6)
 
 
@@ -441,11 +441,15 @@ def at_country_html(year):
     mid = [h for h in rows if h["date"].weekday() in (1, 2, 3)]
     lst = lambda xs: (", ".join(xs[:-1]) + " und " + xs[-1]) if len(xs) > 1 else (xs[0] if xs else "keiner")
     nf = date(year, 10, 26)
-    return f"""
+    balance = f"""
 <h2>Das Feiertagsjahr {year} in Zahlen</h2>
 <p>{len(rows) - len(we)} der 13 Feiertage liegen {year} auf einem Werktag von Montag bis Freitag. Aufs Wochenende {'fällt' if len(we) == 1 else 'fallen'} {lst([h['name'] + ' (' + WDL[h['date'].weekday()] + ')' for h in we])}; einen Ersatztag gibt es dafür nicht. Ein langes Wochenende ohne Urlaub bringen die Feiertage an einem Montag oder Freitag – {year} sind das {lst([h['name'] for h in mofr])}. Feiertage am Dienstag, Mittwoch oder Donnerstag ({lst([h['name'] for h in mid])}) sind die Kandidaten für Fenstertage. Der Nationalfeiertag ist {year} ein {WDL[nf.weekday()]}.</p>
 
-<h2>Woher die österreichischen Feiertage kommen</h2>
+"""
+    if year != 2027:
+        return balance + '<p><a href="/feiertage-2027-oesterreich.html#hintergrund">Herkunft und Rechtsgrundlagen der Feiertage in der Länderübersicht</a></p>'
+    return balance + f"""
+<h2 id="hintergrund">Woher die österreichischen Feiertage kommen</h2>
 <p>Zehn der 13 Feiertage sind kirchlichen Ursprungs: Heilige Drei Könige, Ostermontag, Christi Himmelfahrt, Pfingstmontag, Fronleichnam, Mariä Himmelfahrt, Allerheiligen, Mariä Empfängnis, Christtag und Stefanitag. Die beweglichen davon hängen am Ostersonntag – {year} ist das der {fmt(H.easter(year), 'at', wd=False)}. Weltlich sind Neujahr, der <strong>Staatsfeiertag</strong> am 1. Mai und der <strong>Nationalfeiertag</strong> am 26. Oktober. Er erinnert an den 26. Oktober 1955, an dem der Nationalrat das Bundesverfassungsgesetz über die immerwährende Neutralität beschloss.</p>
 <p>Der <strong>Karfreitag</strong> war bis 2018 nur für Angehörige der evangelischen Kirchen, der Altkatholischen und der Methodistischen Kirche ein Feiertag. Nachdem der Europäische Gerichtshof diese Regel im Jänner 2019 als Diskriminierung beurteilt hatte, wurde sie gestrichen. Seitdem gibt es den <a href="/persoenlicher-feiertag-oesterreich.html">persönlichen Feiertag</a>: einen Urlaubstag pro Jahr, den alle Beschäftigten mit drei Monaten Vorlauf selbst festlegen können.</p>
 
@@ -476,13 +480,17 @@ def de_country_html(year):
     bb = H.buss_und_bettag(year)
     assert where.get("Buß- und Bettag") == ["Sachsen"] and where.get("Weltkindertag") == ["Thüringen"]
     assert sorted(where.get("Internationaler Frauentag")) == ["Berlin", "Mecklenburg-Vorpommern"]
-    return f"""
+    balance = f"""
 <h2>Feiertage {year} je Bundesland</h2>
 <p>Die Zahl der gesetzlichen Feiertage schwankt in Deutschland zwischen {min(p[2] for p in per)} und {max(p[2] for p in per)}. Entscheidend für die freien Tage ist aber, wie viele davon auf einen Werktag fallen: {year} sind das am meisten in {lst(most)} ({mx}), am wenigsten in {lst(least)} ({mn}). Bundesweit {'liegt einer' if len(nat_we) == 1 else 'liegen ' + str(len(nat_we))} der neun gemeinsamen Feiertage auf einem Wochenende{(': ' + lst([h['name'] for h in nat_we])) if nat_we else ''}. Einen Ersatztag gibt es dafür in keinem Land.</p>
 <div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Feiertage {year}</th><th scope="col">davon Mo–Fr</th><th scope="col">zusätzlich zu den neun bundesweiten</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="small muted">Gezählt sind landesweite gesetzliche Feiertage; Bayern mit Mariä Himmelfahrt, das dort in Gemeinden mit überwiegend katholischer Bevölkerung gilt. Brandenburg zählt Ostersonntag und Pfingstsonntag ausdrücklich als Feiertage mit, die immer auf einen Sonntag fallen.</p>
 
-<h2>Rechtsgrundlage: die Feiertagsgesetze der Länder</h2>
+"""
+    if year != 2027:
+        return balance + '<p><a href="/feiertage-2027-deutschland.html#hintergrund">Herkunft und Rechtsgrundlagen der Feiertage in der Länderübersicht</a></p>'
+    return balance + f"""
+<h2 id="hintergrund">Rechtsgrundlage: die Feiertagsgesetze der Länder</h2>
 <p>Für Feiertage sind in Deutschland die Länder zuständig. Jedes der 16 Länder hat ein eigenes Sonn- und Feiertagsgesetz, das die gesetzlichen Feiertage aufzählt und regelt, was an ihnen erlaubt ist. Nur der Tag der Deutschen Einheit ist bundesrechtlich festgelegt: Artikel 2 Absatz 2 des Einigungsvertrags bestimmt den 3. Oktober als gesetzlichen Feiertag. Das Grundgesetz schützt die Sonntage und die staatlich anerkannten Feiertage „als Tage der Arbeitsruhe und der seelischen Erhebung“ (Art. 140 GG in Verbindung mit Art. 139 der Weimarer Reichsverfassung), legt aber selbst keine Feiertage fest.</p>
 <p>Daraus folgt eine praktische Regel: Für Beschäftigte zählen die Feiertage am Arbeitsort, nicht am Wohnort. Wer in Mainz wohnt und in Frankfurt arbeitet, hat an Allerheiligen keinen freien Tag; wer in Leipzig wohnt und in Halle arbeitet, hat am Buß- und Bettag keinen. Fällt ein Feiertag auf ein Wochenende, entfällt er ersatzlos. Der 24. und der 31. Dezember sind in keinem Land gesetzliche Feiertage; viele Tarifverträge stellen sie aber ganz oder ab Mittag frei.</p>
 
@@ -545,7 +553,7 @@ ob Allerheiligen dort ein gesetzlicher Feiertag ist.</p>""",
           description=f"Alle Brückentage {year}: die Fenstertage in Österreich und die Brückentage jedes deutschen Bundeslandes – mit freien Tagen pro Urlaubstag.",
           h1=f"Fenster- und Brückentage {year}", lead=f"Mit wenig Urlaub viel frei: alle Fenstertage {year} in Österreich und die Brückentage in jedem deutschen Bundesland.",
           tool="".join(str(p) for p in parts), body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "fenstertag-zwickeltag-brueckentag")],
-          jsonld=[crumbs_ld(crumbs)], active=f"/brueckentage-{CUR}.html", priority=0.9 if year == CUR else 0.6)
+          jsonld=[crumbs_ld(crumbs)], lastmod="2026-11-22", active=f"/brueckentage-{CUR}.html", priority=0.9 if year == CUR else 0.6)
 
 
 def build_planner():

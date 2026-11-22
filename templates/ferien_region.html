@@ -32,7 +32,7 @@
       <tbody>{% for r in d.rows %}<tr><td><span class="dot f-{{ r.cls }}"></span>{{ r.name }}</td><td class="date"><span class="lg">{{ r.span }}</span><span class="sm">{{ r.short }}</span></td><td>{{ r.days }}</td><td>{{ r.wd }}</td></tr>{% endfor %}
       <tr class="sum"><td>Gesamt</td><td></td><td>{{ d.total }}</td><td>{{ d.wd }}</td></tr></tbody>
     </table></div>
-    <p class="small muted">„Tage“ zählt Kalendertage inklusive Wochenenden. „Arbeitstage“ sind Montag bis Freitag ohne gesetzliche Feiertage – also die Urlaubstage, die ein berufstätiger Elternteil bräuchte, um die Ferien komplett abzudecken.</p>
+    <p class="small muted"><a href="/schulferien-{{ sy_slug }}.html#zaehlweise">Wie Kalender- und Arbeitstage gezählt werden</a></p>
     <p class="no-print"><button class="btn" type="button" data-ferien-ics data-name="Schulferien {{ sy }} {{ name }}" data-file="schulferien-{{ sy_slug }}-{{ slug }}.ics" data-rows='{{ ics_json }}'>Ferien in den Kalender (.ics)</button>
     <a class="btn ghost" href="/urlaubsplaner.html">Urlaub dazu planen</a></p>
 

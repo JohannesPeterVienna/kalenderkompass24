@@ -29,11 +29,10 @@
       <tbody>{% for r in summer_rows %}<tr><td><a href="{{ r.href }}">{{ r.name }}</a> <span class="small muted">{{ 'AT' if r.c == 'at' else 'DE' }}</span></td><td class="date"><span class="lg">{{ r.span }}</span><span class="sm">{{ r.short }}</span></td><td>{{ r.days }}</td></tr>{% endfor %}</tbody>
     </table></div>
     {{ m.ad("rect") }}
-    <h2>So nutzt du die Übersicht</h2>
+    <h2 id="zaehlweise">Welche Tage für die Betreuung zählen</h2>
     <div class="prose">
-      <p><strong>Urlaub buchen:</strong> Reisen in der Nebensaison sind oft deutlich günstiger. Der Zeitstrahl zeigt, wann in vielen Ländern gleichzeitig Ferien sind – und welche Wochen frei von Ferienandrang bleiben.</p>
-      <p><strong>Familie in mehreren Ländern:</strong> Wer Großeltern, Patchwork-Kinder oder Freunde in einem anderen Bundesland hat, findet hier sofort die gemeinsamen Ferienwochen.</p>
-      <p><strong>Betreuung planen:</strong> Auf jeder Länderseite steht, wie viele Arbeitstage in den Ferien liegen – also wie viele Urlaubstage Eltern bräuchten, um alles selbst abzudecken.</p>
+      <p>Die Spalte „Tage“ zählt den ersten und den letzten Ferientag mit. Von Samstag bis zum Sonntag der folgenden Woche sind das neun Kalendertage. Darin liegen fünf Tage von Montag bis Freitag. Fällt einer davon auf einen am Ort berücksichtigten gesetzlichen Feiertag, weist die Tabelle vier Arbeitstage aus.</p>
+      <p>Wer beispielsweise nur Montag, Dienstag und Donnerstag arbeitet, markiert im Kalenderexport diese drei Wochentage. Bei geteilten Ferien zählen für ein Treffen nur die Tage zwischen dem späteren Beginn und dem früheren Ende. Ein gemeinsamer erster Ferientag garantiert noch kein gemeinsames Ferienende.</p>
       <p class="small muted">Alle Angaben ohne Gewähr. Schulautonome Tage sind nicht enthalten; sie legt jede Schule selbst fest.</p>
     </div>
   </div>
