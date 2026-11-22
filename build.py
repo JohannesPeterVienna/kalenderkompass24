@@ -630,7 +630,16 @@ def build_shop():
 
 
 def build_familie():
-    tool = """<div class="familie" data-familie>
+    tool = """<section class="box" aria-labelledby="blanko-titel">
+<h2 id="blanko-titel">Familienkalender 2027 mit 6 Spalten zum Ausdrucken</h2>
+<p>Das Musterblatt für Januar passt auf eine A4-Seite. Tragt oben die Namen und darunter für jeden Tag die Termine ein.
+Bei vier Personen bleiben zum Beispiel zwei Spalten für Fahrdienste und gemeinsame Termine.
+Samstage und Sonntage sind grau hinterlegt.</p>
+<p><a class="btn" href="/assets/familienkalender-januar-2027-6-spalten.pdf" download>Januar 2027 herunterladen (PDF, 1 Seite)</a></p>
+</section>
+<h2>Eigenen Familienplaner gestalten</h2>
+<p>Wenn Feiertage, Schulferien oder Geburtstage schon beim Drucken eingetragen sein sollen, wähle unten dein Bundesland und die Personen aus.</p>
+<div class="familie" data-familie>
 <form class="fform" data-fform onsubmit="return false">
   <div class="fgrid">
     <label>Bundesland<select name="region"><option>wird geladen …</option></select></label>
@@ -653,6 +662,14 @@ def build_familie():
   <p class="small muted" data-fnote></p><p class="small" data-fmsg role="status"></p></div>
 </div>
 <script src="/assets/familie.js?v=""" + V + """" defer></script>"""
+    product = next(p for p in PRODUCTS if p["slug"] == "familienplaner-2027")
+    if SHOP_LIVE and product["checkout"] and product["price"]:
+        from markupsafe import escape
+        buy_link = (f'<p><a class="btn" href="{escape(product["checkout"])}" data-shop-buy="{product["slug"]}">'
+                    f'Familienplaner 2027 kaufen · {escape(product["price"])}</a></p>')
+        tool = tool.replace("</section>", '<h3>Regionaler Familienplaner für das ganze Jahr</h3>'
+                            '<p>Zwölf Monatsblätter in A4 und A3 mit fünf Namensspalten, Feiertagen und regionalen Schulferien.</p>'
+                            + buy_link + "</section>", 1)
     import ferien as F
     body = """<h2>So entsteht dein Familienplaner</h2>
 <ol><li><strong>Bundesland wählen:</strong> Die gesetzlichen Feiertage und die amtlichen Schulferien deines Bundeslandes werden automatisch eingetragen.</li>
@@ -692,12 +709,12 @@ def build_familie():
 </ul>
 <p class="small muted">Feiertage nach den Feiertagsgesetzen, Schulferien nach oesterreich.gv.at und der Kultusministerkonferenz. Wie wir rechnen, steht unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>. Alle Angaben ohne Gewähr.</p>""".replace("{F_SY}", F.SCHOOLYEAR).replace("{CUR}", str(CUR))
     crumbs = [("/", "Start"), ("/familienplaner.html", "Familienplaner")]
-    write("familienplaner.html", "tool.html", title="Familienplaner 2027 zum Ausdrucken – mit Feiertagen, Schulferien & Geburtstagsfotos | Kalenderkompass 24",
-          description="Familienplaner 2027 kostenlos gestalten: Spalte pro Person, Feiertage und Schulferien deines Bundeslandes, Geburtstage mit Foto – als PDF zum Ausdrucken.",
-          h1="Familienplaner 2027", lead="Gestalte euren Familienkalender mit Feiertagen und Schulferien deines Bundeslandes – und den Geburtstagen der Familie, auf Wunsch mit Foto.",
+    write("familienplaner.html", "tool.html", title="Familienkalender 2027 zum Ausdrucken – Januar mit 6 Spalten | Kalenderkompass 24",
+          description="Januar 2027 mit sechs leeren Spalten als druckfertiges A4-Musterblatt laden. Alternativ einen Planer mit Ferien, Feiertagen und Namen gestalten.",
+          h1="Familienplaner 2027", lead="Lade die fertige Druckvorlage herunter oder gestalte einen Kalender für deine Familie.",
           tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen",)],
           jsonld=[crumbs_ld(crumbs), {"@context": "https://schema.org", "@type": "WebApplication", "name": "Familienplaner", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "url": SITE + "/familienplaner.html"}],
-          active="/familienplaner.html", priority=0.9,
+          active="/familienplaner.html", priority=0.9, lastmod="2026-11-22",
           skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben dem Formular
 
 
