@@ -1247,22 +1247,39 @@ def build_articles():
               lastmod=LASTMOD_1811 if frist else LASTMOD, sources=[("Arbeitsruhegesetz im RIS", RIS)] if fenster else None)
 
 
-LEGAL_ADDR = "AdStern – Agentur für digitales Marketing<br>Seilerstätte 8/8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
+LEGAL_ADDR = "AdStern – Agentur für digitales Marketing<br>Seilerstätte 8, 1010 Wien, Österreich<br>E-Mail: <a href='mailto:office@adstern.com'>office@adstern.com</a><br>Web: <a href='https://www.adstern.com'>www.adstern.com</a>"
 
 
 def build_legal():
     write("imprint.html", "page.html", title="Impressum | Kalenderkompass 24", description="Impressum und Offenlegung von Kalenderkompass 24.",
-          h1="Impressum", body=f"""<h2>Medieninhaber und Herausgeber</h2><p>{LEGAL_ADDR.replace('Seilerstätte 8/8', 'Seilerstätte 8')}</p>
-<h2>Unternehmensangaben</h2><p>Unternehmensgegenstand: Werbeagentur<br>UID-Nummer: ATU54682507<br>Gewerbebehörde: Magistratisches Bezirksamt für den 1. und 8. Bezirk, Wien<br>Kammerzugehörigkeit: Wirtschaftskammer Wien, Fachgruppe Werbung und Marktkommunikation<br>Berufsbezeichnung: Werbeagentur (Gewerbe, verliehen in Österreich)<br>Anwendbare Rechtsvorschriften: Gewerbeordnung, abrufbar unter <a href="https://www.ris.bka.gv.at" rel="noopener">www.ris.bka.gv.at</a></p>
-<p>Angaben nach § 5 E-Commerce-Gesetz und § 25 Mediengesetz.</p>
-<h2>Grundlegende Richtung</h2><p>Kalenderkompass 24 ist eine unabhängige Informationsseite zu Feiertagen, Brückentagen, Kalenderwochen und Urlaubsplanung in Österreich und Deutschland. Die Seite finanziert sich über Werbung.</p>
+          h1="Impressum", body=f"""<h2>Medieninhaber und Diensteanbieter</h2>
+<p><strong>AdStern – Agentur für digitales Marketing</strong><br>Johannes Peter<br>Seilerstätte 8<br>1010 Wien<br>Österreich</p>
+<p><a href="mailto:office@adstern.com">office@adstern.com</a></p>
+<h2>Unternehmensangaben</h2><dl><dt><strong>Unternehmensgegenstand</strong></dt><dd>Werbeagentur</dd>
+<dt><strong>UID-Nummer</strong></dt><dd>ATU54682507</dd>
+<dt><strong>GISA-Zahl</strong></dt><dd>31741743</dd>
+<dt><strong>Gewerbestandort</strong></dt><dd>Seilerstätte 8, 1010 Wien</dd>
+<dt><strong>Mitgliedschaft</strong></dt><dd>Mitglied der Fachgruppe Werbung und Marktkommunikation</dd>
+<dt><strong>Aufsichts- und Gewerbebehörde</strong></dt><dd><a href="https://www.wien.gv.at/kontakt/mba0108">Magistratisches Bezirksamt für den 1. und 8. Bezirk, Wien</a></dd>
+<dt><strong>Gewerberechtliche Vorschrift</strong></dt><dd><a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&amp;Gesetzesnummer=10007517">Gewerbeordnung 1994 (RIS)</a></dd></dl>
+<h2>Grundlegende Blattlinie gemäß § 25 Mediengesetz</h2><p>Kalenderkompass24 informiert über Feiertage, Schulferien und Brückentage in Österreich und Deutschland und bietet Werkzeuge zur Familien- und Urlaubsplanung.</p>
+<h2>Kontaktformular</h2>
+<form action="https://www.viennabyalocal.com/kontakt.php" method="post" accept-charset="UTF-8" aria-label="Kontaktformular" style="display:grid;gap:.85rem;max-width:34rem">
+ <input type="hidden" name="site" value="kalenderkompass24.de"><input type="hidden" name="language" value="de">
+ <div hidden aria-hidden="true"><label>Website URL <input name="company_url" tabindex="-1" autocomplete="off"></label></div>
+ <label style="display:grid;gap:.25rem">Name (optional)<input name="sender_name" autocomplete="name" type="text" maxlength="120" style="font:inherit;width:100%;box-sizing:border-box;padding:.55em"></label>
+ <label style="display:grid;gap:.25rem">Deine E-Mail-Adresse (Pflichtfeld)<input name="email" autocomplete="email" type="email" required maxlength="254" style="font:inherit;width:100%;box-sizing:border-box;padding:.55em"></label>
+ <label style="display:grid;gap:.25rem">Deine Nachricht (Pflichtfeld)<textarea name="message" rows="5" required maxlength="6000" style="font:inherit;width:100%;box-sizing:border-box;padding:.55em"></textarea></label>
+ <p>AdStern verwendet deine Angaben zur Bearbeitung deiner Anfrage. <a href="/privacy.html">Datenschutzerklärung</a></p>
+ <button type="submit" style="justify-self:start;padding:.65em 1.2em;font:inherit">Nachricht senden</button>
+</form>
 <h2>Haftung</h2><p>Alle Angaben wurden sorgfältig nach den geltenden Feiertagsgesetzen berechnet und geprüft, erfolgen aber ohne Gewähr. Rechtliche Hinweise in den Ratgebern ersetzen keine Rechtsberatung.</p>""",
           ads=False, robots="noindex,follow", active="")
     write("about.html", "page.html", title="Über Kalenderkompass 24: Herausgeber, Methode und Datenquellen", description="Wer Kalenderkompass 24 herausgibt, woher die Feiertags- und Feriendaten stammen, wie sie berechnet und bei jedem Build automatisch geprüft werden.",
           h1="Über Kalenderkompass 24", lead="Feiertage, Brückentage und Urlaubsplanung – genau, schnell und ohne Anmeldung.", checked=CHECKED_1811, lastmod=LASTMOD_1811,
           body=f"""<p>Kalenderkompass 24 beantwortet Fragen, die sich jedes Jahr wieder stellen: Wann ist der nächste Feiertag? Welche Brückentage gibt es? Wann sind Schulferien? Und wie hole ich aus meinem Urlaub die meisten freien Tage heraus? Die Seite deckt Österreich und Deutschland ab, jedes Bundesland einzeln, und funktioniert ohne Anmeldung.</p>
 <h2>Herausgeber</h2>
-<p>Kalenderkompass 24 ist ein Angebot von <strong>AdStern – Agentur für digitales Marketing</strong>, Seilerstätte 8/8, 1010 Wien. AdStern ist Medieninhaber und Herausgeber und verantwortet alle Inhalte; die vollständigen Angaben stehen im <a href="/imprint.html">Impressum</a>. Die Seite ist unabhängig von Behörden, Kirchen und Interessenverbänden und finanziert sich über Werbung. Anzeigen sind als „Werbung“ gekennzeichnet und vom redaktionellen Inhalt getrennt.</p>
+<p>Kalenderkompass 24 ist ein Angebot von <strong>AdStern – Agentur für digitales Marketing</strong>, Seilerstätte 8, 1010 Wien. AdStern ist Medieninhaber und Herausgeber und verantwortet alle Inhalte; die vollständigen Angaben stehen im <a href="/imprint.html">Impressum</a>. Die Seite ist unabhängig von Behörden, Kirchen und Interessenverbänden und finanziert sich über Werbung. Anzeigen sind als „Werbung“ gekennzeichnet und vom redaktionellen Inhalt getrennt.</p>
 <h2>Was du hier findest</h2>
 <ul><li>Gesetzliche Feiertage für alle 9 österreichischen Bundesländer und alle 16 deutschen Länder, mit Landespatronen und regionalen Besonderheiten</li>
 <li>Brückentage und einen Urlaubsplaner, der Urlaubstage rund um Feiertage optimal verteilt</li>
@@ -1301,6 +1318,7 @@ def build_legal():
     write("privacy.html", "page.html", title="Datenschutz | Kalenderkompass 24", description="Datenschutzerklärung von Kalenderkompass 24.",
           h1="Datenschutzerklärung", lead="Stand: 18. November 2026", ads=False, robots="noindex,follow", active="", body=f"""
 <h2>Verantwortlicher</h2><p>{LEGAL_ADDR}</p>
+<h3>Kontaktformular</h3><p>Wenn du das Formular im Impressum absendest, werden deine E-Mail-Adresse, deine Nachricht, der freiwillig angegebene Name und die Website, von der du schreibst, über das World4You-Webhosting von AdStern an office@adstern.com übermittelt. AdStern verwendet diese Angaben zur Bearbeitung deiner Anfrage. Zum Schutz vor automatisiertem Versand zählt der Server Anfragen je pseudonymisierter IP-Kennung in einem Zeitfenster von 15 Minuten.</p>
 <h2>Hosting</h2><p>Die Website wird über GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, USA) ausgeliefert. Beim Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten wie IP-Adresse, aufgerufene Adresse, Browserinformationen und Zeitpunkt, um die Seite auszuliefern und vor Angriffen zu schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. Die Schriften liegen auf unserem eigenen Server; es wird keine Verbindung zu Google Fonts aufgebaut.</p>
 <h2>Werkzeuge</h2><p>Kalender, Planer und Rechner arbeiten ausschließlich in deinem Browser. Deine Eingaben werden nicht an uns übertragen. Damit die Seite sich dein Bundesland merkt, speichern wir es im lokalen Speicher deines Browsers (localStorage). In „Mein Kalender“ gilt dasselbe für deine Einträge, Kategorien und Farben; sie verlassen dein Gerät nur, wenn du selbst eine Kalenderdatei oder Sicherung herunterlädst. Im Familienplaner gilt dasselbe für Namen, Geburtstage und Fotos: Fotos werden im Browser verkleinert, nicht hochgeladen und nur lokal gespeichert; das PDF entsteht auf deinem Gerät. Diese Speicherung ist für die von dir gewünschte Funktion erforderlich (§ 165 Abs. 3 TKG 2021). Du kannst sie jederzeit über die Browser-Einstellungen löschen.</p>
 <p><strong>Teilbare Links:</strong> Im Urlaubsplaner, im Arbeitstage-Rechner und im Fristenrechner kannst du mit „Link kopieren“ eine Adresse erzeugen, die deine Auswahl enthält (Land, Bundesland, Jahr, Zahl der Urlaubstage, Datumsangaben, Länge und Art der Frist). Beim Rechnen selbst ändert sich die Adresse nicht. Wird ein solcher Link geöffnet, ist die Adresse samt dieser Werte – wie bei jedem Seitenaufruf – Teil der Verbindungsdaten beim Hoster und der Seitenadresse, die Google für Anzeigen und – nur mit deiner Einwilligung – für die Statistik verarbeitet (siehe unten). Namen oder andere persönliche Angaben enthält der Link nicht.</p>
