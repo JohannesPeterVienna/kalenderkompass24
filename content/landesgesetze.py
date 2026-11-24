@@ -11,7 +11,7 @@ ABRUF = "24. November 2026"
 # slug: (Kurzname des Gesetzes, amtliche Fundstelle, Link, Text)
 GESETZE_DE = {
     "bayern": (
-        "Bayerisches Feiertagsgesetz (FTG)",
+        "Feiertagsgesetz (FTG)",
         "Gesetz über den Schutz der Sonn- und Feiertage vom 21. Mai 1980, BayRS 1131-3-I",
         "https://www.gesetze-bayern.de/Content/Document/BayFTG/true",
         """<p>Art. 1 Abs. 1 nennt zwölf Feiertage, die im ganzen Staatsgebiet gelten, und dazu Mariä Himmelfahrt „in Gemeinden mit überwiegend katholischer Bevölkerung“. Welche Gemeinden das sind, stellt das Landesamt für Statistik nach dem Ergebnis der letzten Volkszählung fest; die Gemeinde macht es ortsüblich bekannt (Art. 1 Abs. 3). In der Stadt Augsburg ist außerdem der 8. August (Friedensfest) gesetzlicher Feiertag (Art. 1 Abs. 2).</p>

@@ -17,7 +17,7 @@ ROOT = Path(__file__).parent
 FRISTEN = json.loads((ROOT / "content" / "fristen.json").read_text(encoding="utf-8"))   # Vorschriften und Beispiele des Fristenrechners
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261124b"
+V = "20261124c"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"

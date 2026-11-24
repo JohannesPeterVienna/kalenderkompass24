@@ -357,7 +357,7 @@
   function syncYears(){ $$("[data-set-year]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.setYear === state.year))); }
   // Sprungmarken: #jahr-2028 wählt das Jahr, auf Länderseiten wählt #wien das Bundesland
   function applyHash(){
-    const h = decodeURIComponent(location.hash.slice(1));
+    let h = ''; try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) { return false; }
     const y = /^jahr-(\d{4})$/.exec(h);
     if (y){ if ($(`[data-set-year="${y[1]}"]`)) state.year = +y[1]; return false; }
     if (h && document.body.dataset.fixed && $("[data-region]") && Object.prototype.hasOwnProperty.call(DATA.countries[state.country].regions, h)){ state.region = h; return true; }
