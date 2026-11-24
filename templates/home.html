@@ -25,10 +25,6 @@
 
 <div class="wrap layout">
   <div>
-    <h2><span data-bt>Fenstertage</span> <span data-year-label>{{ year }}</span> <span data-region-in>in Österreich</span></h2>
-    <p class="muted">Ein oder zwei Urlaubstage zwischen Feiertag und Wochenende, sortiert nach Datum. Rechts: nötige Urlaubstage → freie Tage am Stück. Rot markiert sind die Tage, bei denen ein Urlaubstag mindestens vier freie Tage bringt.</p>
-    {{ m.bridges(bridge_list, "at") }}
-
     <h2>Mein Kalender</h2>
     <p>Trag eigene Termine, Urlaube und Schultage ein – in deinen Farben, passend zu dem Kalender, den du schon verwendest. Feiertage bleiben rot. Alles bleibt in deinem Browser, ohne Anmeldung.</p>
     <div class="mk" data-mk data-mk-compact></div>
@@ -46,11 +42,8 @@
       <p class="small muted" style="margin-top:12px">Mehr Optionen im <a href="/urlaubsplaner.html">Urlaubsplaner</a>.</p>
     </div>
 
-    <h2>Alle Feiertage <span data-year-label>{{ year }}</span> · <span data-region-label>Österreich</span></h2>
-    {{ m.htable(rows) }}
-    <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>In meinen Kalender übernehmen (.ics)</button></p>
-
     <h2>Feiertage nach Bundesland</h2>
+    <p>Alle Feiertage 2026 bis 2028 mit Fenster- bzw. Brückentagen und Kalender-Export (.ics): <a href="{{ ft_url.at }}">Österreich</a> · <a href="{{ ft_url.de }}">Deutschland</a></p>
     <h3><a href="{{ ft_url.at }}">Österreich</a></h3>
     <ul class="tiles">{% for slug,name in at_regions %}<li><a href="{{ ft_url.at }}#{{ slug }}">{{ name }}</a></li>{% endfor %}</ul>
     <h3><a href="{{ ft_url.de }}">Deutschland</a></h3>

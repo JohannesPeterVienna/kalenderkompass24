@@ -300,15 +300,14 @@ def build_home():
     # Statisch nur Datumsangaben (ohne „in X Tagen“), damit die Seite ohne JavaScript nie veraltet wirkt;
     # app.js ersetzt den Kasten im Browser durch den tagesaktuellen Countdown für das gewählte Bundesland.
     nxt = [r for y in (t.year, t.year+1) for r in H.region_holidays("at", "", y) if r["date"] >= t][:3]
-    rows = rows_for("at", "", CUR)
     iw = TODAY.isocalendar()
     ld = [{"@context": "https://schema.org", "@type": "WebSite", "name": "Kalenderkompass 24", "url": SITE + "/",
-           "inLanguage": "de", "description": "Feiertage, Brückentage und Urlaubsplanung für Österreich und Deutschland."},
-          holiday_ld("at", "", CUR, rows)]
+           "inLanguage": "de", "description": "Feiertage, Brückentage und Urlaubsplanung für Österreich und Deutschland."}]
+    # Feiertagstabelle, Fenstertage und .ics stehen seit 24.11.2026 nur noch auf den Länderseiten (FT_URL)
     write("index.html", "home.html", title=f"Feiertage, Fenster- & Brückentage {CUR}: Österreich & Deutschland",
           description=f"Alle Feiertage {CUR} mit Fenstertagen (Österreich) und Brückentagen (Deutschland) für jedes Bundesland – mit eigenem Kalender, Urlaubsplaner und Export.",
           next_list=[{"name": r["name"], "date": fmt(r["date"], "at")} for r in nxt], next_sheet={"month": M_AT[nxt[0]["date"].month-1], "day": nxt[0]["date"].day, "wd": WDS[nxt[0]["date"].weekday()] + " · KW " + str(nxt[0]["date"].isocalendar()[1])}, next_asof=fmt(t, "at", wd=False), band=band_view("at", "", CUR),
-          bridge_list=bridge_view("at", "", CUR), rows=rows, year_attr=CUR,
+          year_attr=CUR,
           at_regions=list(H.AT_REGIONS.items()), de_regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()],
           articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/", mk=True, lastmod=LASTMOD_2411,
           skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Brückentagen und Urlaubsplaner
