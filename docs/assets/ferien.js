@@ -19,8 +19,11 @@
   if (sel){
     // gemerktes Bundesland (Startseite, Werkzeuge) vorwählen, wenn es zu diesem Land gehört
     try { const r = (localStorage.getItem("kk24-region") || "").split(":")[1]; if (r && [...sel.options].some(o => o.value === r)) sel.value = r; } catch {}
+    // Sprungmarke #<land> (z. B. aus einer alten Adresse) wählt das Bundesland im Countdown
+    const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h && [...sel.options].some(o => o.value === h)){ sel.value = h; show(); } };
     sel.addEventListener("change", show);
-    show();
+    window.addEventListener("hashchange", fromHash);
+    show(); fromHash();
   }
   document.addEventListener("click", e => {
     const btn = e.target.closest("[data-ferien-ics]"); if (!btn) return;

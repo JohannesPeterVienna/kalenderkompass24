@@ -420,6 +420,7 @@
       DATA = await res.json();
     } catch { return; } // ohne Daten bleibt der vorgerenderte Inhalt stehen
     if (!fixed) applyShareParams();
+    else { const q = Number(new URLSearchParams(location.search).get("jahr")); if (Number.isInteger(q) && $(`[data-set-year="${q}"]`)) state.year = q; }   // alte Adresse feiertage-2028-<land>
     applyHash();
     window.addEventListener("hashchange", () => { if (applyHash()) fillRegions(); renderAll(); });
     fillRegions(); bind(); renderAll();

@@ -127,8 +127,14 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE, SF_URL, FT_URL, macros):
         d = data[(c, s)]
         sem = next(r for r in d["rows"] if r["name"] == "Semesterferien")
         su = next(r for r in d["rows"] if r["name"] == "Sommerferien")
+        # Festtag des Landespatrons im Unterrichtsjahr (schulfrei nach § 2 Abs. 4 Z 2 SchZG)
+        pat = []
+        for (m, dd), pn in H.AT_PATRONS[s]:
+            if "Landespatron" not in pn: continue
+            pd = date(F.SY_START.year if m >= 9 else F.SY_END.year, m, dd)
+            pat.append(f"{pn.split(' (')[0]}<div class='small muted'>{WS[pd.weekday()]} {pd.day}.{pd.month}.{pd.year}</div>")
         rrow.append(f"<tr id='{s}'><td><strong>{n}</strong><div class='small'><a href='{FT_URL['at']}#{s}'>Landespatron und Feiertage</a></div></td>"
-                    f"<td class='date'>{short(sem['start'], sem['end'])}</td><td class='date'>{short(su['start'], su['end'])}</td>"
+                    f"<td class='date'>{short(sem['start'], sem['end'])}</td><td class='date'>{short(su['start'], su['end'])}</td><td>{'<br>'.join(pat)}</td>"
                     f"<td>{d['total']}</td><td>{d['wd']}</td><td class='no-print'>{ics_button(c, s, '.ics')}</td></tr>")
     east = [n for s, n in regs.items() if data[(c, s)]["summer"]["start"] == date(2027, 7, 3)]
     first_html = f"""
@@ -137,11 +143,22 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE, SF_URL, FT_URL, macros):
 <p class="small muted">Arbeitstage: Montag bis Freitag ohne gesetzliche Feiertage – wie viele Urlaubstage berufstätige Eltern für die ganze Ferienzeit bräuchten.</p>
 <h2 id="bundeslaender">Semester- und Sommerferien nach Bundesland</h2>
 <p>Die Semesterferien liegen in drei Gruppen in den ersten drei Februarwochen. Im Sommer beginnen {jlist(east)} eine Woche früher als die übrigen Bundesländer. Je Zeile: alle Ferien des Bundeslandes zusammen und der Kalender-Export mit allen Terminen.</p>
-<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Semesterferien</th><th scope="col">Sommerferien</th><th scope="col">Ferientage gesamt</th><th scope="col">Arbeitstage gesamt</th><th scope="col" class="no-print">Kalender</th></tr></thead><tbody>{''.join(rrow)}</tbody></table></div>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Semesterferien</th><th scope="col">Sommerferien</th><th scope="col">Landespatron (schulfrei)</th><th scope="col">Ferientage gesamt</th><th scope="col">Arbeitstage gesamt</th><th scope="col" class="no-print">Kalender</th></tr></thead><tbody>{''.join(rrow)}</tbody></table></div>
 """
+    assert date(2026, 10, 26).weekday() == 0   # Nationalfeiertag 2026 an einem Montag → höchstens drei schulautonome Tage
+    sz = "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&amp;Gesetzesnummer=10009575&amp;Paragraf=2"
     rest_html = f"""
+<h2 id="schulzeitgesetz">Was das Schulzeitgesetz festlegt</h2>
+<p>Die Ferien stehen in § 2 des Schulzeitgesetzes 1985. Der Ferienkalender von oesterreich.gv.at gilt nach eigener Angabe für öffentliche und private mittlere und höhere Schulen mit Öffentlichkeitsrecht; für Volksschulen, Neue Mittelschulen, Sonder-, Berufs- und Polytechnische Schulen gelten diese Ferien üblicherweise ebenfalls, Schulen im Tourismusbereich können abweichen. Die Festtage der Landespatrone nennt er nicht.</p>
+<ul>
+<li><strong>Semesterferien:</strong> eine Woche. Sie beginnen in Niederösterreich und Wien am ersten Montag im Februar, im Burgenland, in Kärnten, Salzburg, Tirol und Vorarlberg am zweiten und in Oberösterreich und der Steiermark am dritten Montag (§ 2 Abs. 2 Z 1 lit. b). Stellen Bildungsdirektion und Land aus fremdenverkehrspolitischen Gründen gleichlautende Anträge, kann der Bundesminister den Beginn durch Verordnung um eine Woche verlegen (Abs. 2a). Im Ferienkalender 2026/2027 liegen Salzburg, Tirol und Vorarlberg mit Oberösterreich und der Steiermark in der dritten Februarwoche.</li>
+<li><strong>Sommerferien:</strong> Sie beginnen im Burgenland, in Niederösterreich und Wien an dem Samstag zwischen 28. Juni und 4. Juli, in den übrigen sechs Bundesländern an dem Samstag zwischen 5. und 11. Juli (§ 2 Abs. 2 Z 2).</li>
+<li><strong>Weitere schulfreie Tage</strong> (§ 2 Abs. 4): der Allerseelentag, in jedem Bundesland der Festtag des Landespatrons sowie der Landesfeiertag, wenn er dort arbeitsfrei begangen wird, die Herbstferien vom 27. bis 31. Oktober, die Weihnachtsferien vom 24. Dezember bis 6. Jänner (dazu der 23. Dezember, wenn er auf einen Montag fällt), die Osterferien vom Samstag vor dem Palmsonntag bis zum Ostermontag und die Pfingstferien vom Samstag vor dem Pfingstsonntag bis zum Pfingstmontag.</li>
+<li><strong>Schulautonome Tage</strong> (§ 2 Abs. 5): Schulforum oder Schulgemeinschaftsausschuss können je Unterrichtsjahr höchstens zwei Tage schulfrei erklären, wenn der 26. Oktober auf einen Sonntag fällt, höchstens drei, wenn er auf einen Montag oder Samstag fällt, sonst höchstens vier. 2026 ist der 26. Oktober ein Montag – im Unterrichtsjahr 2026/2027 sind es also höchstens drei Tage. Die Schulbehörde kann in besonderen Fällen einen weiteren Tag durch Verordnung schulfrei erklären. Welche Tage das sind, legt jede Schule fest; deshalb stehen sie in keinem amtlichen Kalender und fehlen auch hier.</li>
+</ul>
+<p class="small muted">Quellen: <a href="{sz}" rel="noopener">Schulzeitgesetz 1985, BGBl. Nr. 77/1985, zuletzt geändert durch BGBl. I Nr. 96/2022, § 2 im RIS</a>; <a href="{F.SRC_AT[1]}" rel="noopener">{F.SRC_AT[0]}</a> (Stand 25.08.2026). Beide abgerufen am 24. November 2026.</p>
 <p class="small muted">Wie Kalender- und Arbeitstage gezählt werden und was das für die Betreuung heißt, steht bei den <a href="{SF_URL['de']}#zaehlweise">Schulferien in Deutschland</a>.</p>
-<p class="small muted">Quelle: <a href="{F.SRC_AT[1]}" rel="noopener">{F.SRC_AT[0]}</a>. Alle Angaben ohne Gewähr. Schulautonome Tage legt jede Schule selbst fest; sie sind hier nicht enthalten.</p>
+<p class="small muted">Alle Angaben ohne Gewähr.</p>
 """
     crumbs = [("/", "Start"), (SF_URL["at"], "Schulferien Österreich")]
     page(c, SF_URL["at"].lstrip("/"), crumbs,
@@ -149,7 +166,7 @@ def run(write, fmt, mshort, crumbs_ld, TODAY, SITE, SF_URL, FT_URL, macros):
          description=f"Schulferien {F.SCHOOLYEAR} in Österreich: gemeinsame Ferien, Semester- und Sommerferien je Bundesland, Zeitstrahl, Arbeitstage für Eltern und Kalender-Download.",
          h1=f"Schulferien {F.SCHOOLYEAR} in Österreich",
          lead="Herbst-, Weihnachts-, Oster- und Pfingstferien sind in ganz Österreich gleich. Unterschiede gibt es nur bei den Semesterferien (drei Gruppen im Februar) und beim Sommer: Burgenland, Niederösterreich und Wien starten eine Woche früher.",
-         jumps=[("#bundeslaender", "Nach Bundesland"), (SF_URL["de"], "Schulferien Deutschland")],
+         jumps=[("#bundeslaender", "Nach Bundesland"), ("#schulzeitgesetz", "Was das Gesetz festlegt"), (SF_URL["de"], "Schulferien Deutschland")],
          body_first=first_html, body_rest=rest_html, srcs=[F.SRC_AT], lastmod="2026-11-24",
          side=[(FT_URL["at"], "Feiertage Österreich"), (SF_URL["de"], "Schulferien Deutschland"), (f"{SF_URL['de']}#sommerferien", "Sommerferien 2027 im Vergleich"), ("/urlaubsplaner.html", "Urlaubsplaner"), ("/familienplaner.html", "Familienplaner")])
 

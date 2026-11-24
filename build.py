@@ -10,13 +10,14 @@ from content.articles import ARTICLES
 from content.laender import LAND, CLAIMS_DE
 from content.oesterreich import LAND_AT, CLAIMS_AT
 from content.werkzeuge import URLAUBSPLANER
+from content.landesgesetze import gesetz_html, GESETZE_DE
 from content.shop import PRODUCTS, SHOP_LIVE
 
 ROOT = Path(__file__).parent
 FRISTEN = json.loads((ROOT / "content" / "fristen.json").read_text(encoding="utf-8"))   # Vorschriften und Beispiele des Fristenrechners
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261124a"
+V = "20261124b"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
@@ -425,9 +426,10 @@ def de_main_html():
     laender = []
     for slug, (name, code) in H.DE_REGIONS.items():
         facts = region_facts(c, slug, year)[:-1]     # der letzte Satz gilt für alle Länder und steht im Hintergrund
+        if slug == "bayern": facts = [f for f in facts if "Augsburg" not in f]   # steht mit Fundstelle im Gesetzesabschnitt
         own = (LAND.get(slug) or "").replace("<h3>", "<h4>").replace("</h3>", "</h4>")
         laender.append(f'<section id="{slug}" class="land"><h3>{name}</h3>' + "".join(f"<p>{f}</p>" for f in facts)
-                       + own + (de_plan_html(slug, year) if own else "") + "</section>")   # Urlaubsblöcke wie bisher nur bei Ländern mit eigenem Text
+                       + own + gesetz_html(slug) + (de_plan_html(slug, year) if own else "") + "</section>")   # Urlaubsblöcke wie bisher nur bei Ländern mit eigenem Text
     return f"""
 <h2>Welcher Feiertag gilt wo?</h2>
 <p>Ein roter Punkt bedeutet: gesetzlicher Feiertag im jeweiligen Land. Unter jedem Feiertag stehen seine Termine 2026, 2027 und 2028.</p>
@@ -936,7 +938,8 @@ def redirects():
             r[f"feiertage-{y}-{cslug}.html"] = (f"{FT_URL[c]}#jahr-{y}", f"zu den Feiertagen in {cname}")
         for slug, name in regs.items():
             for y in (2027, 2028):
-                r[f"feiertage-{y}-{slug}.html"] = (f"{FT_URL[c]}#{slug}", f"zu den Feiertagen in {cname}, Abschnitt {name}")
+                # 2028: Jahr per Abfrage (?jahr=2028) – app.js wählt es; canonical bleibt die Adresse ohne Abfrage
+                r[f"feiertage-{y}-{slug}.html"] = (f"{FT_URL[c]}{'' if y == CUR else f'?jahr={y}'}#{slug}", f"zu den Feiertagen in {cname}, Abschnitt {name}")
             r[f"schulferien-{F.SY_SLUG}-{slug}.html"] = (f"{SF_URL[c]}#{slug}", f"zu den Schulferien in {cname}, Abschnitt {name}")
     r[f"schulferien-{F.SY_SLUG}.html"] = (SF_URL["at"], "zu den Schulferien in Österreich")
     r["sommerferien-2027.html"] = (f"{SF_URL['de']}#sommerferien", "zum Sommerferien-Vergleich")
@@ -955,10 +958,11 @@ REDIRECTS = redirects()
 def build_redirects():
     for src, (target, label) in REDIRECTS.items():
         assert not (OUT / src).exists(), f"{src}: Weiterleitung würde eine gebaute Seite überschreiben"
+        canon = re.sub(r"\?[^#]*", "", target)
         (OUT / src).write_text(f"""<!doctype html>
 <html lang="de-AT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Weitergeleitet | Kalenderkompass 24</title>
-<meta name="robots" content="noindex,follow"><link rel="canonical" href="{SITE}{target}">
+<meta name="robots" content="noindex,follow"><link rel="canonical" href="{SITE}{canon}">
 <meta http-equiv="refresh" content="0; url={target}"></head>
 <body><p>Diese Seite ist umgezogen: <a href="{target}">weiter {label}</a>.</p></body></html>
 """, encoding="utf-8")
@@ -976,7 +980,7 @@ def check_links():
         for href, frag in re.findall(r'href=["\']/([^"\'#?]+\.html)#([^"\']+)', html):
             if href in files and not has_id(files[href], frag): bad.append(f"{name} → /{href}#{frag} (Sprungmarke fehlt)")
     for src, (target, label) in REDIRECTS.items():
-        page, _, frag = target.lstrip("/").partition("#")
+        page, _, frag = re.sub(r"\?[^#]*", "", target).lstrip("/").partition("#")
         if page not in files: bad.append(f"{src}: Ziel {page} fehlt")
         elif frag and not has_id(files[page], frag): bad.append(f"{src}: Sprungmarke #{frag} fehlt in {page}")
     if bad:
