@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% import "macros.html" as m with context %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <h1>{{ h1 }}</h1>
+  <p class="lead">{{ lead }}</p>
+  {{ m.checked_line() }}
+  <div class="picker no-print">{{ wahl | safe }}</div>
+  <p class="jump no-print"><a class="btn ghost" href="#{{ regions_id }}">{{ regions_label }}</a> <a class="btn ghost" href="#hintergrund">Rechtsgrundlage und Herkunft</a></p>
+</div></section>
+<div class="wrap">{{ m.band(band, "Feiertage " ~ year ~ " auf einen Blick") }}</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div>
+    <h2>Alle Feiertage <span data-year-label>{{ year }}</span> <span data-region-in>{{ in_country }}</span></h2>
+    {{ m.htable(rows) }}
+    <p class="no-print" style="margin-top:14px"><button class="btn" type="button" data-ics>Feiertage in den Kalender (.ics)</button></p>
+
+    <h2><span data-bt>{{ bt }}</span> <span data-year-label>{{ year }}</span> <span data-region-in>{{ in_country }}</span></h2>
+    {{ m.bridges(bridge_list, country) }}
+    {% if bridge_note %}<p class="small muted">{{ bridge_note | safe }}</p>{% endif %}
+
+    {{ m.ad("rect") }}
+
+    <div class="land-text">{{ main_html | safe }}</div>
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Urlaub planen</h3><p class="small">Wie viele freie Tage holst du aus deinen Urlaubstagen heraus?</p><a class="btn" href="/urlaubsplaner.html">Zum Urlaubsplaner</a></div>
+    <div class="box"><h3>Mehr dazu</h3><ul><li><a href="{{ br_url }}#jahr-{{ year }}">{{ bt }} {{ year }}</a></li><li><a href="{{ sf_url[country] }}">Schulferien {{ country_name }}</a></li><li><a href="{{ print_url }}">Kalender zum Ausdrucken</a></li><li><a href="{{ other[0] }}">{{ other[1] }}</a></li></ul></div>
+    {{ m.ad("half") }}{{ m.ad("sky") }}
+  </aside>
+</div>
+{% endblock %}

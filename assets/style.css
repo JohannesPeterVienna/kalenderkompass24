@@ -366,3 +366,15 @@ ins.adsbygoogle[data-ad-status="unfilled"]{display:none!important}
   .kk-blatt .kk-blatt__kopf{margin:0 -14px 10px;padding:7px 14px}.kk-blatt h2{font-size:1.08rem}.kk-blatt p{margin:0 0 .45em}.kk-blatt__wahl{margin-top:10px}}
 @media (max-width:480px){.kk-blatt{padding-top:12px;border-top:5px solid var(--red)}.kk-blatt .kk-blatt__kopf{display:none}.kk-blatt__zu{top:6px;right:4px}}
 @media print{.kk-blatt{display:none!important}}
+
+/* Länderseiten (24.11.2026): Jahreswahl, Bundesland-Abschnitte, Ferien-Countdown mit Auswahl */
+.jahr-wahl{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.jahre{display:flex;gap:6px;flex-wrap:wrap}
+.jahre .btn{padding:8px 14px}
+.jahre .btn[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.land-text p,.land-text li{max-width:70ch}
+.land{border-top:1px solid var(--line);margin-top:28px;padding-top:4px}
+.land h4{font-size:1rem;margin:1.2em 0 .4em}
+:target{scroll-margin-top:12px}
+.ferien-wahl{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.ferien-wahl select{max-width:100%}

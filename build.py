@@ -16,7 +16,7 @@ ROOT = Path(__file__).parent
 FRISTEN = json.loads((ROOT / "content" / "fristen.json").read_text(encoding="utf-8"))   # Vorschriften und Beispiele des Fristenrechners
 OUT = ROOT / "docs"
 SITE = "https://kalenderkompass24.de"
-V = "20261118a"
+V = "20261124a"
 UPDATED = "November 2026"
 CHECKED = "2. November 2026"          # sichtbare Prüfzeile auf Ratgeber-, Feiertags- und Ferienseiten
 CHECKED_ISO = "2026-11-02"
@@ -26,6 +26,7 @@ CHECKED_0511 = "5. November 2026"     # neue Seite Mein Kalender
 LASTMOD = "2026-11-04"                # lastmod in der Sitemap (Seiten ohne inhaltliche Änderung seither)
 CHECKED_1811 = "18. November 2026"    # Seiten, die am 18.11.2026 neu entstanden oder inhaltlich geändert wurden
 LASTMOD_1811 = "2026-11-18"
+LASTMOD_2411 = "2026-11-24"           # Seiten, die am 24.11.2026 zusammengelegt oder inhaltlich geändert wurden
 METHODIK = "/quellen-methodik.html"
 RIS = "https://www.ris.bka.gv.at/"
 TODAY = date(2026, 11, 4)        # Build-Stand: nächste Feiertage auf der Startseite, laufende Ferien
@@ -40,8 +41,15 @@ MS_DE = ["Jan"] + MS_AT[1:]
 WDL = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"]
 WDS = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 
-NAV = [("/", "Feiertage"), ("/mein-kalender.html", "Mein Kalender"), (f"/brueckentage-{CUR}.html", "Fenstertage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
-       ("/schulferien-2026-2027.html", "Schulferien"), ("/familienplaner.html", "Familienplaner"), (f"/kalenderwochen-{CUR}.html", "Kalenderwochen"), (f"/kalender-{CUR}-zum-ausdrucken.html", "Kalender drucken")]
+# Seit 24.11.2026 je Land eine Feiertags- und eine Schulferienseite, je eine Seite für Kalenderwochen und Druckkalender
+FT_URL = {"at": "/feiertage-oesterreich.html", "de": "/feiertage-deutschland.html"}
+SF_URL = {"at": "/schulferien-oesterreich.html", "de": "/schulferien-deutschland.html"}
+KW_URL = "/kalenderwochen.html"
+BR_URL = "/brueckentage.html"
+PRINT_URL = "/kalender-zum-ausdrucken.html"
+
+NAV = [("/", "Feiertage"), ("/mein-kalender.html", "Mein Kalender"), (BR_URL, "Fenstertage"), ("/urlaubsplaner.html", "Urlaubsplaner"),
+       (SF_URL["at"], "Schulferien"), ("/familienplaner.html", "Familienplaner"), (KW_URL, "Kalenderwochen"), (PRINT_URL, "Kalender drucken")]
 
 env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=True, trim_blocks=True, lstrip_blocks=True)
 PAGES = []  # (path, priority) für die Sitemap
@@ -57,7 +65,8 @@ def fmt(d, country, wd=True, year=True):
 def write(path, template, **ctx):
     base = dict(site=SITE, v=V, updated=UPDATED, nav=NAV, active=ctx.get("active", path), jsonld=[], ads=True,
                 lang_at=True, years=YEARS, year=CUR, robots=None, region_attr=None, year_attr=None, og_title=None,
-                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, fr=False, shop_live=SHOP_LIVE)
+                checked=None, sources=None, skip_ads=(), extra_html=None, mk=False, fr=False, shop_live=SHOP_LIVE,
+                ft_url=FT_URL, sf_url=SF_URL, kw_url=KW_URL, print_url=PRINT_URL, br_url=BR_URL)
     m = re.fullmatch(r"[a-z-]+?-(20\d\d)(-[a-z-]+)?\.html", path)
     if "year" not in ctx and m and int(m.group(1)) in YEARS:
         base["year"] = int(m.group(1))       # Jahresseiten zeigen immer ihr eigenes Jahr
@@ -276,12 +285,12 @@ def de_plan_html(slug, year):
         fam = (f"Für Eltern passt {year} am besten der Block rund um {' sowie '.join(names_top)}: Dort {'sind alle vier Urlaubstage' if top == 4 else 'ist einer der vier Urlaubstage' if top == 1 else f'sind {top} der vier Urlaubstage'} auch schulfrei.")
     else:
         fam = "Keiner der Vier-Tage-Blöcke fällt in die Schulferien – Eltern müssen für diese Tage eine Betreuung einplanen oder den Urlaub an die Ferien anpassen."
+    # Erklärung der Spalten steht einmal über allen Ländern (de_main_html)
     return f"""
-<h2>Urlaub {year} {in_name}: die ergiebigsten Termine</h2>
-<p>Von den {len(legal)} gesetzlichen Feiertagen liegen {year} {in_name} {len(wkd)} auf einem Werktag. {('Aufs Wochenende ' + ('fällt ' if len(wke) == 1 else 'fallen ') + we_txt + '.') if wke else ''} Was ein und was vier Urlaubstage rund um jeden dieser Feiertage bringen:</p>
+<h4>Urlaub {year} {in_name}: die ergiebigsten Termine</h4>
+{('<p>Aufs Wochenende ' + ('fällt ' if len(wke) == 1 else 'fallen ') + we_txt + '.</p>') if wke else ''}
 <div class="scroll"><table class="tbl"><thead><tr><th scope="col">Feiertag</th><th scope="col">1 Urlaubstag</th><th scope="col">4 Urlaubstage</th><th scope="col">davon schulfrei</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <p>Den längsten Block mit vier Urlaubstagen gibt es rund um {' und '.join(h['name'] for h in g)}: {lb['free']} Tage vom {fmt(lb['from'], 'de', year=False)} bis {fmt(lb['to'], 'de', year=lb['to'].year != year)}. {fam}</p>
-<p class="small muted">Fünftagewoche; 24. und 31. Dezember als Arbeitstage; Feiertage einzelner Gemeinden nicht berücksichtigt. „davon schulfrei“: Urlaubstage, an denen nach dem amtlichen Ferienkalender auch die Schulen {in_name} geschlossen sind. Andere Urlaubsmengen rechnet der <a href="/urlaubsplaner.html">Urlaubsplaner</a> durch.</p>
 """
 
 
@@ -301,154 +310,76 @@ def build_home():
           next_list=[{"name": r["name"], "date": fmt(r["date"], "at")} for r in nxt], next_sheet={"month": M_AT[nxt[0]["date"].month-1], "day": nxt[0]["date"].day, "wd": WDS[nxt[0]["date"].weekday()] + " · KW " + str(nxt[0]["date"].isocalendar()[1])}, next_asof=fmt(t, "at", wd=False), band=band_view("at", "", CUR),
           bridge_list=bridge_view("at", "", CUR), rows=rows, year_attr=CUR,
           at_regions=list(H.AT_REGIONS.items()), de_regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()],
-          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/", mk=True,
+          articles=ARTICLES, kw={"week": iw[1], "year": iw[0]}, jsonld=ld, priority=1.0, active="/", mk=True, lastmod=LASTMOD_2411,
           skip_ads=("half", "sky"))   # Seitenleisten-Anzeigen lägen direkt neben Brückentagen und Urlaubsplaner
 
 
-def ferien_teaser(country, slug, name):
-    import ferien as F
-    ps = [p for p in F.periods(country, slug) if not p["single"]]
-    su = F.summer(country, slug)
-    lng = max((p for p in ps if p["name"] != "Sommerferien"), key=lambda p: p["days"])
-    return {"text": f"Im Schuljahr {F.SCHOOLYEAR} hat {H.region_nom(slug, name)} {len(ps)} Ferienblöcke mit insgesamt {F.total_days(country, slug)} Ferientagen. "
-                    f"Die Sommerferien 2027 dauern von {fmt(su['start'], country)} bis {fmt(su['end'], country)}. "
-                    f"Die längsten Ferien nach dem Sommer sind die {lng['name']} mit {lng['days']} Tagen ({fmt(lng['start'], country, wd=False)} bis {fmt(lng['end'], country, wd=False)}). "
-                    f"Wer Brückentage und Ferien kombiniert, kann Familienurlaub besonders effizient planen.",
-            "href": f"/schulferien-{F.SY_SLUG}-{slug}.html", "sy": F.SCHOOLYEAR}
+def sd(d, country):
+    """Kurzes Datum mit Wochentag: „Do 27. Mai“."""
+    return f"{WDS[d.weekday()]} {d.day}. {mshort(country)[d.month-1]}"
 
 
-def at_bridge_text(year, in_name):
-    """Kurzfassung der (bundesweit gleichen) Fenstertage für AT-Länderseiten mit eigenem Text; die volle Liste steht im Ratgeber."""
-    bl = H.bridge_days("at", "", year)
-    one = [b for b in bl if b["vacation"] == 1]
-    two = [b for b in bl if b["vacation"] == 2]
-    lst = ", ".join(fmt(b["days"][0], "at", year=False) for b in one[:-1]) + " und " + fmt(one[-1]["days"][0], "at", year=False)
-    hs = sorted({b["holiday"] for b in two})
-    return (f"Die gesetzlichen Feiertage sind in ganz Österreich gleich, deshalb gelten {in_name} dieselben Fenstertage wie im übrigen Land: "
-            f"{lst} – mit je einem Urlaubstag {one[0]['free']} freie Tage am Stück. Dazu kommen {len(two)} Zwickel aus je zwei Arbeitstagen rund um "
-            f"{' und '.join(hs)}. Der Landespatron zählt dabei nicht mit, weil er für Beschäftigte ein normaler Arbeitstag ist.")
+def jlist(xs):
+    return (", ".join(xs[:-1]) + " und " + xs[-1]) if len(xs) > 1 else (xs[0] if xs else "")
 
 
-def build_regions(year):
-    for country, regions in (("at", H.AT_REGIONS), ("de", {k: v[0] for k, v in H.DE_REGIONS.items()})):
-        cslug = "oesterreich" if country == "at" else "deutschland"
-        cname = "Österreich" if country == "at" else "Deutschland"
-        for slug, name in regions.items():
-            rows = rows_for(country, slug, year)
-            legal = [r for r in rows if r["kind"] == "legal"]
-            bl = bridge_view(country, slug, year)
-            singles = [b for b in bl if b["vacation"] == 1]
-            bt = "Fenstertag" if country == "at" else "Brückentag"
-            lead = (f"{len(legal)} gesetzliche Feiertage, {len(bl)} {bt}{'e' if len(bl) != 1 else ''}"
-                    + (f" – der beste: {singles[0]['take']}, {singles[0]['free']} Tage frei mit einem Urlaubstag." if singles else ".")
-                    + " Mit Jahresübersicht und Kalender-Export.")
-            path = f"feiertage-{year}-{slug}.html"
-            in_name = H.region_in(slug, name)
-            own = (LAND_AT if country == "at" else LAND).get(slug) if year == CUR else None
-            srcs = [("Arbeitsruhegesetz § 7 und Schulzeitgesetz 1985 im RIS", RIS)] if country == "at" else []
-            if country == "at" and own:
-                import ferien as F
-                srcs.append(F.SRC_AT)
-                pat = [r for r in rows if r["kind"] == "patron" and r["date"].weekday() < 5]
-                sem = next(p for p in F.periods("at", slug) if p["name"] == "Semesterferien")
-                lead = (f"{len(legal)} gesetzliche Feiertage wie in ganz Österreich, dazu "
-                        + " und ".join(f"der {p['name'].split(' (')[0]} am {fmt(p['date'], 'at', year=False)}" for p in pat)
-                        + f" – an Schulen in der Regel unterrichtsfrei. Semesterferien {sem['start'].day}.–{fmt(sem['end'], 'at', wd=False, year=False)}, "
-                        f"Sommerferien ab {fmt(F.summer('at', slug)['start'], 'at', wd=False, year=False)}.")
-            crumbs = [("/", "Start"), (f"/feiertage-{year}-{cslug}.html", f"Feiertage {year} {cname}"), ("/" + path, name)]
-            write(path, "region.html", title=f"Feiertage {year} {name}: Termine & {bt}e | Kalenderkompass 24",
-                  description=f"Feiertage {year} {in_name}: alle {len(legal)} gesetzlichen Feiertage mit Wochentag, {bt}e und Urlaubstipps – mit Kalender-Download.",
-                  h1=f"Feiertage {year} {in_name}", lead=lead, name=name, in_name=in_name, slug=slug, country=country,
-                  country_slug=cslug, country_name=cname, legal_count=len(legal),
-                  weekday_count=len([r for r in legal if r["date"].weekday() < 5]), bridge_count=len(bl),
-                  band=band_view(country, slug, year), rows=rows, bridge_list=bl,
-                  # Mit eigenem AT-Länderteil nur der erste, landesbezogene Satz – der Rest stünde wortgleich auf allen neun Seiten
-                  facts=region_facts(country, slug, year)[:1] if (country == "at" and own) else region_facts(country, slug, year),
-                  bridge_text=at_bridge_text(year, in_name) if (country == "at" and own) else None,
-                  land_html=(own + de_plan_html(slug, year)) if (country == "de" and own) else own,
-                  land_title=(f"Landespatron, Ferien und Besonderheiten {in_name}" if country == "at" else f"Rechtsgrundlage und Besonderheiten {in_name}"),
-                  ferien=ferien_teaser(country, slug, name) if (year == 2027 and not (country == "at" and own)) else None,
-                  other_years=[y for y in (2027, 2028) if y != year], siblings=[(s, n) for s, n in regions.items() if s != slug],
-                  crumbs=crumbs, region_attr=f"{country}:{slug}:{year}", lang_at=(country == "at"),
-                  # Nur Seiten des Hauptjahres mit eigenem Länderteil (content/laender.py, content/oesterreich.py)
-                  # werden indexiert; Folgejahr-Seiten (Vorschau) und Länder ohne eigenen Text bleiben
-                  # für Besucher erreichbar, werden aber nicht als eigene Suchseite angeboten.
-                  robots=None if own else "noindex,follow",
-                  checked=CHECKED_NEW if (own and country == "at") else CHECKED_0411 if own else CHECKED, sources=srcs,
-                  jsonld=[crumbs_ld(crumbs), holiday_ld(country, slug, year, rows)], active="/", priority=0.8 if year == CUR else 0.6)
+def region_choice(country, years=YEARS, default=CUR):
+    """Jahr (Schaltflächen mit Sprungmarke #jahr-JJJJ) und Bundesland für die Länderseiten."""
+    regs = H.AT_REGIONS if country == "at" else {k: v[0] for k, v in H.DE_REGIONS.items()}
+    first = "ganz Österreich" if country == "at" else "bundesweit"
+    opts = f'<option value="">{first}</option>' + "".join(f'<option value="{k}">{v}</option>' for k, v in regs.items())
+    return year_buttons(years, default) + f'<label>Bundesland<select data-region>{opts}</select></label>'
 
 
-def build_country(year):
-    # Österreich
-    rows = rows_for("at", "", year)
+def year_buttons(years, default):
+    btns = "".join(f'<button type="button" class="btn ghost" id="jahr-{y}" data-set-year="{y}" aria-pressed="{"true" if y == default else "false"}">{y}</button>'
+                   for y in years)
+    return f'<div class="jahr-wahl"><span id="jahr-wahl-titel">Jahr</span><div class="jahre" role="group" aria-labelledby="jahr-wahl-titel">{btns}</div></div>'
+
+
+def at_main_html():
+    """Österreich-Seite unterhalb der Werkzeuge: Jahresvergleich, Landespatrone, Hintergrund, Bundesländer."""
+    c = "at"
+    by = {y: {h["name"]: h["date"] for h in H.region_holidays(c, "", y)} for y in YEARS}
+    names = [h["name"] for h in H.region_holidays(c, "", CUR)]
+    assert all(set(by[y]) == set(names) for y in YEARS) and len(names) == 13
+    cell = lambda d: f"<td class='date{' muted' if d.weekday() >= 5 else ''}'>{sd(d, c)}</td>"
+    comp = "".join(f"<tr><td>{n}</td>{''.join(cell(by[y][n]) for y in YEARS)}</tr>" for n in names)
+    nums = []
+    for y in YEARS:
+        rows = H.region_holidays(c, "", y)
+        we = [h for h in rows if h["date"].weekday() >= 5]
+        mofr = [h for h in rows if h["date"].weekday() in (0, 4)]
+        nums.append(f"<tr><td><strong>{y}</strong></td><td>{len(rows) - len(we)}</td><td>{len(we)}</td><td>{len(mofr)}</td>"
+                    f"<td>{len(H.bridge_days(c, '', y))}</td><td>{fmt(H.easter(y), c, wd=False, year=False)}</td></tr>")
     pats = {}
     for slug, lst in H.AT_PATRONS.items():
         for (m, d), n in lst:
-            pats.setdefault((m, d, n), []).append(H.AT_REGIONS[slug])
-    patrons = [{"day": f"{d}. {M_AT[m-1]} ({WDL[date(year, m, d).weekday()]})", "name": n.split(" (")[0],
-                "regions": ", ".join(sorted(r))} for (m, d, n), r in sorted(pats.items())]
-    bl = bridge_view("at", "", year)
-    crumbs = [("/", "Start"), (f"/feiertage-{year}-oesterreich.html", f"Feiertage {year} Österreich")]
-    wk = len([r for r in rows if r["date"].weekday() < 5])
-    write(f"feiertage-{year}-oesterreich.html", "country.html",
-          title=f"Feiertage {year} Österreich: alle 13 Termine, Fenstertage & Landespatrone | Kalenderkompass 24",
-          description=f"Alle 13 gesetzlichen Feiertage {year} in Österreich mit Wochentag, Fenstertagen und den Landespatronen aller Bundesländer.",
-          h1=f"Feiertage {year} in Österreich",
-          lead=f"Österreich hat 13 gesetzliche Feiertage, bundesweit einheitlich. {year} fallen {wk} davon auf einen Werktag, dazu kommen {len(bl)} Fenstertage.",
-          band=band_view("at", "", year), band_title=f"Österreich {year} auf einen Blick", rows=rows,
-          table_title=f"Gesetzliche Feiertage {year}", patrons=patrons, matrix=None, bridge_list=bl, bridge_note=None,
-          facts=["Grundlage ist § 7 Abs. 2 Arbeitsruhegesetz. Die Feiertage gelten in allen neun Bundesländern gleich; Unterschiede gibt es nur bei den Landespatronen, die keine gesetzlichen Feiertage sind.",
-                 "Der Karfreitag ist seit 2019 kein Feiertag mehr. An seine Stelle trat der persönliche Feiertag, den jede und jeder einmal pro Jahr selbst festlegen kann."],
-          regions=list(H.AT_REGIONS.items()), region_year=year if year in (2027, 2028) else CUR, country="at",
-          other_years=[y for y in YEARS if y != year], slug="oesterreich", country_name="Österreich",
-          lastmod="2026-11-22", extra_html=at_country_html(year),
-          crumbs=crumbs, checked=CHECKED_0411, sources=[("Arbeitsruhegesetz § 7 im RIS", RIS)],
-          jsonld=[crumbs_ld(crumbs), holiday_ld("at", "", year, rows)], priority=0.9 if year == CUR else 0.6)
+            pats.setdefault((m, d, n), []).append(slug)
+    prow = "".join(f"<tr><td class='date'>{d}. {M_AT[m-1]}</td><td>{n.split(' (')[0]}</td><td>{', '.join(f'<a href=\"#{s}\">{H.AT_REGIONS[s]}</a>' for s in sorted(ss, key=lambda s: H.AT_REGIONS[s]))}</td>"
+                   + "".join(f"<td>{WDS[date(y, m, d).weekday()]}</td>" for y in YEARS) + "</tr>"
+                   for (m, d, n), ss in sorted(pats.items()))
+    yh = "".join(f'<th scope="col">{y}</th>' for y in YEARS)
+    regions = "".join(f'<section id="{slug}" class="land"><h3>{name}</h3>{LAND_AT[slug]}</section>' for slug, name in H.AT_REGIONS.items())
+    tiles = "".join(f'<li><a href="#{slug}">{name}</a></li>' for slug, name in H.AT_REGIONS.items())
+    return f"""
+<h2>Die Feiertage 2026, 2027 und 2028 im Vergleich</h2>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Feiertag</th>{yh}</tr></thead><tbody>{comp}</tbody></table></div>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Jahr</th><th scope="col">Feiertage Mo–Fr</th><th scope="col">am Wochenende</th><th scope="col">am Montag oder Freitag</th><th scope="col">Fenstertage</th><th scope="col">Ostersonntag</th></tr></thead><tbody>{''.join(nums)}</tbody></table></div>
+<p class="small muted">Ausgegraut: Feiertag am Samstag oder Sonntag – einen Ersatztag gibt es dafür nicht. Feiertage am Montag oder Freitag bringen ein langes Wochenende ohne Urlaub; Feiertage am Dienstag, Mittwoch oder Donnerstag sind die Kandidaten für Fenstertage.</p>
 
-    # Deutschland
-    nat = rows_for("de", "", year)
-    allh = {}
-    for slug, (name, code) in H.DE_REGIONS.items():
-        for r in H.region_holidays("de", slug, year):
-            if r["kind"] != "legal": continue          # schulfreie Tage (z. B. Buß- und Bettag in Bayern) sind keine Feiertage
-            allh.setdefault((r["date"], r["name"]), set()).add(code)
-    codes = [v[1] for v in H.DE_REGIONS.values()]
-    mrows = [{"name": n, "day": fmt(d, "de", year=False), "cells": [c in s for c in codes]} for (d, n), s in sorted(allh.items())]
-    matrix = {"codes": codes, "names": [v[0] for v in H.DE_REGIONS.values()], "rows": mrows,
-              "legend": "Kürzel: " + ", ".join(f"{v[1]} = {v[0]}" for v in H.DE_REGIONS.values()) + ". Mariä Himmelfahrt in Bayern gilt in Gemeinden mit überwiegend katholischer Bevölkerung."}
-    crumbs = [("/", "Start"), (f"/feiertage-{year}-deutschland.html", f"Feiertage {year} Deutschland")]
-    wk = len([r for r in nat if r["date"].weekday() < 5])
-    write(f"feiertage-{year}-deutschland.html", "country.html",
-          title=f"Feiertage {year} Deutschland: alle Bundesländer im Vergleich | Kalenderkompass 24",
-          description=f"Feiertage {year} in Deutschland: die 9 bundesweiten Feiertage und eine Übersicht, welcher Feiertag in welchem Bundesland gilt.",
-          h1=f"Feiertage {year} in Deutschland",
-          lead=f"Neun Feiertage gelten {year} bundesweit, {wk} davon an Werktagen. Alle weiteren legen die Bundesländer fest – die Tabelle zeigt, wo welcher gilt.",
-          band=band_view("de", "", year), band_title=f"Bundesweite Feiertage {year}", rows=nat,
-          table_title=f"Bundesweite Feiertage {year}", patrons=None, matrix=matrix, bridge_list=None,
-          bridge_note=f"Brückentage hängen in Deutschland vom Bundesland ab. Die Übersicht für alle Länder findest du bei den Brückentagen {year}.",
-          facts=["Feiertage sind in Deutschland Ländersache. Nur der Tag der Deutschen Einheit ist durch Bundesrecht festgelegt; die übrigen bundesweiten Feiertage stehen in allen Landesgesetzen."],
-          regions=[(k, v[0]) for k, v in H.DE_REGIONS.items()], region_year=year if year in (2027, 2028) else CUR, country="de",
-          other_years=[y for y in YEARS if y != year], slug="deutschland", country_name="Deutschland",
-          lastmod="2026-11-22", extra_html=de_country_html(year),
-          crumbs=crumbs, checked=CHECKED_0411, jsonld=[crumbs_ld(crumbs), holiday_ld("de", "", year, nat)], lang_at=False, priority=0.9 if year == CUR else 0.6)
-
-
-def at_country_html(year):
-    """Ausbau der Österreich-Übersicht: Jahresbilanz (berechnet), Herkunft der Feiertage, Rechtliches."""
-    rows = H.region_holidays("at", "", year)
-    we = [h for h in rows if h["date"].weekday() >= 5]
-    mofr = [h for h in rows if h["date"].weekday() in (0, 4)]
-    mid = [h for h in rows if h["date"].weekday() in (1, 2, 3)]
-    lst = lambda xs: (", ".join(xs[:-1]) + " und " + xs[-1]) if len(xs) > 1 else (xs[0] if xs else "keiner")
-    nf = date(year, 10, 26)
-    balance = f"""
-<h2>Das Feiertagsjahr {year} in Zahlen</h2>
-<p>{len(rows) - len(we)} der 13 Feiertage liegen {year} auf einem Werktag von Montag bis Freitag. Aufs Wochenende {'fällt' if len(we) == 1 else 'fallen'} {lst([h['name'] + ' (' + WDL[h['date'].weekday()] + ')' for h in we])}; einen Ersatztag gibt es dafür nicht. Ein langes Wochenende ohne Urlaub bringen die Feiertage an einem Montag oder Freitag – {year} sind das {lst([h['name'] for h in mofr])}. Feiertage am Dienstag, Mittwoch oder Donnerstag ({lst([h['name'] for h in mid])}) sind die Kandidaten für Fenstertage. Der Nationalfeiertag ist {year} ein {WDL[nf.weekday()]}.</p>
-
+<h2>Landespatrone und schulfreie Tage</h2>
+<p>Diese Tage sind in Österreich keine gesetzlichen Feiertage. Geschäfte haben offen, an Schulen ist in der Regel frei, und manche Betriebe und Behörden geben frei.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Datum</th><th scope="col">Tag</th><th scope="col">Bundesland</th>{yh}</tr></thead><tbody>{prow}</tbody></table></div>
+{at_hintergrund_html(CUR)}
+<h2 id="bundeslaender">Die neun Bundesländer</h2>
+<ul class="tiles no-print">{tiles}</ul>
+{regions}
 """
-    if year != 2027:
-        return balance + '<p><a href="/feiertage-2027-oesterreich.html#hintergrund">Herkunft und Rechtsgrundlagen der Feiertage in der Länderübersicht</a></p>'
-    return balance + f"""
+
+
+def at_hintergrund_html(year):
+    return f"""
 <h2 id="hintergrund">Woher die österreichischen Feiertage kommen</h2>
 <p>Zehn der 13 Feiertage sind kirchlichen Ursprungs: Heilige Drei Könige, Ostermontag, Christi Himmelfahrt, Pfingstmontag, Fronleichnam, Mariä Himmelfahrt, Allerheiligen, Mariä Empfängnis, Christtag und Stefanitag. Die beweglichen davon hängen am Ostersonntag – {year} ist das der {fmt(H.easter(year), 'at', wd=False)}. Weltlich sind Neujahr, der <strong>Staatsfeiertag</strong> am 1. Mai und der <strong>Nationalfeiertag</strong> am 26. Oktober. Er erinnert an den 26. Oktober 1955, an dem der Nationalrat das Bundesverfassungsgesetz über die immerwährende Neutralität beschloss.</p>
 <p>Der <strong>Karfreitag</strong> war bis 2018 nur für Angehörige der evangelischen Kirchen, der Altkatholischen und der Methodistischen Kirche ein Feiertag. Nachdem der Europäische Gerichtshof diese Regel im Jänner 2019 als Diskriminierung beurteilt hatte, wurde sie gestrichen. Seitdem gibt es den <a href="/persoenlicher-feiertag-oesterreich.html">persönlichen Feiertag</a>: einen Urlaubstag pro Jahr, den alle Beschäftigten mit drei Monaten Vorlauf selbst festlegen können.</p>
@@ -458,42 +389,74 @@ def at_country_html(year):
 """
 
 
-def de_country_html(year):
-    """Ausbau der Deutschland-Übersicht: Feiertage je Land (berechnet), Herkunft der Zusatzfeiertage, Rechtsgrundlage."""
-    nat = {h["name"] for h in H.region_holidays("de", "", year)}
+def de_main_html():
+    """Deutschland-Seite unterhalb der Werkzeuge: Matrix mit Terminen 2026–2028, Länderbilanz, Hintergrund, Länder."""
+    c, year = "de", CUR
+    codes = [v[1] for v in H.DE_REGIONS.values()]
+    allh, dates = {}, {}
+    for y in YEARS:
+        for slug, (name, code) in H.DE_REGIONS.items():
+            for r in H.region_holidays(c, slug, y):
+                if r["kind"] != "legal": continue          # schulfreie Tage (z. B. Buß- und Bettag in Bayern) sind keine Feiertage
+                dates.setdefault(r["name"], {})[y] = r["date"]
+                if y == year: allh.setdefault((r["date"], r["name"]), set()).add(code)
+    assert all(len(v) == len(YEARS) for v in dates.values()), dates
+    mrows = "".join(
+        f"<tr><td><strong>{n}</strong><div class='small muted'>{' · '.join(f'{y}: {sd(dates[n][y], c)}' for y in YEARS)}</div></td>"
+        + "".join(f"<td>{'<span class=\"yes\" aria-label=\"ja\">●</span>' if cd in s else '<span class=\"muted\" aria-label=\"nein\">–</span>'}</td>" for cd in codes) + "</tr>"
+        for (d, n), s in sorted(allh.items()))
+    heads = "".join(f'<th scope="col" title="{v[0]}">{v[1]}</th>' for v in H.DE_REGIONS.values())
+    legend = "Kürzel: " + ", ".join(f"{v[1]} = {v[0]}" for v in H.DE_REGIONS.values()) + ". Mariä Himmelfahrt in Bayern gilt in Gemeinden mit überwiegend katholischer Bevölkerung."
+
+    nat = {h["name"] for h in H.region_holidays(c, "", year)}
     per, where = [], {}
     for slug, (name, code) in H.DE_REGIONS.items():
-        legal = [h for h in H.region_holidays("de", slug, year) if h["kind"] == "legal"]
-        extra = [h for h in legal if h["name"] not in nat]
+        legal = {y: [h for h in H.region_holidays(c, slug, y) if h["kind"] == "legal"] for y in YEARS}
+        extra = [h for h in legal[year] if h["name"] not in nat]
         for h in extra: where.setdefault(h["name"], []).append(name)
-        per.append((slug, name, len(legal), sum(h["date"].weekday() < 5 for h in legal), extra))
-    rows = "".join(f"<tr><td><a href='/feiertage-{year if year in (2027, 2028) else CUR}-{slug}.html'>{name}</a></td><td>{n}</td><td>{w}</td>"
-                   f"<td>{', '.join(h['name'] for h in ex) or '–'}</td></tr>" for slug, name, n, w, ex in per)
-    mx, mn = max(p[3] for p in per), min(p[3] for p in per)
-    most = [p[1] for p in per if p[3] == mx]; least = [p[1] for p in per if p[3] == mn]
-    nat_rows = H.region_holidays("de", "", year)
-    nat_we = [h for h in nat_rows if h["date"].weekday() >= 5]
-    lst = lambda xs: (", ".join(xs[:-1]) + " und " + xs[-1]) if len(xs) > 1 else xs[0]
-    w = lambda n: lst(sorted(where.get(n, [])))
+        per.append((slug, name, len(legal[year]), {y: sum(h["date"].weekday() < 5 for h in legal[y]) for y in YEARS}, extra))
+    rows = "".join(f"<tr><td><a href='#{slug}'>{name}</a></td><td>{n}</td>" + "".join(f"<td>{w[y]}</td>" for y in YEARS)
+                   + f"<td>{', '.join(h['name'] for h in ex) or '–'}</td></tr>" for slug, name, n, w, ex in per)
+    mx, mn = max(p[3][year] for p in per), min(p[3][year] for p in per)
+    most = [p[1] for p in per if p[3][year] == mx]; least = [p[1] for p in per if p[3][year] == mn]
+    nat_we = [h for h in H.region_holidays(c, "", year) if h["date"].weekday() >= 5]
+    yh = "".join(f'<th scope="col">Mo–Fr {y}</th>' for y in YEARS)
+
+    tiles = "".join(f'<li><a href="#{slug}">{name}</a></li>' for slug, (name, code) in H.DE_REGIONS.items())
+    laender = []
+    for slug, (name, code) in H.DE_REGIONS.items():
+        facts = region_facts(c, slug, year)[:-1]     # der letzte Satz gilt für alle Länder und steht im Hintergrund
+        own = (LAND.get(slug) or "").replace("<h3>", "<h4>").replace("</h3>", "</h4>")
+        laender.append(f'<section id="{slug}" class="land"><h3>{name}</h3>' + "".join(f"<p>{f}</p>" for f in facts)
+                       + own + (de_plan_html(slug, year) if own else "") + "</section>")   # Urlaubsblöcke wie bisher nur bei Ländern mit eigenem Text
+    return f"""
+<h2>Welcher Feiertag gilt wo?</h2>
+<p>Ein roter Punkt bedeutet: gesetzlicher Feiertag im jeweiligen Land. Unter jedem Feiertag stehen seine Termine 2026, 2027 und 2028.</p>
+<div class="scroll"><table class="tbl matrix"><thead><tr><th scope="col">Feiertag</th>{heads}</tr></thead><tbody>{mrows}</tbody></table></div>
+<p class="small muted">{legend}</p>
+
+<h2>Feiertage je Bundesland</h2>
+<p>Die Zahl der gesetzlichen Feiertage schwankt in Deutschland zwischen {min(p[2] for p in per)} und {max(p[2] for p in per)}. Entscheidend für die freien Tage ist aber, wie viele davon auf einen Werktag fallen: {year} sind das am meisten in {jlist(most)} ({mx}), am wenigsten in {jlist(least)} ({mn}). Bundesweit {'liegt einer' if len(nat_we) == 1 else 'liegen ' + str(len(nat_we))} der neun gemeinsamen Feiertage {year} auf einem Wochenende{(': ' + jlist([h['name'] for h in nat_we])) if nat_we else ''}. Einen Ersatztag gibt es dafür in keinem Land.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Feiertage</th>{yh}<th scope="col">zusätzlich zu den neun bundesweiten</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p class="small muted">Gezählt sind landesweite gesetzliche Feiertage; Bayern mit Mariä Himmelfahrt, das dort in Gemeinden mit überwiegend katholischer Bevölkerung gilt. Brandenburg zählt Ostersonntag und Pfingstsonntag ausdrücklich als Feiertage mit, die immer auf einen Sonntag fallen.</p>
+<h3>2026: zwei Samstage im Herbst</h3><p>Der 3. und der 31. Oktober liegen 2026 beide auf einem Samstag. Beim Vergleich zweier Stellen mit einer Montag-bis-Freitag-Woche macht der zusätzliche Reformationstag im betreffenden Bundesland in diesem Jahr daher keinen weiteren freien Werktag aus. In der Spalte mit den Feiertagen wird er dennoch gezählt.</p>
+<h3>2028: eine Urlaubsentscheidung im Oktober</h3><p>Der 3. Oktober fällt auf einen Dienstag. Wer normalerweise Montag bis Freitag arbeitet und Montag, den 2. Oktober, freinimmt, hat vom 30. September bis 3. Oktober vier Tage zusammenhängend frei. Vier Wochen später ergibt sich dieselbe Konstellation am 30. und 31. Oktober ausschließlich dort, wo der Reformationstag arbeitsfrei ist.</p>
+{de_hintergrund_html(year, where)}
+<h2 id="laender">Die 16 Länder</h2>
+<ul class="tiles no-print">{tiles}</ul>
+<p>Je Land steht unten, was gilt; bei {len(LAND)} Ländern dazu, was ein und was vier Urlaubstage rund um jeden Feiertag an einem Werktag {year} bringen. Fünftagewoche; 24. und 31. Dezember als Arbeitstage; Feiertage einzelner Gemeinden nicht berücksichtigt. „davon schulfrei“: Urlaubstage, an denen nach dem amtlichen Ferienkalender auch die Schulen des Landes geschlossen sind. Andere Urlaubsmengen rechnet der <a href="/urlaubsplaner.html">Urlaubsplaner</a> durch.</p>
+{''.join(laender)}
+"""
+
+
+def de_hintergrund_html(year, where):
+    w = lambda n: jlist(sorted(where.get(n, [])))
     e = H.easter(year)
     fl = e + timedelta(60)
     bb = H.buss_und_bettag(year)
     assert where.get("Buß- und Bettag") == ["Sachsen"] and where.get("Weltkindertag") == ["Thüringen"]
     assert sorted(where.get("Internationaler Frauentag")) == ["Berlin", "Mecklenburg-Vorpommern"]
-    balance = f"""
-<h2>Feiertage {year} je Bundesland</h2>
-<p>Die Zahl der gesetzlichen Feiertage schwankt in Deutschland zwischen {min(p[2] for p in per)} und {max(p[2] for p in per)}. Entscheidend für die freien Tage ist aber, wie viele davon auf einen Werktag fallen: {year} sind das am meisten in {lst(most)} ({mx}), am wenigsten in {lst(least)} ({mn}). Bundesweit {'liegt einer' if len(nat_we) == 1 else 'liegen ' + str(len(nat_we))} der neun gemeinsamen Feiertage auf einem Wochenende{(': ' + lst([h['name'] for h in nat_we])) if nat_we else ''}. Einen Ersatztag gibt es dafür in keinem Land.</p>
-<div class="scroll"><table class="tbl"><thead><tr><th scope="col">Bundesland</th><th scope="col">Feiertage {year}</th><th scope="col">davon Mo–Fr</th><th scope="col">zusätzlich zu den neun bundesweiten</th></tr></thead><tbody>{rows}</tbody></table></div>
-<p class="small muted">Gezählt sind landesweite gesetzliche Feiertage; Bayern mit Mariä Himmelfahrt, das dort in Gemeinden mit überwiegend katholischer Bevölkerung gilt. Brandenburg zählt Ostersonntag und Pfingstsonntag ausdrücklich als Feiertage mit, die immer auf einen Sonntag fallen.</p>
-
-"""
-    if year != 2027:
-        if year == 2026:
-            balance += "<h2>Zwei Samstage im Herbst</h2><p>Der 3. und der 31. Oktober liegen 2026 beide auf einem Samstag. Beim Vergleich zweier Stellen mit einer Montag-bis-Freitag-Woche macht der zusätzliche Reformationstag im betreffenden Bundesland in diesem Jahr daher keinen weiteren freien Werktag aus. In der Spalte mit den Feiertagen wird er dennoch gezählt.</p>"
-        elif year == 2028:
-            balance += "<h2>Eine Urlaubsentscheidung im Oktober</h2><p>Der 3. Oktober fällt auf einen Dienstag. Wer normalerweise Montag bis Freitag arbeitet und Montag, den 2. Oktober, freinimmt, hat vom 30. September bis 3. Oktober vier Tage zusammenhängend frei. Vier Wochen später ergibt sich dieselbe Konstellation am 30. und 31. Oktober ausschließlich dort, wo der Reformationstag arbeitsfrei ist.</p>"
-        return balance + '<p><a href="/feiertage-2027-deutschland.html#hintergrund">Herkunft und Rechtsgrundlagen der Feiertage in der Länderübersicht</a></p>'
-    return balance + f"""
+    return f"""
 <h2 id="hintergrund">Rechtsgrundlage: die Feiertagsgesetze der Länder</h2>
 <p>Für Feiertage sind in Deutschland die Länder zuständig. Jedes der 16 Länder hat ein eigenes Sonn- und Feiertagsgesetz, das die gesetzlichen Feiertage aufzählt und regelt, was an ihnen erlaubt ist. Nur der Tag der Deutschen Einheit ist bundesrechtlich festgelegt: Artikel 2 Absatz 2 des Einigungsvertrags bestimmt den 3. Oktober als gesetzlichen Feiertag. Das Grundgesetz schützt die Sonntage und die staatlich anerkannten Feiertage „als Tage der Arbeitsruhe und der seelischen Erhebung“ (Art. 140 GG in Verbindung mit Art. 139 der Weimarer Reichsverfassung), legt aber selbst keine Feiertage fest.</p>
 <p>Daraus folgt eine praktische Regel: Für Beschäftigte zählen die Feiertage am Arbeitsort, nicht am Wohnort. Wer in Mainz wohnt und in Frankfurt arbeitet, hat an Allerheiligen keinen freien Tag; wer in Leipzig wohnt und in Halle arbeitet, hat am Buß- und Bettag keinen. Fällt ein Feiertag auf ein Wochenende, entfällt er ersatzlos. Der 24. und der 31. Dezember sind in keinem Land gesetzliche Feiertage; viele Tarifverträge stellen sie aber ganz oder ab Mittag frei.</p>
@@ -510,24 +473,78 @@ def de_country_html(year):
 <li><strong>Buß- und Bettag</strong> – nur in Sachsen, {year} am {fmt(bb, 'de', year=False)}. Er liegt immer am Mittwoch vor dem 23. November. In den übrigen Ländern wurde er ab 1995 abgeschafft, um die Arbeitgeber bei der Finanzierung der Pflegeversicherung zu entlasten; Beschäftigte in Sachsen tragen dafür einen höheren Anteil am Pflegeversicherungsbeitrag. In Bayern ist an diesem Tag schulfrei.</li>
 <li><strong>Augsburger Hohes Friedensfest (8. August)</strong> – nur im Stadtgebiet von Augsburg. Die Stadt feiert seit 1650 das Ende der Benachteiligung der Protestanten nach dem Dreißigjährigen Krieg. Weil es nicht im ganzen Land gilt, rechnen wir es nicht mit.</li>
 </ul>
-<p>Ostersonntag und Pfingstsonntag sind überall Sonntage und damit ohnehin arbeitsfrei; Brandenburg nennt sie zusätzlich ausdrücklich als Feiertage, was für Zuschläge bei Sonntagsarbeit eine Rolle spielen kann. Wie wir rechnen und welche Quellen wir nutzen, steht unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>; Brücken- und Urlaubstage für jedes Land findest du bei den <a href="/brueckentage-{year if year in (2027, 2028) else CUR}.html">Brückentagen {year if year in (2027, 2028) else CUR}</a>.</p>
+<p>Ostersonntag und Pfingstsonntag sind überall Sonntage und damit ohnehin arbeitsfrei; Brandenburg nennt sie zusätzlich ausdrücklich als Feiertage, was für Zuschläge bei Sonntagsarbeit eine Rolle spielen kann. Wie wir rechnen und welche Quellen wir nutzen, steht unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>; Brücken- und Urlaubstage für jedes Land findest du bei den <a href="{BR_URL}#jahr-{year}">Brückentagen {year}</a>.</p>
 """
 
 
-def build_bridges(year):
+def build_feiertage(country):
+    import ferien as F
+    year = CUR
+    rows = rows_for(country, "", year)
+    bl = bridge_view(country, "", year)
+    wk = len([r for r in rows if r["kind"] == "legal" and r["date"].weekday() < 5])
+    path = FT_URL[country].lstrip("/")
+    if country == "at":
+        cname, crumbs = "Österreich", [("/", "Start"), (FT_URL["at"], "Feiertage Österreich")]
+        ctx = dict(title="Feiertage Österreich 2026–2028: alle 13 Termine, Fenstertage & Landespatrone | Kalenderkompass 24",
+                   description=f"Die 13 gesetzlichen Feiertage in Österreich für 2026, {year} und 2028 mit Wochentag, Fenstertagen, Landespatronen und den Besonderheiten aller neun Bundesländer.",
+                   h1="Feiertage in Österreich",
+                   lead=f"Österreich hat 13 gesetzliche Feiertage, bundesweit einheitlich. {year} fallen {wk} davon auf einen Werktag, dazu kommen {len(bl)} Fenstertage. Jahr und Bundesland wählst du oben; darunter stehen die Landespatrone und die Besonderheiten jedes Bundeslandes.",
+                   regions_id="bundeslaender", regions_label="Die neun Bundesländer", in_country="in Österreich", bt="Fenstertage",
+                   bridge_note=None, main_html=at_main_html(), other=(FT_URL["de"], "Feiertage Deutschland"),
+                   sources=[("Arbeitsruhegesetz § 7 im RIS", RIS), F.SRC_AT], checked=CHECKED_0411, lang_at=True)
+    else:
+        cname, crumbs = "Deutschland", [("/", "Start"), (FT_URL["de"], "Feiertage Deutschland")]
+        ctx = dict(title="Feiertage Deutschland 2026–2028: alle Bundesländer im Vergleich | Kalenderkompass 24",
+                   description=f"Feiertage in Deutschland für 2026, {year} und 2028: die 9 bundesweiten Feiertage, welcher Feiertag in welchem Bundesland gilt, und die Besonderheiten aller 16 Länder.",
+                   h1="Feiertage in Deutschland",
+                   lead=f"Neun Feiertage gelten bundesweit, {year} liegen {wk} davon auf Werktagen. Alle weiteren legen die Länder fest – Jahr und Land wählst du oben, die Übersicht zeigt, wo welcher Feiertag gilt.",
+                   regions_id="laender", regions_label="Die 16 Länder", in_country="in Deutschland", bt="Brückentage",
+                   bridge_note=f"Ohne gewähltes Land: nur die neun bundesweiten Feiertage. Landesfeiertage verändern die Brückentage – alle Länder im Vergleich stehen bei den <a href=\"{BR_URL}#jahr-{year}\">Brückentagen {year}</a>.",
+                   main_html=de_main_html(), other=(FT_URL["at"], "Feiertage Österreich"),
+                   sources=None, checked=CHECKED_0411, lang_at=False)
+    write(path, "feiertage.html", **ctx, country=country, country_name=cname, wahl=region_choice(country),
+          band=band_view(country, "", year), rows=rows, bridge_list=bl, crumbs=crumbs,
+          region_attr=f"{country}::{year}", year_attr=year, lastmod=LASTMOD_2411,
+          jsonld=[crumbs_ld(crumbs), holiday_ld(country, "", year, rows)], active="/", priority=0.9)
+
+
+def bridge_table(year):
+    """Fenster- und Brückentage eines Jahres: eine Zeile je Termin, dazu, wo er gilt (statt einer Liste je Land)."""
+    groups = {}
+    def add(b, country, slug=None, name=None):
+        r = b["raw"]
+        g = groups.setdefault((tuple(r["days"]), r["holiday"], r["start"], r["end"]), {"b": r, "at": False, "de": []})
+        if country == "at": g["at"] = True
+        else: g["de"].append((slug, name))
     at = bridge_view("at", "", year)
-    de_rows = []
+    for b in at: add(b, "at")
+    per = {}
     for slug, (name, code) in H.DE_REGIONS.items():
         bl = bridge_view("de", slug, year)
-        de_rows.append((slug, name, bl))
-    parts = [f"<h2>Österreich: {len(at)} Fenstertage</h2><p>Gilt in allen Bundesländern gleich.</p>"]
-    parts.append(env.get_template("macros.html").module.bridges(at, "at", live=False))
-    parts.append(f"<h2>Deutschland nach Bundesland</h2><div class='scroll'><table class='tbl'><thead><tr><th>Bundesland</th><th>Brückentage {year}</th><th>Urlaubstage → freie Tage</th></tr></thead><tbody>")
-    for slug, name, bl in de_rows:
-        days = "<br>".join(b["take"] + f" <span class='muted small'>({b['holiday']})</span>" for b in bl) or "<span class='muted'>keine</span>"
-        eff = "<br>".join(f"{b['vacation']} → {b['free']}" for b in bl) or "–"
-        parts.append(f"<tr><td><a href='/feiertage-{year}-{slug}.html'>{name}</a></td><td>{days}</td><td>{eff}</td></tr>")
-    parts.append("</tbody></table></div>")
+        per[name] = len(bl)
+        for b in bl: add(b, "de", slug, name)
+    short = lambda d: f"{WDS[d.weekday()]} {d.day}.{d.month}."
+    rows = []
+    for key in sorted(groups):
+        g = groups[key]; b = g["b"]
+        where = (["Österreich"] if g["at"] else []) + (
+            ["Deutschland: alle 16 Länder"] if len(g["de"]) == 16 else
+            ["Deutschland: " + ", ".join(f"<a href='{FT_URL['de']}#{s}'>{n}</a>" for s, n in g["de"])] if g["de"] else [])
+        rows.append(f"<tr><td class='date'>{' + '.join(short(d) for d in b['days'])}</td><td>{b['holiday']}</td>"
+                    f"<td><strong>{b['vacation']} → {b['free']}</strong><div class='small muted'>{short(b['start'])}–{short(b['end'])}</div></td><td>{'<br>'.join(where)}</td></tr>")
+    mx, mn = max(per.values()), min(per.values())
+    most = [n for n, v in per.items() if v == mx]; least = [n for n, v in per.items() if v == mn]
+    return (f"<h2 id='jahr-{year}'>Alle Fenster- und Brückentage {year}</h2>"
+            f"<p>{year} hat Österreich {len(at)} Fenstertage. In Deutschland {'kommt' if len(most) == 1 else 'kommen'} {jlist(most)} auf {mx} Brückentage, {jlist(least)} auf {mn}.</p>"
+            f"<div class='scroll'><table class='tbl'><thead><tr><th scope='col'>Urlaub nehmen</th><th scope='col'>rund um</th><th scope='col'>Urlaub → frei</th><th scope='col'>gilt in</th></tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table></div>")
+
+
+BRIDGE_YEARS = (2027, 2028)
+
+
+def build_bridges():
     guide = {
         2027: """<h2>Vier Urlaubstage im Jänner oder drei einzelne lange Wochenenden?</h2>
 <p>In Österreich lassen sich rund um den 6. Jänner zwei Vorschläge aus der Tabelle verbinden.
@@ -548,16 +565,22 @@ am Mittwoch, dem 1. November, verbinden. Mit Urlaub am 27., 30. und 31. Oktober 
 sieben freie Tage am Stück. Für gemeinsame Pläne mit einem deutschen Arbeitsort prüfe zusätzlich,
 ob Allerheiligen dort ein gesetzlicher Feiertag ist.</p>""",
     }
-    body = guide[year] + """<p>Weitere Zeiträume mit deinem Urlaubskontingent berechnet der
+    tool = ("<p class='jump no-print'>" + " ".join(f"<a class='btn ghost' href='#jahr-{y}'>{y}</a>" for y in BRIDGE_YEARS) + "</p>"
+            "<p>In Österreich sind die Fenstertage in allen Bundesländern dieselben, weil die gesetzlichen Feiertage überall gleich sind. In Deutschland hängen die Brückentage "
+            "von den Landesfeiertagen ab. Jeder Termin steht in der Tabelle seines Jahres nur einmal, mit allen Ländern, in denen er gilt. "
+            f"Die Feiertage selbst stehen bei den Feiertagen in <a href='{FT_URL['at']}'>Österreich</a> und <a href='{FT_URL['de']}'>Deutschland</a>.</p>"
+            "<p class='small muted'>Urlaub → frei: nötige Urlaubstage → freie Tage am Stück, darunter der freie Zeitraum. Fünftagewoche von Montag bis Freitag; "
+            "Landespatrone in Österreich und Feiertage einzelner Gemeinden zählen nicht mit.</p>")
+    body = "".join(bridge_table(y) + guide[y] for y in BRIDGE_YEARS) + """<p>Weitere Zeiträume mit deinem Urlaubskontingent berechnet der
 <a href="/urlaubsplaner.html">Urlaubsplaner</a>. Die Zählweise erklärt der
 <a href="/fenstertag-zwickeltag-brueckentag.html">Ratgeber zu Brücken- und Fenstertagen</a>.</p>"""
-    crumbs = [("/", "Start"), (f"/brueckentage-{year}.html", f"Fenster- und Brückentage {year}")]
-    write(f"brueckentage-{year}.html", "tool.html",
-          title=f"Fenster- & Brückentage {year}: Österreich & Deutschland | Kalenderkompass 24",
-          description=f"Alle Brückentage {year}: die Fenstertage in Österreich und die Brückentage jedes deutschen Bundeslandes – mit freien Tagen pro Urlaubstag.",
-          h1=f"Fenster- und Brückentage {year}", lead=f"Mit wenig Urlaub viel frei: alle Fenstertage {year} in Österreich und die Brückentage in jedem deutschen Bundesland.",
-          tool="".join(str(p) for p in parts), body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "fenstertag-zwickeltag-brueckentag")],
-          jsonld=[crumbs_ld(crumbs)], lastmod="2026-11-22", active=f"/brueckentage-{CUR}.html", priority=0.9 if year == CUR else 0.6)
+    crumbs = [("/", "Start"), (BR_URL, "Fenster- und Brückentage")]
+    write(BR_URL.lstrip("/"), "tool.html",
+          title="Fenster- & Brückentage 2027 und 2028: Österreich & Deutschland | Kalenderkompass 24",
+          description="Alle Brückentage 2027 und 2028: die Fenstertage in Österreich und die Brückentage jedes deutschen Bundeslandes – mit freien Tagen pro Urlaubstag.",
+          h1="Fenster- und Brückentage 2027 und 2028", lead="Mit wenig Urlaub viel frei: alle Fenstertage in Österreich und die Brückentage in jedem deutschen Bundesland, für 2027 und 2028.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] in ("ferien-planen", "fenstertag-zwickeltag-brueckentag")],
+          jsonld=[crumbs_ld(crumbs)], lastmod=LASTMOD_2411, active=BR_URL, priority=0.9)
 
 
 def build_planner():
@@ -863,7 +886,7 @@ def build_fristen():
 <li><strong>Tage werden gezählt, Wochen, Monate und Jahre nicht.</strong> Eine Frist nach Wochen, Monaten oder Jahren endet an dem Tag, der nach Benennung oder Zahl dem Ereignistag entspricht – zwei Wochen ab Mittwoch also am übernächsten Mittwoch, ein Monat ab dem 13. am 13. des Folgemonats. Fehlt der Tag im letzten Monat, endet die Frist am Monatsletzten (§ 902 Abs. 2 ABGB, § 188 Abs. 2 und 3 BGB). Ein Monat ist deshalb je nach Lage 28 bis 31 Tage lang.</li>
 <li><strong>Erst am Ende wird geprüft, ob der letzte Tag verschiebt.</strong> Samstage, Sonntage und Feiertage innerhalb der Frist zählen normal mit. Nur wenn der letzte Tag auf einen der Tage fällt, die die gewählte Vorschrift nennt, rückt das Ende auf den nächsten Tag, der nicht dazugehört. Welche Tage das sind, zeigt die Tabelle.</li>
 </ol>
-<p>Die Feiertage kommen aus derselben Datei wie unsere <a href="/feiertage-{CUR}-oesterreich.html">Feiertagstabellen</a>; den Karfreitag berechnet der Rechner aus dem Osterdatum. Alles läuft in deinem Browser. Die Adresse der Seite ändert sich beim Rechnen nicht – nur wenn du „Link kopieren“ wählst, entsteht ein Link, der deine Eingaben enthält.</p>
+<p>Die Feiertage kommen aus derselben Datei wie unsere <a href="{FT_URL['at']}">Feiertagstabellen</a>; den Karfreitag berechnet der Rechner aus dem Osterdatum. Alles läuft in deinem Browser. Die Adresse der Seite ändert sich beim Rechnen nicht – nur wenn du „Link kopieren“ wählst, entsteht ein Link, der deine Eingaben enthält.</p>
 <h2>Welche Vorschrift verschiebt das Fristende an welchem Tag?</h2>
 <p>Aus den Gesetzestexten zusammengestellt, jede Zeile mit Link zur amtlichen Fassung. Abgerufen und vollständig gelesen am {stand}.</p>
 <div class="fr-filter no-print"><label class="fr-feld">Land<select data-fr-land><option value="">beide</option><option value="at">Österreich</option><option value="de">Deutschland</option></select></label>
@@ -899,86 +922,137 @@ def build_fristen():
           jsonld=[crumbs_ld(crumbs)], active="", priority=0.8)
 
 
-REDIRECTS = {
-    # 18.11.2026: „Monatsplanung“ war allgemeine Planungshilfe ohne eigenen Datenkern; die Arbeitstage je Monat stehen im Arbeitstage-Rechner.
-    "monatsplanung.html": "/arbeitstage-rechner.html",
-}
+def redirects():
+    """Alte Adresse → (neues Ziel samt Sprungmarke, Linktext). Weiterleitungsseiten: noindex, canonical aufs Ziel,
+    meta refresh, kein Werbe- oder Statistikcode, nicht in der Sitemap und nirgends intern verlinkt."""
+    import ferien as F
+    r = {
+        # 18.11.2026: „Monatsplanung“ war allgemeine Planungshilfe ohne eigenen Datenkern; die Arbeitstage je Monat stehen im Arbeitstage-Rechner.
+        "monatsplanung.html": ("/arbeitstage-rechner.html", "zum Arbeitstage-Rechner"),
+    }
+    # 24.11.2026: Jahres- und Länderseiten mit gleichem Kern zusammengelegt (je Land eine Feiertags- und eine Schulferienseite)
+    for c, regs in (("at", H.AT_REGIONS), ("de", {k: v[0] for k, v in H.DE_REGIONS.items()})):
+        cslug, cname = ("oesterreich", "Österreich") if c == "at" else ("deutschland", "Deutschland")
+        for y in YEARS:
+            r[f"feiertage-{y}-{cslug}.html"] = (f"{FT_URL[c]}#jahr-{y}", f"zu den Feiertagen in {cname}")
+        for slug, name in regs.items():
+            for y in (2027, 2028):
+                r[f"feiertage-{y}-{slug}.html"] = (f"{FT_URL[c]}#{slug}", f"zu den Feiertagen in {cname}, Abschnitt {name}")
+            r[f"schulferien-{F.SY_SLUG}-{slug}.html"] = (f"{SF_URL[c]}#{slug}", f"zu den Schulferien in {cname}, Abschnitt {name}")
+    r[f"schulferien-{F.SY_SLUG}.html"] = (SF_URL["at"], "zu den Schulferien in Österreich")
+    r["sommerferien-2027.html"] = (f"{SF_URL['de']}#sommerferien", "zum Sommerferien-Vergleich")
+    for y in (2027, 2028):
+        r[f"kalender-{y}-zum-ausdrucken.html"] = (f"{PRINT_URL}#jahr-{y}", "zum Kalender zum Ausdrucken")
+    for y in YEARS:
+        r[f"kalenderwochen-{y}.html"] = (f"{KW_URL}#jahr-{y}", "zu den Kalenderwochen")
+    for y in BRIDGE_YEARS:
+        r[f"brueckentage-{y}.html"] = (f"{BR_URL}#jahr-{y}", "zu den Fenster- und Brückentagen")
+    return r
+
+
+REDIRECTS = redirects()
 
 
 def build_redirects():
-    for src, target in REDIRECTS.items():
+    for src, (target, label) in REDIRECTS.items():
+        assert not (OUT / src).exists(), f"{src}: Weiterleitung würde eine gebaute Seite überschreiben"
         (OUT / src).write_text(f"""<!doctype html>
 <html lang="de-AT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Weitergeleitet | Kalenderkompass 24</title>
 <meta name="robots" content="noindex,follow"><link rel="canonical" href="{SITE}{target}">
 <meta http-equiv="refresh" content="0; url={target}"></head>
-<body><p>Diese Seite ist umgezogen: <a href="{target}">weiter zum Arbeitstage-Rechner</a>.</p></body></html>
+<body><p>Diese Seite ist umgezogen: <a href="{target}">weiter {label}</a>.</p></body></html>
 """, encoding="utf-8")
 
 
-def build_kw(year):
-    first = date.fromisocalendar(year, 1, 1)
-    weeks = date(year, 12, 28).isocalendar()[1]
-    rows = []
-    for w in range(1, weeks + 1):
-        mon = date.fromisocalendar(year, w, 1); sun = mon + timedelta(6)
-        rows.append(f"<tr data-kw-row='{year}-{w}'><td class='date'>KW {w}</td><td>{fmt(mon,'at',wd=False)}</td><td>{fmt(sun,'at',wd=False)}</td></tr>")
+def check_links():
+    """Selbsttest: Keine gebaute Seite verlinkt eine Weiterleitung; jede Sprungmarke eines Ziels existiert."""
+    files = {f.name: f.read_text(encoding="utf-8") for f in OUT.glob("*.html")}
+    has_id = lambda html, frag: re.search(rf"""\bid=["']{re.escape(frag)}["']""", html) is not None
+    bad = []
+    for name, html in files.items():
+        if name in REDIRECTS: continue
+        for href in re.findall(r'href=["\']/([^"\'#?]+\.html)', html):
+            if href in REDIRECTS: bad.append(f"{name} → /{href}")
+        for href, frag in re.findall(r'href=["\']/([^"\'#?]+\.html)#([^"\']+)', html):
+            if href in files and not has_id(files[href], frag): bad.append(f"{name} → /{href}#{frag} (Sprungmarke fehlt)")
+    for src, (target, label) in REDIRECTS.items():
+        page, _, frag = target.lstrip("/").partition("#")
+        if page not in files: bad.append(f"{src}: Ziel {page} fehlt")
+        elif frag and not has_id(files[page], frag): bad.append(f"{src}: Sprungmarke #{frag} fehlt in {page}")
+    if bad:
+        sys.exit("Link-Selbsttest fehlgeschlagen:\n" + "\n".join(bad[:40]))
+    print(f"Link-Selbsttest: {len(REDIRECTS)} Weiterleitungen mit gültigem Ziel, keine interne Verlinkung darauf")
+
+
+def build_kw():
     tool = (f"<div class='planner'><div class='kw-now' data-kw-now><b>KW</b></div><p class='small muted' style='margin:6px 0 0'>Aktuelle Kalenderwoche nach ISO 8601</p></div>"
-            f"<h2>Alle {weeks} Kalenderwochen {year}</h2><div class='scroll'><table class='tbl'><thead><tr><th>Woche</th><th>Montag</th><th>Sonntag</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>")
-    if year == 2026:
-        body = """<h2>Den letzten Wochenbericht 2026 richtig beschriften</h2>
+            f"<p class='jump no-print'>" + " ".join(f"<a class='btn ghost' href='#jahr-{y}'>{y}</a>" for y in YEARS) + "</p>")
+    text = {
+        2026: """<h3>Den letzten Wochenbericht 2026 richtig beschriften</h3>
 <p>Der Montag nach Weihnachten ist der 28. Dezember. Sein Sonntag liegt bereits am 3. Jänner 2027. Für den gesamten Bericht lautet die Kennung trotzdem 2026-W53. Wer Sonntagszahlen dem Kalenderjahr des Datums zuordnet, würde diese eine Berichtswoche auf zwei Jahre verteilen.</p>
-<p>Für eine fortlaufende Wochenliste folgt auf 2026-W53 unmittelbar 2027-W01. Die Tabelle für den Anschluss steht unter <a href="/kalenderwochen-2027.html#iso">Jahreswechsel 2027 und ISO-Zählweise</a>.</p>"""
-    elif year == 2027:
-        body = """<h2 id="iso">Wann eine neue Berichtswoche beginnt</h2>
+<p>Für eine fortlaufende Wochenliste folgt auf 2026-W53 unmittelbar 2027-W01. Die Tabelle für den Anschluss steht unter <a href="#iso">Jahreswechsel 2027 und ISO-Zählweise</a>.</p>""",
+        2027: """<h3 id="iso">Wann eine neue Berichtswoche beginnt</h3>
 <p>Freitag, der 1. Jänner 2027, gehört noch zu KW 53 des Vorjahres. Montag, der 4. Jänner, eröffnet KW 1. Bei einem Wochendienst von Freitag bis Donnerstag verteilen sich die sieben Tage deshalb auf zwei Wochenblätter: drei Tage auf 2026-W53 und vier auf 2027-W01.</p>
-<p>Eine ISO-Woche beginnt montags. Der erste Donnerstag eines Jahres liegt immer in KW 1. Für den Datenaustausch gehört zur Nummer deshalb auch das ISO-Wochenjahr. Am 1. Jänner können Kalenderjahr und Wochenjahr verschieden sein.</p>"""
-    elif year == 2028:
-        body = """<h2>Den Schalttag im Wochenplan finden</h2>
+<p>Eine ISO-Woche beginnt montags. Der erste Donnerstag eines Jahres liegt immer in KW 1. Für den Datenaustausch gehört zur Nummer deshalb auch das ISO-Wochenjahr. Am 1. Jänner können Kalenderjahr und Wochenjahr verschieden sein.</p>""",
+        2028: """<h3>Den Schalttag im Wochenplan finden</h3>
 <p>Dienstag, der 29. Februar 2028, liegt in KW 9. Auf dasselbe Wochenblatt gehören Montag, der 28. Februar, und Mittwoch, der 1. März. Für eine Übergabe mit Frist bis Freitag dieser Woche lautet das Datum 3. März. Ein zweites Blatt nur wegen des Monatswechsels würde drei Arbeitstage vom Wochenanfang trennen.</p>
-<p>Am Jahresanfang gehören Samstag und Sonntag, der 1. und 2. Jänner, noch zu 2027-W52. Die erste volle Arbeitswoche beginnt am 3. Jänner. <a href="/kalenderwochen-2027.html#iso">So wird das Wochenjahr bestimmt.</a></p>"""
-    else:
-        body = f"<h2>Jahresgrenzen {year}</h2><p>Die erste Kalenderwoche beginnt am {fmt(first, 'at')}. Die letzte der {weeks} Wochen beginnt am {fmt(date.fromisocalendar(year, weeks, 1), 'at')}.</p>"
-    crumbs = [("/", "Start"), (f"/kalenderwochen-{year}.html", f"Kalenderwochen {year}")]
-    write(f"kalenderwochen-{year}.html", "tool.html", title=f"Kalenderwochen {year}: alle KW mit Datum | Kalenderkompass 24",
-          description=f"Alle {weeks} Kalenderwochen {year} mit Start- und Enddatum nach ISO 8601 – und welche KW gerade ist.",
-          h1=f"Kalenderwochen {year}", lead=f"Welche Kalenderwoche ist heute? Hier stehen alle {weeks} Wochen {year} mit Datum von Montag bis Sonntag.",
-          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[], jsonld=[crumbs_ld(crumbs)],
-          active=f"/kalenderwochen-{CUR}.html", lastmod="2026-11-22", priority=0.8 if year in (2026, 2027) else 0.5)
+<p>Am Jahresanfang gehören Samstag und Sonntag, der 1. und 2. Jänner, noch zu 2027-W52. Die erste volle Arbeitswoche beginnt am 3. Jänner. <a href="#iso">So wird das Wochenjahr bestimmt.</a></p>""",
+    }
+    body = []
+    for year in YEARS:
+        weeks = date(year, 12, 28).isocalendar()[1]
+        rows = []
+        for w in range(1, weeks + 1):
+            mon = date.fromisocalendar(year, w, 1); sun = mon + timedelta(6)
+            rows.append(f"<tr data-kw-row='{year}-{w}'><td class='date'>KW {w}</td><td>{fmt(mon,'at',wd=False)}</td><td>{fmt(sun,'at',wd=False)}</td></tr>")
+        body.append(f"<h2 id='jahr-{year}'>Alle {weeks} Kalenderwochen {year}</h2><div class='scroll'><table class='tbl'><thead><tr><th>Woche</th><th>Montag</th><th>Sonntag</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
+                    + text[year])
+    crumbs = [("/", "Start"), (KW_URL, "Kalenderwochen")]
+    write(KW_URL.lstrip("/"), "tool.html", title="Kalenderwochen 2026, 2027 und 2028: alle KW mit Datum | Kalenderkompass 24",
+          description="Alle Kalenderwochen 2026, 2027 und 2028 mit Start- und Enddatum nach ISO 8601 – und welche KW gerade ist.",
+          h1="Kalenderwochen 2026 bis 2028", lead="Welche Kalenderwoche ist heute? Hier stehen alle Wochen der Jahre 2026, 2027 und 2028 mit Datum von Montag bis Sonntag.",
+          tool=tool, body="".join(body), crumbs=crumbs, show_picker=False, related=[], jsonld=[crumbs_ld(crumbs)],
+          active=KW_URL, lastmod=LASTMOD_2411, priority=0.8)
 
 
-def build_print(year):
-    def month_grid(country, region):
-        hol = {h["date"]: h for h in H.region_holidays(country, region, year)}
-        out = []
-        for m in range(1, 13):
-            d = date(year, m, 1); cells = ["<td></td>"] * d.weekday()
-            while d.month == m:
-                h = hol.get(d); style = ""
-                if h and h["kind"] == "legal": style = " style='color:var(--red);font-weight:700'"
-                elif d.weekday() >= 5: style = " class='muted'"
-                cells.append(f"<td{style}{' title=\"'+h['name']+'\"' if h else ''}>{d.day}</td>")
-                d += timedelta(1)
-            weeks = [cells[i:i+7] for i in range(0, len(cells), 7)]
-            body = "".join("<tr>" + "".join(w) + "</tr>" for w in weeks)
-            out.append(f"<div><h3 style='margin:0 0 6px;font-size:1rem'>{M_AT[m-1]}</h3><table class='mini'><thead><tr>{''.join('<th>'+x+'</th>' for x in WDS)}</tr></thead><tbody>{body}</tbody></table></div>")
-        return "".join(out)
+def print_grid(country, region, year):
+    hol = {h["date"]: h for h in H.region_holidays(country, region, year)}
+    out = []
+    for m in range(1, 13):
+        d = date(year, m, 1); cells = ["<td></td>"] * d.weekday()
+        while d.month == m:
+            h = hol.get(d); style = ""
+            if h and h["kind"] == "legal": style = " style='color:var(--red);font-weight:700'"
+            elif d.weekday() >= 5: style = " class='muted'"
+            cells.append(f"<td{style}{' title=\"'+h['name']+'\"' if h else ''}>{d.day}</td>")
+            d += timedelta(1)
+        weeks = [cells[i:i+7] for i in range(0, len(cells), 7)]
+        body = "".join("<tr>" + "".join(w) + "</tr>" for w in weeks)
+        out.append(f"<div><h3 style='margin:0 0 6px;font-size:1rem'>{mnames(country)[m-1]}</h3><table class='mini'><thead><tr>{''.join('<th>'+x+'</th>' for x in WDS)}</tr></thead><tbody>{body}</tbody></table></div>")
+    return "".join(out)
+
+
+def build_print():
+    from markupsafe import Markup
+    year, years = CUR, (2027, 2028)
     hlist = "".join(f"<li>{r['day']}: {r['name']}</li>" for r in rows_for("at", "", year))
     tool = (f"<style>.months{{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}}"
             ".mini{border-collapse:collapse;width:100%;font-size:.82rem;text-align:center}.mini th{color:var(--muted);font-weight:600}.mini td,.mini th{padding:3px}"
             "@media print{.months{grid-template-columns:repeat(4,1fr);gap:8px}.mini{font-size:9pt}h1{font-size:18pt}}</style>"
+            f"<div class='picker no-print' style='margin:0 0 14px'>{year_buttons(years, year)}</div>"
             f"<p class='no-print'><button class='btn' type='button' data-print>Drucken oder als PDF speichern</button></p>"
-            f"<div class='months'>{month_grid('at','')}</div>"
-            f"<h2 style='font-size:1.1rem'>Feiertage {year} in Österreich</h2><ul style='columns:2;font-size:.9rem'>{hlist}</ul>")
-    body = f"""<h2>Für jedes Bundesland</h2>
-<p>Dieser Kalender zeigt die bundesweiten Feiertage Österreichs. Für dein Bundesland – auch in Deutschland – öffnest du die passende Seite unter <a href="/feiertage-{year}-oesterreich.html">Feiertage {year} Österreich</a> oder <a href="/feiertage-{year}-deutschland.html">Feiertage {year} Deutschland</a> und druckst dort die Jahresübersicht.</p>
+            f"<div class='months' data-print-cal>{print_grid('at', '', year)}</div>"
+            f"<h2 style='font-size:1.1rem'>Feiertage <span data-year-label>{year}</span> <span data-region-in>in Österreich</span></h2><ul style='columns:2;font-size:.9rem' data-print-list>{hlist}</ul>")
+    body = """<h2>Für jedes Bundesland</h2>
+<p>Ohne Auswahl zeigt der Kalender die bundesweiten Feiertage Österreichs. Wählst du oben Land und Bundesland – auch in Deutschland –, tragen Kalender und Liste die Feiertage dort ein; mit den Schaltflächen wechselst du zwischen 2027 und 2028.</p>
 <p>Tipp: Im Druckdialog „Querformat“ wählen. Werbung und Navigation werden beim Druck automatisch ausgeblendet.</p>"""
-    crumbs = [("/", "Start"), (f"/kalender-{year}-zum-ausdrucken.html", f"Kalender {year} zum Ausdrucken")]
-    write(f"kalender-{year}-zum-ausdrucken.html", "tool.html", title=f"Kalender {year} zum Ausdrucken – mit Feiertagen (A4, PDF) | Kalenderkompass 24",
-          description=f"Kostenloser Jahreskalender {year} zum Ausdrucken auf A4 – mit allen Feiertagen, als PDF speicherbar.",
-          h1=f"Kalender {year} zum Ausdrucken", lead=f"Das ganze Jahr {year} auf einer A4-Seite, Feiertage in Rot. Kostenlos drucken oder als PDF speichern.",
-          tool=tool, body=body, crumbs=crumbs, show_picker=False, related=[a for a in ARTICLES if a["slug"] == "tage-richtig-zaehlen"],
-          jsonld=[crumbs_ld(crumbs)], active=f"/kalender-{CUR}-zum-ausdrucken.html", priority=0.8)
+    crumbs = [("/", "Start"), (PRINT_URL, "Kalender zum Ausdrucken")]
+    write(PRINT_URL.lstrip("/"), "tool.html", title="Kalender 2027 und 2028 zum Ausdrucken – mit Feiertagen (A4, PDF) | Kalenderkompass 24",
+          description="Kostenloser Jahreskalender 2027 oder 2028 zum Ausdrucken auf A4 – mit den Feiertagen deines Bundeslandes, als PDF speicherbar.",
+          h1=Markup(f"Kalender <span data-year-label>{year}</span> zum Ausdrucken"), lead="Das ganze Jahr auf einer A4-Seite, Feiertage in Rot. Kostenlos drucken oder als PDF speichern.",
+          tool=tool, body=body, crumbs=crumbs, show_picker=True, show_year=False, year_attr=year, related=[a for a in ARTICLES if a["slug"] == "tage-richtig-zaehlen"],
+          jsonld=[crumbs_ld(crumbs)], active=PRINT_URL, lastmod=LASTMOD_2411, priority=0.8)
 
 
 # ---------------------------------------------------------------- Fenstertage Österreich (Ratgeber, Hauptjahr)
@@ -1037,7 +1111,7 @@ def fenstertage_body(year=CUR):
         pt = "<br>".join(f"{p['name'].split(' (')[0]}: {f(p['date'])}" for p in pats)
         sem = next(p for p in F.periods(c, slug) if p["name"] == "Semesterferien")
         su = F.summer(c, slug)
-        srows.append(f"<tr><td><a href='/feiertage-{year}-{slug}.html'>{name}</a></td><td>{pt}</td>"
+        srows.append(f"<tr><td><a href='{FT_URL['at']}#{slug}'>{name}</a></td><td>{pt}</td>"
                      f"<td>{sem['start'].day}.–{f(sem['end'], wd=False)}</td><td>{'Ost' if su['start'] == date(2027, 7, 3) else 'West'} (ab {f(su['start'], wd=False)})</td></tr>")
     return f"""
 <p>Ein <strong>Fenstertag</strong> ist ein Arbeitstag, der zwischen einem Feiertag und dem Wochenende liegt. Wer ihn freinimmt, verbindet beides zu einem langen Block. In Österreich gelten {year} bundesweit dieselben 13 gesetzlichen Feiertage; {len(wk)} davon fallen auf einen Werktag, {len(we)} aufs Wochenende. Daraus ergeben sich {len(singles)} klassische Fenstertage, an denen ein einziger Urlaubstag vier freie Tage bringt, und {len(br) - len(singles)} Zwickel aus je zwei Arbeitstagen. Alles auf dieser Seite ist aus denselben Daten berechnet wie unsere Feiertagstabellen – Ostersonntag {year} ist der {f(e, wd=False)}.</p>
@@ -1081,7 +1155,7 @@ def fenstertage_body(year=CUR):
 <li><strong>Deutschland:</strong> Der Arbeitgeber legt den Urlaub fest, muss aber die Wünsche der Beschäftigten berücksichtigen, sofern keine dringenden betrieblichen Gründe entgegenstehen (§ 7 Abs. 1 Bundesurlaubsgesetz).</li>
 </ul>
 <p>Viele Betriebe schließen an beliebten Fenstertagen trotzdem. Dann wird der Tag meist als Betriebsurlaub verbucht, der in Österreich vereinbart werden muss. Manche Kollektivverträge regeln den 24. und 31. Dezember gesondert; das ist hier nicht eingerechnet.</p>
-<div class="note">Tipp: Beliebte Fenstertage sind im Team schnell vergeben. Wer früh im Jahr plant, hat die besten Chancen. Die Brückentage aller deutschen Länder stehen bei den <a href="/brueckentage-{year}.html">Brückentagen {year}</a>, wie wir rechnen unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>.</div>
+<div class="note">Tipp: Beliebte Fenstertage sind im Team schnell vergeben. Wer früh im Jahr plant, hat die besten Chancen. Die Brückentage aller deutschen Länder stehen bei den <a href="{BR_URL}#jahr-{year}">Brückentagen {year}</a>, wie wir rechnen unter <a href="/quellen-methodik.html">Quellen &amp; Methodik</a>.</div>
 """
 
 
@@ -1334,7 +1408,7 @@ def build_legal():
 <h2>Deine Rechte</h2><p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, eine Einwilligung jederzeit zu widerrufen. Deine Einwilligung zu Werbung und Statistik kannst du jederzeit selbst über „Datenschutz-Einstellungen“ unten auf jeder Seite ändern oder widerrufen.</p><h2>Beschwerde bei der Datenschutzbehörde</h2><p>Wenn du meinst, dass die Verarbeitung deiner Daten gegen das Datenschutzrecht verstößt, kannst du dich direkt an die zuständige Aufsichtsbehörde wenden:<br>Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien<br>E-Mail: <a href="mailto:dsb@dsb.gv.at">dsb@dsb.gv.at</a> · Web: <a href="https://www.dsb.gv.at" rel="noopener">www.dsb.gv.at</a></p>""")
     write("404.html", "page.html", title="Seite nicht gefunden | Kalenderkompass 24", description="Diese Seite gibt es nicht.",
           h1="Diese Seite gibt es nicht", lead="Vielleicht hilft dir einer dieser Links weiter.", ads=False, robots="noindex",
-          body=f"<ul><li><a href='/'>Feiertage und Brückentage</a></li><li><a href='/feiertage-{CUR}-oesterreich.html'>Feiertage {CUR} Österreich</a></li><li><a href='/feiertage-{CUR}-deutschland.html'>Feiertage {CUR} Deutschland</a></li><li><a href='/urlaubsplaner.html'>Urlaubsplaner</a></li></ul>", active="")
+          body=f"<ul><li><a href='/'>Feiertage und Brückentage</a></li><li><a href='{FT_URL["at"]}'>Feiertage Österreich</a></li><li><a href='{FT_URL["de"]}'>Feiertage Deutschland</a></li><li><a href='/urlaubsplaner.html'>Urlaubsplaner</a></li></ul>", active="")
 
 
 def build_static():
@@ -1374,16 +1448,14 @@ def main():
     OUT.mkdir()
     build_data()
     build_home()
-    for y in (2027, 2028): build_regions(y)
-    for y in YEARS: build_country(y)
-    for y in (2027, 2028): build_bridges(y)
+    for c in ("at", "de"): build_feiertage(c)
+    build_bridges()
     build_planner(); build_workdays(); build_fristen(); build_familie(); build_mein_kalender(); build_shop()
-    for y in YEARS: build_kw(y)
-    for y in (2027, 2028): build_print(y)
-    import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE)
+    build_kw(); build_print()
+    import build_ferien; build_ferien.run(write, fmt, mshort, crumbs_ld, TODAY, SITE, SF_URL, FT_URL, env.get_template("macros.html").module)
     check_claims(); check_claims_de()
-    build_articles(); build_redirects(); build_methodik(); build_legal(); build_static()
-    check_years()
+    build_articles(); build_methodik(); build_legal(); build_redirects(); build_static()
+    check_years(); check_links()
     print(f"{len(PAGES)} indexierbare Seiten in {OUT}")
 
 

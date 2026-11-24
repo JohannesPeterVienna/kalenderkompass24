@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% import "macros.html" as m with context %}
+{% block main %}
+{{ m.crumbs(crumbs) }}
+<section class="hero" style="padding-top:20px"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <h1>{{ h1 }}</h1>
+      <p class="lead">{{ lead }}</p>
+      {{ m.checked_line(srcs) }}
+      <p class="jump no-print">{% for href, label in jumps %}<a class="btn ghost" href="{{ href }}">{{ label }}</a> {% endfor %}</p>
+    </div>
+    <div class="next" data-ferien-next>
+      <label class="small muted ferien-wahl"><span data-fn-head>Nächste Ferien</span><select data-ferien-region>{% for s, n in regions %}<option value="{{ s }}"{% if s == nxt_region %} selected{% endif %}>{{ n }}</option>{% endfor %}</select></label>
+      <div class="when" data-fn-when>{{ nxt.days }} {{ 'Tag' if nxt.days == 1 else 'Tage' }}</div>
+      <div class="what" data-fn-what>{{ nxt.name }}</div>
+      <div class="rel" data-fn-rel>{{ nxt.span }}</div>
+    </div>
+  </div>
+</div></section>
+<div class="wrap">
+  <section class="band">
+    <div class="band-head"><h2>Das Schuljahr {{ sy }} {{ in_country }}</h2><span class="small muted">Name antippen für Details</span></div>
+    {{ m.gantt(gantt, axis, "Schulferien " ~ sy ~ " " ~ in_country) }}
+    {{ m.flegend() }}
+  </section>
+</div>
+<div class="wrap">{{ m.ad("billboard") }}</div>
+<div class="wrap layout">
+  <div class="land-text">
+    {{ body_first | safe }}
+    {{ m.ad("rect") }}
+    {{ body_rest | safe }}
+  </div>
+  <aside class="side">
+    <div class="box"><h3>Mehr dazu</h3><ul>{% for href, label in side %}<li><a href="{{ href }}">{{ label }}</a></li>{% endfor %}</ul></div>
+    {{ m.ad("half") }}{{ m.ad("sky") }}
+  </aside>
+</div>
+<script src="/assets/ferien.js?v={{ v }}" defer></script>
+{% endblock %}

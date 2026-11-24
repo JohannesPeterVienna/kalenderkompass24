@@ -40,7 +40,7 @@ ARTICLES = [
 <li><strong>Fenstertag Montag, 25. Oktober 2027</strong> (vor dem Nationalfeiertag am Dienstag): Mitteilung bis 24. Juli 2027. Ergebnis: vier freie Tage vom 23. bis 26. Oktober.</li>
 <li><strong>Religiöse Feiertage:</strong> Wer etwa Jom Kippur oder das Ende des Ramadan begeht, kann dafür ebenso den persönlichen Feiertag nutzen. Da sich diese Termine nach Mond- bzw. Lunisolarkalendern richten, sollte man das Datum vor der Meldung genau prüfen.</li>
 </ul>
-<div class="note">Gerade bei beliebten Fenstertagen wie dem 7. Mai oder dem 25. Oktober lohnt sich der persönliche Feiertag: Er ist der einzige Urlaubstag, den dir niemand im Team mehr streitig machen kann. Welche Fenstertage es 2027 gibt, zeigt die Seite <a href="/brueckentage-2027.html">Brückentage 2027</a>.</div>
+<div class="note">Gerade bei beliebten Fenstertagen wie dem 7. Mai oder dem 25. Oktober lohnt sich der persönliche Feiertag: Er ist der einzige Urlaubstag, den dir niemand im Team mehr streitig machen kann. Welche Fenstertage es 2027 gibt, zeigt die Seite <a href="/brueckentage.html#jahr-2027">Brückentage 2027</a>.</div>
 
 <h2>Typische Fehler</h2>
 <ul>
@@ -204,7 +204,7 @@ ARTICLES = [
 <div class="note">Der <a href="/urlaubsplaner.html">Urlaubsplaner</a> übernimmt die Schritte 1 bis 3 automatisch: Du gibst deine Urlaubstage ein und siehst sofort die effizientesten Termine für dein Bundesland.</div>
 
 <h2>Schulferien beachten</h2>
-<p>Familien sind an die Schulferien gebunden. Für sie ist die wichtigste Frage nicht, wie viele freie Tage ein Urlaubstag bringt, sondern an welchen Tagen die Kinder ohnehin frei haben. Unsere Seiten zu den <a href="/schulferien-2026-2027.html">Schulferien 2026/2027</a> zeigen alle amtlichen Termine; der <a href="/familienplaner.html">Familienplaner</a> trägt Feiertage und Ferien in einen Kalender zum Ausdrucken ein. Achte auf Tage, die nur an den Schulen frei sind – etwa Landespatrone in Österreich, den Buß- und Bettag in Bayern oder einzelne Brückentage nach Christi Himmelfahrt. Dort brauchen berufstätige Eltern Urlaub oder Betreuung, obwohl im Kalender kein Feiertag steht.</p>
+<p>Familien sind an die Schulferien gebunden. Für sie ist die wichtigste Frage nicht, wie viele freie Tage ein Urlaubstag bringt, sondern an welchen Tagen die Kinder ohnehin frei haben. Unsere Seiten zu den Schulferien 2026/2027 in <a href="/schulferien-oesterreich.html">Österreich</a> und <a href="/schulferien-deutschland.html">Deutschland</a> zeigen alle amtlichen Termine; der <a href="/familienplaner.html">Familienplaner</a> trägt Feiertage und Ferien in einen Kalender zum Ausdrucken ein. Achte auf Tage, die nur an den Schulen frei sind – etwa Landespatrone in Österreich, den Buß- und Bettag in Bayern oder einzelne Brückentage nach Christi Himmelfahrt. Dort brauchen berufstätige Eltern Urlaub oder Betreuung, obwohl im Kalender kein Feiertag steht.</p>
 <p>Wer keine schulpflichtigen Kinder hat, profitiert umgekehrt davon, außerhalb der Ferien zu reisen: Unterkünfte und Flüge sind dann oft günstiger, und Ausflugsziele sind leerer.</p>
 <p>Leben Eltern getrennt oder arbeiten beide in verschiedenen Bundesländern, lohnt sich ein gemeinsamer Plan: Wer welche Ferienwoche übernimmt, lässt sich mit dem Familienplaner auf einem Blatt festhalten, bevor die Urlaubsanträge gestellt werden.</p>
 
@@ -324,7 +324,7 @@ ARTICLES = [
 <li><strong>Wochentage:</strong> Normalerweise rutscht ein Datum von einem Jahr zum nächsten um einen Wochentag weiter. Nach einem 29. Februar sind es zwei. Der 1. März ist 2027 ein Montag, 2028 ein Mittwoch.</li>
 <li><strong>Feiertage 2028:</strong> Der Nationalfeiertag am 26. Oktober fällt 2027 auf einen Dienstag, 2028 auf einen Donnerstag. Mariä Empfängnis wandert von Mittwoch auf Freitag, der Christtag von Samstag auf Montag. Für Arbeitnehmer ist 2028 deshalb ein gutes Jahr: In Österreich liegt nur Neujahr am Wochenende.</li>
 <li><strong>Arbeitstage:</strong> Der Februar 2028 hat 21 Arbeitstage statt 20. Das ganze Jahr hat 260 Tage von Montag bis Freitag, nach Abzug der Feiertage sind es in Österreich 248, in Berlin 251.</li>
-<li><strong>Kalenderwochen:</strong> Ob ein Jahr 52 oder 53 ISO-Kalenderwochen hat, hängt vom Wochentag des 1. Jänner und vom Schaltjahr ab. 2026 hatte 53 Wochen, 2027 und 2028 haben 52. Die nächsten Jahre mit 53 Wochen sind 2032 und 2037. Alle Wochen stehen bei den <a href="/kalenderwochen-2028.html">Kalenderwochen 2028</a>.</li>
+<li><strong>Kalenderwochen:</strong> Ob ein Jahr 52 oder 53 ISO-Kalenderwochen hat, hängt vom Wochentag des 1. Jänner und vom Schaltjahr ab. 2026 hatte 53 Wochen, 2027 und 2028 haben 52. Die nächsten Jahre mit 53 Wochen sind 2032 und 2037. Alle Wochen stehen bei den <a href="/kalenderwochen.html#jahr-2028">Kalenderwochen 2028</a>.</li>
 </ul>
 
 <h2>Was der Schalttag im Alltag bedeutet</h2>

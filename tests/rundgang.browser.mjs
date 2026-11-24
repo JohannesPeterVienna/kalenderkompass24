@@ -51,8 +51,17 @@ const sitemap = fs.readFileSync(path.join(DOCS, "sitemap.xml"), "utf8");
 const PFADE = [...sitemap.matchAll(/<loc>https:\/\/kalenderkompass24\.de([^<]*)<\/loc>/g)].map(m => m[1]);
 const ZUSATZ = ["/privacy.html", "/imprint.html", "/404.html"];
 
-await fall(`Sitemap: ${PFADE.length} Seiten, Weiterleitung nicht enthalten`, async () => {
-  assert.ok(PFADE.length >= 40);
+const WEITER = fs.readdirSync(DOCS).filter(f => f.endsWith(".html") && /http-equiv="refresh"/.test(fs.readFileSync(path.join(DOCS, f), "utf8")));
+
+await fall(`Sitemap: ${PFADE.length} Seiten, ${WEITER.length} Weiterleitungen nicht enthalten`, async () => {
+  assert.ok(PFADE.length >= 20);
+  assert.ok(WEITER.length >= 90, "zusammengelegte Seiten (24.11.2026) leiten weiter");
+  for (const f of WEITER) {
+    const w = fs.readFileSync(path.join(DOCS, f), "utf8");
+    assert.ok(!PFADE.includes("/" + f), f + " steht in der Sitemap");
+    assert.match(w, /<meta name="robots" content="noindex,follow">/, f);
+    assert.doesNotMatch(w, /adsbygoogle|consent\.js|data-ad=/, f + " enthält Werbe- oder Einwilligungscode");
+  }
   assert.ok(PFADE.includes("/fristenrechner.html"));
   assert.ok(!PFADE.includes("/monatsplanung.html"));
   const w = fs.readFileSync(path.join(DOCS, "monatsplanung.html"), "utf8");
@@ -99,6 +108,8 @@ await fall(`keine toten internen Links (${ziele.size} Ziele)`, async () => {
   }
   assert.deepEqual(tot, []);
   assert.ok(![...ziele.keys()].includes("/monatsplanung.html"), "niemand verlinkt mehr auf die aufgelöste Seite");
+  const verlinkt = WEITER.filter(f => ziele.has("/" + f)).map(f => `/${f} (auf ${ziele.get("/" + f)})`);
+  assert.deepEqual(verlinkt, [], "niemand verlinkt eine Weiterleitung");
 });
 
 for (const breite of [390, 1366]) {

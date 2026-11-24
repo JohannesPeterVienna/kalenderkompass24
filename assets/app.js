@@ -332,12 +332,43 @@
     $$("[data-country]").forEach(sel => sel.value = state.country);
     $$("[data-year]").forEach(sel => sel.value = state.year);
   }
-  function renderAll(){ renderNext(); renderBands(); renderBridges(); renderTable(); renderPlanner(); renderWorkdays(); navLabel();
+  /* Kalender zum Ausdrucken: Monatsraster und Feiertagsliste für Land, Bundesland und Jahr */
+  function renderPrint(){
+    const el = $("[data-print-cal]"); if (!el) return;
+    const rows = holidays(state.country, state.region, state.year);
+    const hol = Object.fromEntries(rows.map(h => [h.iso, h]));
+    const ms = months(state.country), wd = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+    let html = "";
+    for (let m = 0; m < 12; m++){
+      const first = new Date(state.year, m, 1), cells = Array((first.getDay() + 6) % 7).fill("<td></td>");
+      for (let d = new Date(first); d.getMonth() === m; d = add(d, 1)){
+        const h = hol[iso(d)];
+        const attr = h && h.kind === "legal" ? ` style="color:var(--red);font-weight:700"` : (d.getDay() === 0 || d.getDay() === 6) ? ` class="muted"` : "";
+        cells.push(`<td${attr}${h ? ` title="${h.name}"` : ""}>${d.getDate()}</td>`);
+      }
+      let body = ""; for (let i = 0; i < cells.length; i += 7) body += "<tr>" + cells.slice(i, i + 7).join("") + "</tr>";
+      html += `<div><h3 style="margin:0 0 6px;font-size:1rem">${ms[m]}</h3><table class="mini"><thead><tr>${wd.map(x => `<th>${x}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
+    }
+    el.innerHTML = html;
+    const list = $("[data-print-list]");
+    if (list) list.innerHTML = rows.map(h => `<li>${h.date.getDate()}. ${ms[h.date.getMonth()]}: ${h.name}</li>`).join("");
+  }
+  // Jahreswahl per Schaltfläche (Länderseiten, Druckkalender)
+  function syncYears(){ $$("[data-set-year]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.setYear === state.year))); }
+  // Sprungmarken: #jahr-2028 wählt das Jahr, auf Länderseiten wählt #wien das Bundesland
+  function applyHash(){
+    const h = decodeURIComponent(location.hash.slice(1));
+    const y = /^jahr-(\d{4})$/.exec(h);
+    if (y){ if ($(`[data-set-year="${y[1]}"]`)) state.year = +y[1]; return false; }
+    if (h && document.body.dataset.fixed && $("[data-region]") && Object.prototype.hasOwnProperty.call(DATA.countries[state.country].regions, h)){ state.region = h; return true; }
+    return false;
+  }
+  function renderAll(){ renderNext(); renderBands(); renderBridges(); renderTable(); renderPlanner(); renderWorkdays(); renderPrint(); syncYears(); navLabel();
     document.dispatchEvent(new CustomEvent("kk:change", { detail: { ...state } })); }
   // Menüpunkt passt sich dem Land an: Fenstertage (AT) / Brückentage (DE)
   function navLabel(){
     const c = DATA ? state.country : (store.get("kk24-region") || "at").split(":")[0];
-    $$('.nav a[href^="/brueckentage-"]').forEach(a => a.textContent = BT(c === "de" ? "de" : "at"));
+    $$('.nav a[href^="/brueckentage"]').forEach(a => a.textContent = BT(c === "de" ? "de" : "at"));
   }
   // Schnittstelle für „Mein Kalender“ (meinkalender.js)
   window.KK = { get data(){ return DATA; }, state, holidays, bridges, iso, parse, add, today, isoWeek: d => isoWeek(d), fmt, months, BT, regionLabel,
@@ -358,6 +389,8 @@
     document.addEventListener("click", e => {
       if (e.target.closest("[data-ics]")){ ics(); track("feiertage_ics_export", { land: state.country, region: state.region || "alle" }); }
       if (e.target.closest("[data-print]")){ window.print(); track("kalender_drucken"); }
+      const yb = e.target.closest("[data-set-year]");
+      if (yb){ state.year = +yb.dataset.setYear; renderAll(); }
       const sh = e.target.closest("[data-share]");
       if (sh){
         const msg = $("[data-share-msg]", sh.closest(".planner") || document);
@@ -372,7 +405,7 @@
   async function init(){
     renderKW(); navLabel();
     const root = document.body;
-    if (!$("[data-next],[data-bridges],[data-table],[data-planner],[data-band],[data-workdays],[data-mk]")) return;
+    if (!$("[data-next],[data-bridges],[data-table],[data-planner],[data-band],[data-workdays],[data-mk],[data-print-cal]")) return;
     // Seiten mit fester Region (z. B. Feiertage 2027 Wien) geben sie vor
     const fixed = root.dataset.fixed;
     if (fixed){ const [c,r,y] = fixed.split(":"); state.country = c; state.region = r; if (y) state.year = +y; }
@@ -387,6 +420,8 @@
       DATA = await res.json();
     } catch { return; } // ohne Daten bleibt der vorgerenderte Inhalt stehen
     if (!fixed) applyShareParams();
+    applyHash();
+    window.addEventListener("hashchange", () => { if (applyHash()) fillRegions(); renderAll(); });
     fillRegions(); bind(); renderAll();
   }
   init();
